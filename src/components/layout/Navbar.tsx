@@ -133,8 +133,9 @@ export default function Navbar() {
                     <div
                       className="bg-center bg-no-repeat bg-cover rounded-full size-8"
                       style={{
-                        backgroundImage:
-                          'url("https://ui-avatars.com/api/?name=Kullanici+Adi&background=random")',
+                        backgroundImage: user?.avatar
+                          ? `url("${user.avatar}")`
+                          : `url("https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "U")}&background=5BB678&color=fff")`,
                       }}
                     ></div>
                   </button>
@@ -159,7 +160,7 @@ export default function Navbar() {
                         Sipariş ve Taleplerim
                       </Link>
                       <Link
-                        href="#"
+                        href="/profil"
                         onClick={() => setIsProfileOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                       >
@@ -167,7 +168,7 @@ export default function Navbar() {
                         Profil
                       </Link>
                       <Link
-                        href="#"
+                        href="/ayarlar"
                         onClick={() => setIsProfileOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                       >
