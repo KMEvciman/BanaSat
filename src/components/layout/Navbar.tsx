@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import {
-  ArrowRightLeft,
   Search,
   User,
   Settings,
   LogOut,
   FileText,
-  LayoutGrid,
   ClipboardList,
   HandCoins,
   ChevronDown,
@@ -17,7 +15,6 @@ import ThemeToggle from "@/components/theme/ThemeToggle";
 import { useState, useRef, useEffect } from "react";
 
 const navLinks = [
-  { href: "/kategoriler", label: "Kategoriler", icon: LayoutGrid },
   { href: "/taleplerim", label: "Taleplerim", icon: ClipboardList },
   { href: "/tekliflerim", label: "Tekliflerim", icon: HandCoins },
 ];
@@ -78,12 +75,7 @@ export default function Navbar() {
               href="/"
               className="flex items-center gap-2 text-primary shrink-0"
             >
-              <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
-                <ArrowRightLeft size={20} />
-              </div>
-              <h2 className="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-tight mt-0.5">
-                BanaSat
-              </h2>
+              <img src="/banasat_logo.png" alt="BanaSat" className="h-8 w-auto" />
             </Link>
 
             <label className="hidden md:flex flex-col min-w-40 h-10 w-full md:w-72 relative group">
@@ -117,7 +109,7 @@ export default function Navbar() {
           <div className="flex items-center justify-end gap-3 shrink-0">
             <Link
               href="/talep-olustur"
-              className="hidden md:flex items-center justify-center rounded-xl h-10 px-5 bg-primary hover:bg-blue-600 transition-colors text-white text-sm font-bold shadow-md hover:shadow-lg shadow-primary/20"
+              className="hidden md:flex items-center justify-center rounded-xl h-10 px-5 bg-primary hover:bg-primary/85 transition-colors text-white text-sm font-bold shadow-md hover:shadow-lg shadow-primary/20"
             >
               Talep Oluştur
             </Link>
@@ -208,7 +200,7 @@ export default function Navbar() {
             })}
             <Link
               href="/talep-olustur"
-              className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-center text-xs font-semibold text-white transition-colors hover:bg-blue-600"
+              className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-center text-xs font-semibold text-white transition-colors hover:bg-primary/85"
             >
               Talep Oluştur
             </Link>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRightLeft, Globe, AtSign } from "lucide-react";
+import { Globe, AtSign } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -8,10 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="flex flex-col gap-4 col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 text-primary">
-              <div className="size-6 bg-primary rounded-md flex items-center justify-center text-white">
-                <ArrowRightLeft size={16} />
-              </div>
-              <span className="text-gray-900 dark:text-white text-lg font-bold">BanaSat</span>
+              <img src="/banasat_logo.png" alt="BanaSat" className="h-6 w-auto" />
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
               Türkiye&apos;nin ilk alıcı odaklı pazar yeri. İhtiyacını anlat, teklifler sana gelsin.

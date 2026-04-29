@@ -1,9 +1,12 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { FileText, MailCheck, BadgeCheck, ArrowRight, Flame, Clock } from "lucide-react";
+import ListingCarousel from "@/components/ListingCarousel";
+import ListingCard from "@/components/ListingCard";
+import type { Listing } from "@/components/ListingCarousel";
+import { FileText, MailCheck, BadgeCheck, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-const popularListings = [
+const popularListings: Listing[] = [
   {
     id: 1,
     title: "Projeksiyon Cihazı Kurulumu",
@@ -56,7 +59,7 @@ const popularListings = [
   },
 ];
 
-const recentListings = [
+const recentListings: Listing[] = [
   {
     id: 6,
     title: "Bahçe Peyzaj Düzenlemesi",
@@ -109,72 +112,6 @@ const recentListings = [
   },
 ];
 
-function ListingCard({ listing }: { listing: typeof popularListings[number] }) {
-  return (
-    <div className="group bg-white dark:bg-[#1a2030] rounded-xl border border-gray-100 dark:border-gray-800/60 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300">
-      {/* Image */}
-      <div className="relative h-48 w-full overflow-hidden">
-        <img
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          src={listing.image}
-          alt={listing.title}
-        />
-        {listing.offers >= 8 && (
-          <div className="absolute top-3 left-3">
-            <span className="bg-orange-500/15 text-orange-500 dark:bg-orange-400/15 dark:text-orange-400 px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 backdrop-blur-md border border-orange-500/20 dark:border-orange-400/20">
-              <Flame size={14} className="fill-current" />
-              Popüler
-            </span>
-          </div>
-        )}
-        <div className="absolute bottom-3 right-3 bg-white/85 dark:bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-gray-200/50 dark:border-white/10">
-          <span className="text-primary font-bold text-xs">{listing.category}</span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-4 space-y-3">
-        <div>
-          <h3 className="text-gray-900 dark:text-white text-sm font-bold leading-tight line-clamp-1 group-hover:text-primary transition-colors">
-            {listing.title}
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">
-            {listing.description}
-          </p>
-        </div>
-
-        {/* Budget & Offers */}
-        <div className="flex items-center justify-between py-2.5 border-y border-gray-100 dark:border-gray-800/60">
-          <div className="flex flex-col">
-            <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-semibold tracking-wider">Bütçe</span>
-            <span className="text-gray-900 dark:text-white font-bold text-xs mt-0.5">{listing.budget}</span>
-          </div>
-          <div className="text-right flex flex-col">
-            <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-semibold tracking-wider">Durum</span>
-            <span className={`text-xs font-semibold mt-0.5 ${listing.offers > 0 ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500"}`}>
-              {listing.offers > 0 ? `${listing.offers} teklif` : "Henüz yok"}
-            </span>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between gap-3 pt-0.5">
-          <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-            <Clock size={14} />
-            <span className="text-[11px] whitespace-nowrap">{listing.timeLeft}</span>
-          </div>
-          <Link
-            href="/satici/teklif-ver"
-            className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-semibold hover:bg-blue-600 transition-colors active:scale-95 transform text-center shadow-sm shadow-primary/20"
-          >
-            {listing.offers === 0 ? "İlk Teklifi Ver" : "Teklif Ver"}
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
   return (
     <>
@@ -183,31 +120,29 @@ export default function Home() {
       <main className="flex-1 w-full">
         {/* Popular Listings Section */}
         <div className="w-full bg-background-light dark:bg-background-dark py-10 md:py-14">
-          <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-gray-900 dark:text-white text-2xl md:text-3xl font-bold tracking-tight">
-                  En Popüler İlanlar
-                </h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Şu anda en çok teklif alan ilanlar
-                </p>
+          <div className="px-4 md:px-10">
+            <div className="max-w-7xl mx-auto mb-8">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-gray-900 dark:text-white text-2xl md:text-3xl font-bold tracking-tight">
+                    En Popüler İlanlar
+                  </h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    Şu anda en çok teklif alan ilanlar
+                  </p>
+                </div>
+                <Link href="/taleplerim" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
+                  Tümünü Gör <ArrowRight size={16} />
+                </Link>
               </div>
-              <Link href="/taleplerim" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
-                Tümünü Gör <ArrowRight size={16} />
-              </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-              {popularListings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
-            </div>
+            <ListingCarousel listings={popularListings} />
           </div>
         </div>
 
         {/* How it Works Section */}
-        <div id="nasil-calisir" className="w-full bg-blue-50/50 dark:bg-slate-900/50 py-16 scroll-mt-24">
+        <div id="nasil-calisir" className="w-full bg-primary/5 dark:bg-slate-900/50 py-16 scroll-mt-24">
           <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40">
             <div className="flex flex-col gap-12 text-center">
               <div className="flex flex-col gap-2">
@@ -219,10 +154,8 @@ export default function Home() {
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-                {/* Connector Line (Desktop) */}
                 <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gray-200 dark:bg-gray-700 -z-10"></div>
 
-                {/* Step 1 */}
                 <div className="flex flex-col items-center gap-4 group">
                   <div className="size-24 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center group-hover:-translate-y-1 transition-transform duration-300">
                     <FileText size={36} className="text-primary" />
@@ -235,7 +168,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Step 2 */}
                 <div className="flex flex-col items-center gap-4 group">
                   <div className="size-24 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center group-hover:-translate-y-1 transition-transform duration-300">
                     <MailCheck size={36} className="text-primary" />
@@ -248,7 +180,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Step 3 */}
                 <div className="flex flex-col items-center gap-4 group">
                   <div className="size-24 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center group-hover:-translate-y-1 transition-transform duration-300">
                     <BadgeCheck size={36} className="text-primary" />
@@ -282,7 +213,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {recentListings.map((listing) => (
                 <ListingCard key={listing.id} listing={listing} />
               ))}
@@ -293,13 +224,13 @@ export default function Home() {
         {/* CTA Section */}
         <div className="w-full bg-background-light dark:bg-background-dark py-12">
           <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40">
-            <div className="bg-primary rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl shadow-blue-900/20 relative overflow-hidden">
+            <div className="bg-primary rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl shadow-primary/20 relative overflow-hidden">
               <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
               <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
 
               <div className="flex flex-col gap-4 text-center md:text-left relative z-10 w-full">
                 <h2 className="text-white text-2xl md:text-3xl font-bold">Hâlâ aradığını bulamadın mı?</h2>
-                <p className="text-blue-100 text-base md:text-lg max-w-lg">
+                <p className="text-green-100 text-base md:text-lg max-w-lg">
                   Hemen ücretsiz bir talep oluştur, aradığın ürün veya hizmet ayağına gelsin.
                 </p>
               </div>
