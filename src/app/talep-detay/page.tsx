@@ -122,7 +122,7 @@ export default function TalepDetay() {
         <hr className="border-gray-200 dark:border-gray-800 my-2" />
 
         {/* Filter & Sort Toolbar */}
-        <section className="sticky top-[72px] z-40 bg-background-light dark:bg-background-dark py-2">
+        <section className="sticky top-[105px] md:top-[88px] z-40 bg-background-light dark:bg-background-dark py-2">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               Gelen Teklifler

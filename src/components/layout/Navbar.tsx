@@ -314,7 +314,7 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
       )}
     </div>
       {/* Spacer to prevent content from hiding behind fixed navbar */}
-      <div className={hideCategories ? "h-[72px] md:h-[56px]" : "h-[105px] md:h-[88px]"} />
+      <div className={hideCategories ? "h-[72px] md:h-[56px]" : "h-[200px] sm:h-[140px] md:h-[100px] lg:h-[88px]"} />
     </>
   );
 }

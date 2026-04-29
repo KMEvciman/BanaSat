@@ -194,7 +194,7 @@ export default function OdemeEkrani() {
 
           {/* Right Column: Summary */}
           <div className="lg:col-span-4 relative">
-            <div className="sticky top-24 space-y-6">
+            <div className="lg:sticky lg:top-[120px] space-y-6">
               
               {/* Order Summary Card */}
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">

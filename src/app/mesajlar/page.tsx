@@ -33,7 +33,7 @@ export default function Mesajlar() {
       <Navbar hideCategories />
       <div className="flex flex-1 overflow-hidden">
       {/* Sidebar: Conversation List */}
-      <aside className="w-[380px] flex flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-gray-900 shrink-0 z-20">
+      <aside className="hidden md:flex w-[320px] lg:w-[380px] flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-gray-900 shrink-0 z-20">
         {/* Sidebar Header: Search */}
         <div className="px-5 pt-6 pb-2">
           <h1 className="text-2xl font-bold mb-4 tracking-tight">Mesajlar</h1>
@@ -119,7 +119,7 @@ export default function Mesajlar() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full relative min-w-0 bg-background-light dark:bg-background-dark">
         {/* Sticky Header */}
-        <header className="h-20 shrink-0 bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm">
+        <header className="shrink-0 bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-0 sm:h-20 sticky top-0 z-10 shadow-sm gap-3">
           {/* Left: User Profile */}
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -140,7 +140,7 @@ export default function Mesajlar() {
           </div>
 
           {/* Right: Deal Context */}
-          <div className="flex flex-col items-end">
+          <div className="hidden sm:flex flex-col items-end">
             <div className="flex items-center gap-2 mb-1">
               <span className="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-200">
                 Pazarlık Aşamasında
@@ -154,14 +154,14 @@ export default function Mesajlar() {
         </header>
 
         {/* Chat History */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col bg-[#fafafa] dark:bg-black">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6 flex flex-col bg-[#fafafa] dark:bg-black">
           {/* Date Separator */}
           <div className="flex justify-center">
             <span className="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs px-3 py-1 rounded-full font-medium">Bugün</span>
           </div>
 
           {/* Message: Incoming */}
-          <div className="flex items-end gap-3 max-w-[80%]">
+          <div className="flex items-end gap-3 max-w-[90%] sm:max-w-[80%]">
             <div
               className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-8 w-8 shrink-0 mb-1"
               style={{ backgroundImage: 'url("https://ui-avatars.com/api/?name=Ahmet+Yilmaz&background=random")' }}
@@ -177,7 +177,7 @@ export default function Mesajlar() {
           </div>
 
           {/* Message: Outgoing */}
-          <div className="flex items-end gap-3 max-w-[80%] self-end flex-row-reverse">
+          <div className="flex items-end gap-3 max-w-[90%] sm:max-w-[80%] self-end flex-row-reverse">
             <div
               className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-8 w-8 shrink-0 mb-1"
               style={{ backgroundImage: 'url("https://ui-avatars.com/api/?name=Ben&background=random")' }}
@@ -210,7 +210,7 @@ export default function Mesajlar() {
           </div>
 
           {/* Message: Incoming with Attachment */}
-          <div className="flex items-end gap-3 max-w-[80%]">
+          <div className="flex items-end gap-3 max-w-[90%] sm:max-w-[80%]">
             <div
               className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-8 w-8 shrink-0 mb-1"
               style={{ backgroundImage: 'url("https://ui-avatars.com/api/?name=Ahmet+Yilmaz&background=random")' }}

@@ -18,7 +18,7 @@ export interface Listing {
 function CarouselCard({ listing }: { listing: Listing }) {
   return (
     <Link href={`/ilan/${listing.id}`} className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800/60 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 shrink-0 block">
-      <div className="relative h-48 w-full overflow-hidden">
+      <div className="relative h-44 sm:h-48 w-full overflow-hidden">
         <img
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           src={listing.image}
@@ -65,9 +65,7 @@ function CarouselCard({ listing }: { listing: Listing }) {
             <Clock size={14} />
             <span className="text-[11px] whitespace-nowrap">{listing.timeLeft}</span>
           </div>
-          <span
-            className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-semibold text-center shadow-sm shadow-primary/20"
-          >
+          <span className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-semibold text-center shadow-sm shadow-primary/20">
             {listing.offers === 0 ? "İlk Teklifi Ver" : "Teklif Ver"}
           </span>
         </div>
@@ -76,31 +74,44 @@ function CarouselCard({ listing }: { listing: Listing }) {
   );
 }
 
-const VISIBLE = 4;
-const GAP = 20; // gap-5 = 1.25rem = 20px
+const GAP = 16;
+
+function getVisibleCount(): number {
+  if (typeof window === "undefined") return 4;
+  const w = window.innerWidth;
+  if (w < 640) return 1;
+  if (w < 1024) return 2;
+  if (w < 1280) return 3;
+  return 4;
+}
 
 export default function ListingCarousel({ listings }: { listings: Listing[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(4);
   const [page, setPage] = useState(0);
-  const totalPages = Math.ceil(listings.length / VISIBLE);
+  const [cardWidth, setCardWidth] = useState(0);
 
+  const totalPages = Math.ceil(listings.length / visible);
   const canPrev = page > 0;
   const canNext = page < totalPages - 1;
 
-  const getCardWidth = useCallback(() => {
+  const recalc = useCallback(() => {
+    const v = getVisibleCount();
+    setVisible(v);
     const el = containerRef.current;
-    if (!el) return 300;
-    return (el.clientWidth - GAP * (VISIBLE - 1)) / VISIBLE;
+    if (!el) return;
+    setCardWidth((el.clientWidth - GAP * (v - 1)) / v);
   }, []);
 
-  const [cardWidth, setCardWidth] = useState(0);
+  useEffect(() => {
+    recalc();
+    window.addEventListener("resize", recalc);
+    return () => window.removeEventListener("resize", recalc);
+  }, [recalc]);
 
   useEffect(() => {
-    const update = () => setCardWidth(getCardWidth());
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, [getCardWidth]);
+    if (page >= totalPages) setPage(Math.max(0, totalPages - 1));
+  }, [page, totalPages]);
 
   const goTo = (dir: "prev" | "next") => {
     setPage((p) => {
@@ -109,33 +120,30 @@ export default function ListingCarousel({ listings }: { listings: Listing[] }) {
     });
   };
 
-  const offset = page * (cardWidth + GAP) * VISIBLE;
+  const offset = page * (cardWidth + GAP) * visible;
 
   return (
     <div className="relative">
-      {/* Left Arrow */}
       {canPrev && (
         <button
           onClick={() => goTo("prev")}
-          className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 size-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary transition-all"
+          className="absolute left-1 sm:-left-5 top-1/2 -translate-y-1/2 z-10 size-9 sm:size-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary transition-all"
           aria-label="Önceki"
         >
-          <ChevronLeft size={22} />
+          <ChevronLeft size={20} />
         </button>
       )}
 
-      {/* Right Arrow */}
       {canNext && (
         <button
           onClick={() => goTo("next")}
-          className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 size-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary transition-all"
+          className="absolute right-1 sm:-right-5 top-1/2 -translate-y-1/2 z-10 size-9 sm:size-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary transition-all"
           aria-label="Sonraki"
         >
-          <ChevronRight size={22} />
+          <ChevronRight size={20} />
         </button>
       )}
 
-      {/* Track */}
       <div ref={containerRef} className="overflow-hidden">
         <div
           className="flex transition-transform duration-500 ease-in-out"
@@ -155,7 +163,6 @@ export default function ListingCarousel({ listings }: { listings: Listing[] }) {
         </div>
       </div>
 
-      {/* Dots */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-1.5 mt-6">
           {Array.from({ length: totalPages }).map((_, i) => (

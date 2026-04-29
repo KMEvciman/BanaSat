@@ -221,7 +221,7 @@ function TeklifModal({ teklif, onClose }: { teklif: Teklif; onClose: () => void 
       {/* Modal */}
       <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+        <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 sm:px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
           <div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Teklif Detayı</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{teklif.teklifTarihi}</p>
@@ -235,7 +235,7 @@ function TeklifModal({ teklif, onClose }: { teklif: Teklif; onClose: () => void 
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5">
+        <div className="p-4 sm:p-6 space-y-5">
           {/* Talep Info */}
           <div className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
             <img
@@ -294,7 +294,7 @@ function TeklifModal({ teklif, onClose }: { teklif: Teklif; onClose: () => void 
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-6 py-4 flex gap-3 rounded-b-2xl">
+        <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-4 sm:px-6 py-4 flex gap-3 rounded-b-2xl">
           <Link
             href="/talep-detay"
             className="flex-1 flex items-center justify-center gap-2 h-11 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"

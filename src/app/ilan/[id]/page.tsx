@@ -209,7 +209,7 @@ export default function IlanDetay() {
             {/* Right Column - Sidebar */}
             <div className="flex flex-col gap-6">
               {/* Budget Card */}
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 sticky top-[120px]">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 lg:sticky lg:top-[120px]">
                 <div className="flex flex-col gap-5">
                   {/* Budget */}
                   <div className="text-center pb-5 border-b border-gray-100 dark:border-gray-800">

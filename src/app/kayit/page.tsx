@@ -48,7 +48,7 @@ export default function KayitOl() {
           </div>
 
           {/* Form Card */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-8">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-5 sm:p-8">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               {/* Name */}
               <div className="flex flex-col gap-2">
