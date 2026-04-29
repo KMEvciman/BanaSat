@@ -56,6 +56,125 @@ const popularListings = [
   },
 ];
 
+const recentListings = [
+  {
+    id: 6,
+    title: "Bahçe Peyzaj Düzenlemesi",
+    description: "Villa bahçemiz için komple peyzaj tasarımı ve uygulama hizmeti arıyoruz.",
+    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    category: "Bahçe & Peyzaj",
+    budget: "20.000 - 35.000 TL",
+    offers: 3,
+    timeLeft: "6 gün kaldı",
+  },
+  {
+    id: 7,
+    title: "Düğün Fotoğrafçısı",
+    description: "Ağustos ayında yapılacak düğünümüz için profesyonel fotoğraf ve drone çekimi.",
+    image: "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    category: "Fotoğraf & Video",
+    budget: "8.000 - 15.000 TL",
+    offers: 0,
+    timeLeft: "7 gün kaldı",
+  },
+  {
+    id: 8,
+    title: "Klima Montajı (3 Adet)",
+    description: "Evimize 3 adet inverter klima alımı ve montajı için uygun fiyat teklifi bekliyorum.",
+    image: "https://images.unsplash.com/photo-1631545806609-35d4ae440431?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    category: "Tadilat",
+    budget: "30.000 - 45.000 TL",
+    offers: 5,
+    timeLeft: "3 gün kaldı",
+  },
+  {
+    id: 9,
+    title: "İngilizce Çeviri (50 Sayfa)",
+    description: "Akademik makale çevirisi için profesyonel ve alanında uzman çevirmen arıyorum.",
+    image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    category: "Çeviri",
+    budget: "3.000 - 5.000 TL",
+    offers: 9,
+    timeLeft: "2 gün kaldı",
+  },
+  {
+    id: 10,
+    title: "Kedi Bakım & Pansiyon",
+    description: "Tatil süresince (10 gün) 2 kedimiz için güvenilir pansiyon hizmeti arıyoruz.",
+    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    category: "Evcil Hayvan",
+    budget: "1.500 - 3.000 TL",
+    offers: 2,
+    timeLeft: "5 gün kaldı",
+  },
+];
+
+function ListingCard({ listing }: { listing: typeof popularListings[number] }) {
+  return (
+    <div className="group bg-white dark:bg-[#1a2030] rounded-xl border border-gray-100 dark:border-gray-800/60 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300">
+      {/* Image */}
+      <div className="relative h-48 w-full overflow-hidden">
+        <img
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          src={listing.image}
+          alt={listing.title}
+        />
+        {listing.offers >= 8 && (
+          <div className="absolute top-3 left-3">
+            <span className="bg-orange-500/15 text-orange-500 dark:bg-orange-400/15 dark:text-orange-400 px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 backdrop-blur-md border border-orange-500/20 dark:border-orange-400/20">
+              <Flame size={14} className="fill-current" />
+              Popüler
+            </span>
+          </div>
+        )}
+        <div className="absolute bottom-3 right-3 bg-white/85 dark:bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-gray-200/50 dark:border-white/10">
+          <span className="text-primary font-bold text-xs">{listing.category}</span>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4 space-y-3">
+        <div>
+          <h3 className="text-gray-900 dark:text-white text-sm font-bold leading-tight line-clamp-1 group-hover:text-primary transition-colors">
+            {listing.title}
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">
+            {listing.description}
+          </p>
+        </div>
+
+        {/* Budget & Offers */}
+        <div className="flex items-center justify-between py-2.5 border-y border-gray-100 dark:border-gray-800/60">
+          <div className="flex flex-col">
+            <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-semibold tracking-wider">Bütçe</span>
+            <span className="text-gray-900 dark:text-white font-bold text-xs mt-0.5">{listing.budget}</span>
+          </div>
+          <div className="text-right flex flex-col">
+            <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-semibold tracking-wider">Durum</span>
+            <span className={`text-xs font-semibold mt-0.5 ${listing.offers > 0 ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500"}`}>
+              {listing.offers > 0 ? `${listing.offers} teklif` : "Henüz yok"}
+            </span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between gap-3 pt-0.5">
+          <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
+            <Clock size={14} />
+            <span className="text-[11px] whitespace-nowrap">{listing.timeLeft}</span>
+          </div>
+          <Link
+            href="/satici/teklif-ver"
+            className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-semibold hover:bg-blue-600 transition-colors active:scale-95 transform text-center shadow-sm shadow-primary/20"
+          >
+            {listing.offers === 0 ? "İlk Teklifi Ver" : "Teklif Ver"}
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   return (
     <>
@@ -74,153 +193,20 @@ export default function Home() {
                   Şu anda en çok teklif alan ilanlar
                 </p>
               </div>
-              <Link href="/ilanlarim" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
+              <Link href="/taleplerim" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
                 Tümünü Gör <ArrowRight size={16} />
               </Link>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
               {popularListings.map((listing) => (
-                <div
-                  key={listing.id}
-                  className="group bg-white dark:bg-[#1a2030] rounded-xl border border-gray-100 dark:border-gray-800/60 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300"
-                >
-                  {/* Image */}
-                  <div className="relative h-48 w-full overflow-hidden">
-                    <img
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      src={listing.image}
-                      alt={listing.title}
-                    />
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-orange-500/15 text-orange-500 dark:bg-orange-400/15 dark:text-orange-400 px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 backdrop-blur-md border border-orange-500/20 dark:border-orange-400/20">
-                        <Flame size={14} className="fill-current" />
-                        Popüler
-                      </span>
-                    </div>
-                    <div className="absolute bottom-3 right-3 bg-white/85 dark:bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-gray-200/50 dark:border-white/10">
-                      <span className="text-primary font-bold text-xs">{listing.category}</span>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-4 space-y-3">
-                    <div>
-                      <h3 className="text-gray-900 dark:text-white text-sm font-bold leading-tight line-clamp-1 group-hover:text-primary transition-colors">
-                        {listing.title}
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">
-                        {listing.description}
-                      </p>
-                    </div>
-
-                    {/* Budget & Offers */}
-                    <div className="flex items-center justify-between py-2.5 border-y border-gray-100 dark:border-gray-800/60">
-                      <div className="flex flex-col">
-                        <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-semibold tracking-wider">Bütçe</span>
-                        <span className="text-gray-900 dark:text-white font-bold text-xs mt-0.5">{listing.budget}</span>
-                      </div>
-                      <div className="text-right flex flex-col">
-                        <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-semibold tracking-wider">Durum</span>
-                        <span className="text-green-600 dark:text-green-400 text-xs font-semibold mt-0.5">{listing.offers} teklif</span>
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-between gap-3 pt-0.5">
-                      <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-                        <Clock size={14} />
-                        <span className="text-[11px] whitespace-nowrap">{listing.timeLeft}</span>
-                      </div>
-                      <Link
-                        href="/satici/teklif-ver"
-                        className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-semibold hover:bg-blue-600 transition-colors active:scale-95 transform text-center shadow-sm shadow-primary/20"
-                      >
-                        Teklif Ver
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <ListingCard key={listing.id} listing={listing} />
               ))}
             </div>
           </div>
         </div>
 
-        {/* Hero Section */}
-        <div className="w-full bg-white dark:bg-background-dark">
-          <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40 py-8 md:py-16">
-            <div className="flex flex-col-reverse lg:flex-row gap-8 lg:gap-16 items-center">
-              {/* Content */}
-              <div className="flex flex-col gap-6 flex-1 text-center lg:text-left items-center lg:items-start">
-                <div className="flex flex-col gap-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 w-fit mx-auto lg:mx-0">
-                    <span className="size-2 rounded-full bg-primary animate-pulse"></span>
-                    <span className="text-xs font-semibold text-primary uppercase tracking-wide">
-                      Güvenli Pazar Yeri
-                    </span>
-                  </div>
-                  <h1 className="text-gray-900 dark:text-white text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tighter">
-                    Aradığınızı Değil,<br />
-                    <span className="text-primary">En Uygun Teklifi</span> Bulun
-                  </h1>
-                  <h2 className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-normal leading-relaxed max-w-xl mx-auto lg:mx-0">
-                    İhtiyacınızı girin, binlerce onaylı satıcıdan en iyi fiyat teklifleri anında cebinize gelsin.
-                  </h2>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-2">
-                  <Link href="/talep-olustur" className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-12 px-8 bg-primary hover:bg-blue-600 text-white text-base font-bold transition-all shadow-lg hover:shadow-primary/30">
-                    Hemen Talep Oluştur
-                  </Link>
-                  <Link href="#nasil-calisir" className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-12 px-8 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-base font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
-                    Nasıl Çalışır?
-                  </Link>
-                </div>
-                <div className="flex items-center gap-4 pt-4 opacity-80 justify-center lg:justify-start w-full">
-                  <div className="flex -space-x-3">
-                    <div
-                      className="size-8 rounded-full border-2 border-white dark:border-background-dark bg-gray-200"
-                      style={{
-                        backgroundImage: 'url("https://ui-avatars.com/api/?name=User+A&background=random")',
-                        backgroundSize: "cover",
-                      }}
-                    ></div>
-                    <div
-                      className="size-8 rounded-full border-2 border-white dark:border-background-dark bg-gray-300"
-                      style={{
-                        backgroundImage: 'url("https://ui-avatars.com/api/?name=User+B&background=random")',
-                        backgroundSize: "cover",
-                      }}
-                    ></div>
-                    <div
-                      className="size-8 rounded-full border-2 border-white dark:border-background-dark bg-gray-400"
-                      style={{
-                        backgroundImage: 'url("https://ui-avatars.com/api/?name=User+C&background=random")',
-                        backgroundSize: "cover",
-                      }}
-                    ></div>
-                  </div>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                    10,000+ Tamamlanan Talep
-                  </p>
-                </div>
-              </div>
-              {/* Hero Image */}
-              <div className="w-full lg:w-1/2 relative mt-8 lg:mt-0">
-                <div className="absolute -inset-4 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl blur-2xl opacity-70"></div>
-                <div
-                  className="relative w-full aspect-[4/3] bg-center bg-no-repeat bg-cover rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden"
-                  style={{
-                    backgroundImage: 'url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80")',
-                  }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Features / How it Works Section */}
+        {/* How it Works Section */}
         <div id="nasil-calisir" className="w-full bg-blue-50/50 dark:bg-slate-900/50 py-16 scroll-mt-24">
           <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40">
             <div className="flex flex-col gap-12 text-center">
@@ -235,7 +221,7 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
                 {/* Connector Line (Desktop) */}
                 <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gray-200 dark:bg-gray-700 -z-10"></div>
-                
+
                 {/* Step 1 */}
                 <div className="flex flex-col items-center gap-4 group">
                   <div className="size-24 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center group-hover:-translate-y-1 transition-transform duration-300">
@@ -248,7 +234,7 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
-                
+
                 {/* Step 2 */}
                 <div className="flex flex-col items-center gap-4 group">
                   <div className="size-24 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center group-hover:-translate-y-1 transition-transform duration-300">
@@ -261,7 +247,7 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
-                
+
                 {/* Step 3 */}
                 <div className="flex flex-col items-center gap-4 group">
                   <div className="size-24 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center group-hover:-translate-y-1 transition-transform duration-300">
@@ -279,20 +265,45 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Recent Listings Section */}
+        <div className="w-full bg-white dark:bg-background-dark py-10 md:py-14">
+          <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-gray-900 dark:text-white text-2xl md:text-3xl font-bold tracking-tight">
+                  Son Eklenen İlanlar
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  Yeni yayınlanan taleplere göz atın
+                </p>
+              </div>
+              <Link href="/taleplerim" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
+                Tümünü Gör <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+              {recentListings.map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* CTA Section */}
         <div className="w-full bg-background-light dark:bg-background-dark py-12">
           <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40">
             <div className="bg-primary rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl shadow-blue-900/20 relative overflow-hidden">
               <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
               <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-              
+
               <div className="flex flex-col gap-4 text-center md:text-left relative z-10 w-full">
                 <h2 className="text-white text-2xl md:text-3xl font-bold">Hâlâ aradığını bulamadın mı?</h2>
                 <p className="text-blue-100 text-base md:text-lg max-w-lg">
                   Hemen ücretsiz bir talep oluştur, aradığın ürün veya hizmet ayağına gelsin.
                 </p>
               </div>
-              
+
               <div className="flex gap-4 relative z-10 flex-shrink-0">
                 <Link href="/talep-olustur" className="flex min-w-[200px] cursor-pointer items-center justify-center rounded-xl h-12 px-6 bg-white text-primary hover:bg-gray-50 text-base font-bold transition-colors shadow-lg">
                   Ücretsiz Talep Oluştur
