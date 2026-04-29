@@ -43,11 +43,11 @@ export default function TeklifKarsilastirma() {
             </p>
           </div>
           <div className="flex gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#dbdee6] dark:border-[#3e4552] bg-white dark:bg-[#1e2330] text-[#111318] dark:text-white text-sm font-bold hover:bg-gray-50 dark:hover:bg-[#2a2f3d] transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#dbdee6] dark:border-[#3e4552] bg-white dark:bg-gray-900 text-[#111318] dark:text-white text-sm font-bold hover:bg-gray-50 dark:hover:bg-[#2a2f3d] transition-colors">
               <Printer size={20} />
               <span className="hidden sm:inline">Yazdır</span>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#dbdee6] dark:border-[#3e4552] bg-white dark:bg-[#1e2330] text-[#111318] dark:text-white text-sm font-bold hover:bg-gray-50 dark:hover:bg-[#2a2f3d] transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#dbdee6] dark:border-[#3e4552] bg-white dark:bg-gray-900 text-[#111318] dark:text-white text-sm font-bold hover:bg-gray-50 dark:hover:bg-[#2a2f3d] transition-colors">
               <Share2 size={20} />
               <span className="hidden sm:inline">Paylaş</span>
             </button>
@@ -66,7 +66,7 @@ export default function TeklifKarsilastirma() {
               </div>
 
               {/* Seller A */}
-              <div className="relative flex flex-col items-center p-6 bg-white dark:bg-[#1e2330] rounded-t-xl border-x border-t border-[#dbdee6] dark:border-[#3e4552] shadow-sm">
+              <div className="relative flex flex-col items-center p-6 bg-white dark:bg-gray-900 rounded-t-xl border-x border-t border-[#dbdee6] dark:border-[#3e4552] shadow-sm">
                 <div className="size-16 rounded-full bg-gray-100 mb-3 border border-gray-200 p-1">
                   <img className="w-full h-full object-cover rounded-full" src="https://ui-avatars.com/api/?name=Tekno+Store&background=random" alt="TeknoStore" />
                 </div>
@@ -79,7 +79,7 @@ export default function TeklifKarsilastirma() {
               </div>
 
               {/* Seller B (Recommended) */}
-              <div className="relative flex flex-col items-center p-6 bg-white dark:bg-[#1e2330] rounded-t-xl border-x border-t-4 border-primary shadow-md z-10 -mt-2 pb-8">
+              <div className="relative flex flex-col items-center p-6 bg-white dark:bg-gray-900 rounded-t-xl border-x border-t-4 border-primary shadow-md z-10 -mt-2 pb-8">
                 <div className="absolute -top-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">
                   En İyi Fiyat
                 </div>
@@ -95,7 +95,7 @@ export default function TeklifKarsilastirma() {
               </div>
 
               {/* Seller C */}
-              <div className="relative flex flex-col items-center p-6 bg-white dark:bg-[#1e2330] rounded-t-xl border-x border-t border-[#dbdee6] dark:border-[#3e4552] shadow-sm">
+              <div className="relative flex flex-col items-center p-6 bg-white dark:bg-gray-900 rounded-t-xl border-x border-t border-[#dbdee6] dark:border-[#3e4552] shadow-sm">
                 <div className="size-16 rounded-full bg-gray-100 mb-3 border border-gray-200 p-1">
                   <img className="w-full h-full object-cover rounded-full" src="https://ui-avatars.com/api/?name=Hizli+Satici&background=random" alt="HızlıSatıcı" />
                 </div>
@@ -117,14 +117,14 @@ export default function TeklifKarsilastirma() {
                   <p className="text-xs text-[#616e89] dark:text-gray-400">Vergiler dahil</p>
                 </div>
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-[#dbdee6] dark:border-[#3e4552]">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552]">
                 <span className="text-xl font-bold text-[#111318] dark:text-white">25.000 TL</span>
               </div>
               <div className="flex items-center justify-center py-4 bg-blue-50/30 dark:bg-blue-900/10 border-x border-b border-primary/20 relative">
                 <span className="text-2xl font-black text-primary">24.500 TL</span>
                 <span className="absolute top-2 right-2 text-[10px] font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded">En Düşük</span>
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-[#dbdee6] dark:border-[#3e4552]">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552]">
                 <span className="text-xl font-bold text-[#111318] dark:text-white">26.000 TL</span>
               </div>
 
@@ -135,13 +135,13 @@ export default function TeklifKarsilastirma() {
                 </div>
                 <p className="font-medium text-[#111318] dark:text-white text-sm">Teslimat Süresi</p>
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-medium">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-medium">
                 2 Gün
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-primary/20 text-sm font-medium">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-primary/20 text-sm font-medium">
                 5 Gün
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-bold text-green-600">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-bold text-green-600">
                 1 Gün
                 <Zap size={16} className="ml-1 text-green-600" />
               </div>
@@ -153,13 +153,13 @@ export default function TeklifKarsilastirma() {
                 </div>
                 <p className="font-medium text-[#111318] dark:text-white text-sm">Kargo Ücreti</p>
               </div>
-              <div className="flex items-center justify-center py-4 bg-gray-50 dark:bg-[#252a36] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-bold text-green-600">
+              <div className="flex items-center justify-center py-4 bg-gray-50 dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-bold text-green-600">
                 Ücretsiz
               </div>
               <div className="flex items-center justify-center py-4 bg-blue-50/10 dark:bg-blue-900/5 border-x border-b border-primary/20 text-sm font-medium text-red-500">
                 +50 TL
               </div>
-              <div className="flex items-center justify-center py-4 bg-gray-50 dark:bg-[#252a36] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-bold text-green-600">
+              <div className="flex items-center justify-center py-4 bg-gray-50 dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-bold text-green-600">
                 Ücretsiz
               </div>
 
@@ -170,13 +170,13 @@ export default function TeklifKarsilastirma() {
                 </div>
                 <p className="font-medium text-[#111318] dark:text-white text-sm">Garanti</p>
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm text-[#616e89] dark:text-gray-300">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm text-[#616e89] dark:text-gray-300">
                 2 Yıl TR Garantili
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-primary/20 text-sm text-[#616e89] dark:text-gray-300">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-primary/20 text-sm text-[#616e89] dark:text-gray-300">
                 1 Yıl İthalatçı
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm text-[#616e89] dark:text-gray-300">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm text-[#616e89] dark:text-gray-300">
                 2 Yıl TR Garantili
               </div>
 
@@ -187,13 +187,13 @@ export default function TeklifKarsilastirma() {
                 </div>
                 <p className="font-medium text-[#111318] dark:text-white text-sm">İade Politikası</p>
               </div>
-              <div className="flex items-center justify-center py-4 bg-gray-50 dark:bg-[#252a36] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm text-[#616e89] dark:text-gray-300">
+              <div className="flex items-center justify-center py-4 bg-gray-50 dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm text-[#616e89] dark:text-gray-300">
                 14 Gün
               </div>
               <div className="flex items-center justify-center py-4 bg-blue-50/10 dark:bg-blue-900/5 border-x border-b border-primary/20 text-sm text-[#616e89] dark:text-gray-300">
                 7 Gün
               </div>
-              <div className="flex items-center justify-center py-4 bg-gray-50 dark:bg-[#252a36] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-medium text-green-600">
+              <div className="flex items-center justify-center py-4 bg-gray-50 dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-medium text-green-600">
                 30 Gün
               </div>
 
@@ -204,31 +204,31 @@ export default function TeklifKarsilastirma() {
                 </div>
                 <p className="font-medium text-[#111318] dark:text-white text-sm">Hediye / Ekstra</p>
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm text-[#616e89] dark:text-gray-300">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm text-[#616e89] dark:text-gray-300">
                 -
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-primary/20 text-sm text-[#616e89] dark:text-gray-300">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-primary/20 text-sm text-[#616e89] dark:text-gray-300">
                 -
               </div>
-              <div className="flex items-center justify-center py-4 bg-white dark:bg-[#1e2330] border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-medium text-primary">
+              <div className="flex items-center justify-center py-4 bg-white dark:bg-gray-900 border-x border-b border-[#dbdee6] dark:border-[#3e4552] text-sm font-medium text-primary">
                 Kılıf Hediye
               </div>
 
               {/* Footer Row: Buttons */}
               <div className="pt-4"></div>
               
-              <div className="p-4 bg-white dark:bg-[#1e2330] border-x border-b rounded-b-xl border-[#dbdee6] dark:border-[#3e4552] flex justify-center">
+              <div className="p-4 bg-white dark:bg-gray-900 border-x border-b rounded-b-xl border-[#dbdee6] dark:border-[#3e4552] flex justify-center">
                 <Link href="/odeme" className="w-full flex items-center justify-center h-12 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-lg font-bold text-sm transition-all duration-200">
                   Teklifi Seç
                 </Link>
               </div>
-              <div className="p-4 bg-white dark:bg-[#1e2330] border-x border-b border-primary/20 rounded-b-xl shadow-lg relative z-10 flex justify-center">
+              <div className="p-4 bg-white dark:bg-gray-900 border-x border-b border-primary/20 rounded-b-xl shadow-lg relative z-10 flex justify-center">
                 <Link href="/odeme" className="w-full flex items-center justify-center h-12 bg-primary text-white hover:bg-blue-700 rounded-lg font-bold text-base shadow-lg shadow-blue-500/30 transition-all duration-200 gap-2">
                   Teklifi Seç
                   <CheckCircle size={18} />
                 </Link>
               </div>
-              <div className="p-4 bg-white dark:bg-[#1e2330] border-x border-b rounded-b-xl border-[#dbdee6] dark:border-[#3e4552] flex justify-center">
+              <div className="p-4 bg-white dark:bg-gray-900 border-x border-b rounded-b-xl border-[#dbdee6] dark:border-[#3e4552] flex justify-center">
                 <Link href="/odeme" className="w-full flex items-center justify-center h-12 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-lg font-bold text-sm transition-all duration-200">
                   Teklifi Seç
                 </Link>
@@ -238,7 +238,7 @@ export default function TeklifKarsilastirma() {
         </div>
 
         {/* Info / Disclaimer Section */}
-        <div className="mt-8 flex flex-col md:flex-row gap-6 p-4 rounded-xl bg-blue-50 dark:bg-[#1e2330] border border-blue-100 dark:border-[#2a2f3d]">
+        <div className="mt-8 flex flex-col md:flex-row gap-6 p-4 rounded-xl bg-blue-50 dark:bg-gray-900 border border-blue-100 dark:border-[#2a2f3d]">
           <div className="flex gap-4">
             <div className="size-10 min-w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary">
               <Info size={20} />

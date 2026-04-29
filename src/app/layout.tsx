@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const inter = Inter({
@@ -23,7 +24,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans min-h-full flex flex-col bg-background-light dark:bg-background-dark text-gray-900 dark:text-white transition-colors duration-200">
         <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </div>
       </body>
     </html>

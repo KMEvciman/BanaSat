@@ -60,7 +60,7 @@ export default function TalepDetay() {
           </div>
 
           {/* Details Card */}
-          <div className="bg-white dark:bg-[#1a202c] rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
             <div className="flex flex-col lg:flex-row gap-8">
               <div className="flex-1 flex flex-col gap-6">
                 <div>
@@ -129,11 +129,11 @@ export default function TalepDetay() {
               <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">3</span>
             </h3>
             <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white dark:bg-[#1a202c] border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-200">
+              <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-200">
                 <Filter size={18} />
                 Filtrele
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white dark:bg-[#1a202c] border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-200">
+              <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-200">
                 <ArrowDownWideNarrow size={18} />
                 Sırala: Önerilen
               </button>
@@ -144,7 +144,7 @@ export default function TalepDetay() {
         {/* Offers List */}
         <section className="flex flex-col gap-4 pb-20">
           {/* Card 1 */}
-          <article className="bg-white dark:bg-[#1a202c] rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow duration-200 overflow-hidden">
+          <article className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow duration-200 overflow-hidden">
             <div className="p-5 flex flex-col md:flex-row gap-6">
               <div className="flex md:flex-col items-center md:items-start gap-4 md:w-48 md:border-r md:border-gray-100 dark:md:border-gray-800 md:pr-4">
                 <div className="relative">
@@ -204,7 +204,7 @@ export default function TalepDetay() {
           </article>
 
           {/* Card 3 (Best Rated) */}
-          <article className="relative bg-white dark:bg-[#1a202c] rounded-xl shadow-sm border border-orange-200 dark:border-orange-900 hover:shadow-md transition-shadow duration-200 overflow-hidden">
+          <article className="relative bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-orange-200 dark:border-orange-900 hover:shadow-md transition-shadow duration-200 overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 to-red-500"></div>
             <div className="p-5 flex flex-col md:flex-row gap-6">
               <div className="flex md:flex-col items-center md:items-start gap-4 md:w-48 md:border-r md:border-gray-100 dark:md:border-gray-800 md:pr-4">

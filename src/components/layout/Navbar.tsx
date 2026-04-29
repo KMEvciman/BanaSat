@@ -10,8 +10,11 @@ import {
   ClipboardList,
   HandCoins,
   ChevronDown,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import { useAuth } from "@/context/AuthContext";
 import { useState, useRef, useEffect } from "react";
 
 const navLinks = [
@@ -47,6 +50,7 @@ const categories = [
 ];
 
 export default function Navbar() {
+  const { isLoggedIn, user, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -107,80 +111,106 @@ export default function Navbar() {
 
           {/* User Actions */}
           <div className="flex items-center justify-end gap-3 shrink-0">
-            <Link
-              href="/talep-olustur"
-              className="hidden md:flex items-center justify-center rounded-xl h-10 px-5 bg-primary hover:bg-primary/85 transition-colors text-white text-sm font-bold shadow-md hover:shadow-lg shadow-primary/20"
-            >
-              Talep Oluştur
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <Link
+                  href="/talep-olustur"
+                  className="hidden md:flex items-center justify-center rounded-xl h-10 px-5 bg-primary hover:bg-primary/85 transition-colors text-white text-sm font-bold shadow-md hover:shadow-lg shadow-primary/20"
+                >
+                  Talep Oluştur
+                </Link>
 
-            <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden md:block"></div>
+                <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden md:block"></div>
 
-            <ThemeToggle />
+                <ThemeToggle />
 
-            {/* Profile Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-2 p-1 rounded-full border border-gray-200 dark:border-gray-800 hover:border-primary/50 transition-colors outline-none"
-              >
-                <div
-                  className="bg-center bg-no-repeat bg-cover rounded-full size-8"
-                  style={{
-                    backgroundImage:
-                      'url("https://ui-avatars.com/api/?name=Kullanici+Adi&background=random")',
-                  }}
-                ></div>
-              </button>
-
-              {isProfileOpen && (
-                <div className="absolute right-0 top-12 w-48 bg-white dark:bg-[#1a202c] border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
-                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                      Kullanıcı Adı
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      user@banasat.com
-                    </p>
-                  </div>
-
-                  <Link
-                    href="/taleplerim"
-                    onClick={() => setIsProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                {/* Profile Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center gap-2 p-1 rounded-full border border-gray-200 dark:border-gray-800 hover:border-primary/50 transition-colors outline-none"
                   >
-                    <FileText size={16} />
-                    Sipariş ve Taleplerim
-                  </Link>
-                  <Link
-                    href="#"
-                    onClick={() => setIsProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <User size={16} />
-                    Profil
-                  </Link>
-                  <Link
-                    href="#"
-                    onClick={() => setIsProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <Settings size={16} />
-                    Ayarlar
-                  </Link>
+                    <div
+                      className="bg-center bg-no-repeat bg-cover rounded-full size-8"
+                      style={{
+                        backgroundImage:
+                          'url("https://ui-avatars.com/api/?name=Kullanici+Adi&background=random")',
+                      }}
+                    ></div>
+                  </button>
 
-                  <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1">
-                    <button
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-                    >
-                      <LogOut size={16} />
-                      Çıkış Yap
-                    </button>
-                  </div>
+                  {isProfileOpen && (
+                    <div className="absolute right-0 top-12 w-48 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
+                        <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                          {user?.name || "Kullanıcı"}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {user?.email || "user@banasat.com"}
+                        </p>
+                      </div>
+
+                      <Link
+                        href="/taleplerim"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <FileText size={16} />
+                        Sipariş ve Taleplerim
+                      </Link>
+                      <Link
+                        href="#"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <User size={16} />
+                        Profil
+                      </Link>
+                      <Link
+                        href="#"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <Settings size={16} />
+                        Ayarlar
+                      </Link>
+
+                      <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1">
+                        <button
+                          onClick={() => {
+                            setIsProfileOpen(false);
+                            logout();
+                          }}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                        >
+                          <LogOut size={16} />
+                          Çıkış Yap
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              <>
+                <ThemeToggle />
+
+                <Link
+                  href="/giris"
+                  className="hidden md:flex items-center justify-center gap-1.5 rounded-xl h-10 px-5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <LogIn size={16} />
+                  Giriş Yap
+                </Link>
+                <Link
+                  href="/kayit"
+                  className="hidden md:flex items-center justify-center gap-1.5 rounded-xl h-10 px-5 bg-primary hover:bg-primary/85 transition-colors text-white text-sm font-bold shadow-md hover:shadow-lg shadow-primary/20"
+                >
+                  <UserPlus size={16} />
+                  Kayıt Ol
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Nav Links */}
@@ -198,12 +228,29 @@ export default function Navbar() {
                 </Link>
               );
             })}
-            <Link
-              href="/talep-olustur"
-              className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-center text-xs font-semibold text-white transition-colors hover:bg-primary/85"
-            >
-              Talep Oluştur
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href="/talep-olustur"
+                className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-center text-xs font-semibold text-white transition-colors hover:bg-primary/85"
+              >
+                Talep Oluştur
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/giris"
+                  className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-gray-50 px-3 text-center text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-100 dark:bg-gray-800/50 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  Giriş Yap
+                </Link>
+                <Link
+                  href="/kayit"
+                  className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-center text-xs font-semibold text-white transition-colors hover:bg-primary/85"
+                >
+                  Kayıt Ol
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Mobile Search */}

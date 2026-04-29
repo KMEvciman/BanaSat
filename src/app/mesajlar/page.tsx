@@ -30,7 +30,7 @@ export default function Mesajlar() {
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display h-screen w-full flex overflow-hidden antialiased selection:bg-primary/30">
       {/* Sidebar: Conversation List */}
-      <aside className="w-[380px] flex flex-col border-r border-slate-200 dark:border-slate-800 bg-surface-light dark:bg-[#1e2433] shrink-0 z-20">
+      <aside className="w-[380px] flex flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-gray-900 shrink-0 z-20">
         {/* Sidebar Header: Search */}
         <div className="px-5 pt-6 pb-2">
           <h1 className="text-2xl font-bold mb-4 tracking-tight">Mesajlar</h1>
@@ -116,7 +116,7 @@ export default function Mesajlar() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full relative min-w-0 bg-background-light dark:bg-background-dark">
         {/* Sticky Header */}
-        <header className="h-20 shrink-0 bg-surface-light dark:bg-[#1e2433] border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm">
+        <header className="h-20 shrink-0 bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm">
           {/* Left: User Profile */}
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -151,7 +151,7 @@ export default function Mesajlar() {
         </header>
 
         {/* Chat History */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col bg-[#fafafa] dark:bg-[#0f131a]">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col bg-[#fafafa] dark:bg-black">
           {/* Date Separator */}
           <div className="flex justify-center">
             <span className="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs px-3 py-1 rounded-full font-medium">Bugün</span>
@@ -164,7 +164,7 @@ export default function Mesajlar() {
               style={{ backgroundImage: 'url("https://ui-avatars.com/api/?name=Ahmet+Yilmaz&background=random")' }}
             ></div>
             <div className="flex flex-col gap-1">
-              <div className="bg-white dark:bg-[#1e2433] border border-slate-200 dark:border-slate-700 p-4 rounded-2xl rounded-bl-none shadow-sm">
+              <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl rounded-bl-none shadow-sm">
                 <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed">
                   Merhaba, ilanınızı gördüm. İstediğiniz iPhone 13 Pro Max için elimde temiz, garantisi devam eden bir cihaz var.
                 </p>
@@ -213,7 +213,7 @@ export default function Mesajlar() {
               style={{ backgroundImage: 'url("https://ui-avatars.com/api/?name=Ahmet+Yilmaz&background=random")' }}
             ></div>
             <div className="flex flex-col gap-1">
-              <div className="bg-white dark:bg-[#1e2433] border border-slate-200 dark:border-slate-700 p-4 rounded-2xl rounded-bl-none shadow-sm">
+              <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl rounded-bl-none shadow-sm">
                 <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed">
                   Pil sağlığı %92. Fotoğrafları ekledim, sıfır ayarında diyebilirim. Fiyat için de teklifimi gönderdim, sizin için uygun mudur?
                 </p>
@@ -237,7 +237,7 @@ export default function Mesajlar() {
         </div>
 
         {/* Action Bar (Footer) */}
-        <div className="shrink-0 bg-surface-light dark:bg-[#1e2433] border-t border-slate-200 dark:border-slate-800 p-4">
+        <div className="shrink-0 bg-white dark:bg-gray-900 border-t border-slate-200 dark:border-slate-800 p-4">
           <div className="max-w-4xl mx-auto flex items-end gap-3">
             {/* Attachment Button */}
             <button className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors outline-none block" title="Dosya Ekle">

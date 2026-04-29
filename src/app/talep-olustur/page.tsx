@@ -74,7 +74,7 @@ export default function TalepOlustur() {
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 pt-6">
             {/* Left Column: Form */}
-            <div className="bg-white dark:bg-[#1a202c] rounded-xl shadow-sm border border-[#e5e7eb] dark:border-gray-800 p-6 md:p-8">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-[#e5e7eb] dark:border-gray-800 p-6 md:p-8">
               <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
                 <div className="flex flex-col gap-2">
                   <label className="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal">
@@ -177,7 +177,7 @@ export default function TalepOlustur() {
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-[#1a202c] border border-[#e5e7eb] dark:border-gray-800 rounded-xl p-6 flex flex-col items-center text-center gap-3">
+              <div className="bg-white dark:bg-gray-900 border border-[#e5e7eb] dark:border-gray-800 rounded-xl p-6 flex flex-col items-center text-center gap-3">
                 <div className="size-12 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center mb-1">
                   <Headphones size={24} />
                 </div>

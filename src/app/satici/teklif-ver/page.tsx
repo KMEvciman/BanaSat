@@ -35,7 +35,7 @@ export default function SaticiTeklifVer() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* LEFT COLUMN: Request Context */}
           <div className="lg:col-span-5 lg:sticky lg:top-8 space-y-6">
-            <div className="bg-white dark:bg-[#1a202c] rounded-xl shadow-sm border border-[#e5e7eb] dark:border-[#2d3748] overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-[#e5e7eb] dark:border-[#2d3748] overflow-hidden">
               <div className="p-6 pb-4 border-b border-[#f0f1f4] dark:border-[#2d3748]">
                 <div className="flex items-start justify-between gap-4">
                   <h2 className="text-xl font-bold leading-snug text-[#111318] dark:text-white">iPhone 13 Pro Max - 256GB - Grafit</h2>
@@ -47,7 +47,7 @@ export default function SaticiTeklifVer() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-3 gap-1 p-1 bg-[#f9fafb] dark:bg-[#111827]">
+              <div className="grid grid-cols-3 gap-1 p-1 bg-[#f9fafb] dark:bg-gray-900">
                 <div className="aspect-square bg-center bg-cover rounded-lg col-span-2 row-span-2" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&q=80&w=400')" }}></div>
                 <div className="aspect-square bg-center bg-cover rounded-lg" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1603791239531-1dda55e194a6?auto=format&fit=crop&q=80&w=200')" }}></div>
                 <div className="aspect-square bg-center bg-cover rounded-lg relative" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592899677974-c460ce17e4bf?auto=format&fit=crop&q=80&w=200')" }}>
@@ -78,7 +78,7 @@ export default function SaticiTeklifVer() {
                 </div>
                 <div className="pt-5 border-t border-[#f0f1f4] dark:border-[#2d3748]">
                   <p className="text-sm font-medium text-[#616e89] dark:text-slate-400 mb-2">Alıcı Notu</p>
-                  <div className="bg-[#f6f6f8] dark:bg-[#2d3748] p-4 rounded-lg">
+                  <div className="bg-[#f6f6f8] dark:bg-gray-900 p-4 rounded-lg">
                     <p className="text-sm leading-relaxed text-[#111318] dark:text-slate-200">
                       &quot;Merhaba, öğrenciyim ve çizim yapabileceğim temiz bir cihaz arıyorum. Ekranı çiziksiz, pili %85 üzeri olması tercihimdir. Kutusu ve faturası duruyorsa lütfen belirtin. Şimdiden teşekkürler.&quot;
                     </p>
@@ -90,7 +90,7 @@ export default function SaticiTeklifVer() {
 
           {/* RIGHT COLUMN: Offer Form */}
           <div className="lg:col-span-7 space-y-6">
-            <form onSubmit={(e) => e.preventDefault()} className="bg-white dark:bg-[#1a202c] rounded-xl shadow-sm border border-[#e5e7eb] dark:border-[#2d3748] p-6 sm:p-8">
+            <form onSubmit={(e) => e.preventDefault()} className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-[#e5e7eb] dark:border-[#2d3748] p-6 sm:p-8">
               <div className="flex items-center gap-2 mb-6 pb-4 border-b border-[#f0f1f4] dark:border-[#2d3748]">
                 <FileText size={24} className="text-primary" />
                 <h3 className="text-lg font-bold text-[#111318] dark:text-white">Teklif Detayları</h3>

@@ -49,7 +49,7 @@ export default function OdemeEkrani() {
           <div className="lg:col-span-8 space-y-6">
             
             {/* Shipping Address */}
-            <section className="bg-white dark:bg-[#1a202c] rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8">
+            <section className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8">
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="size-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary">
                   <Truck size={20} />
@@ -114,7 +114,7 @@ export default function OdemeEkrani() {
             </section>
 
             {/* Payment Section */}
-            <section className="bg-white dark:bg-[#1a202c] rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8">
+            <section className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8">
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-3">
                   <div className="size-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary">
@@ -197,7 +197,7 @@ export default function OdemeEkrani() {
             <div className="sticky top-24 space-y-6">
               
               {/* Order Summary Card */}
-              <div className="bg-white dark:bg-[#1a202c] rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">
                 <div className="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
                   <h3 className="text-lg font-bold text-[#111318] dark:text-white">Sipariş Özeti</h3>
                 </div>

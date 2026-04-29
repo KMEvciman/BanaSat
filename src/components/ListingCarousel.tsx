@@ -17,7 +17,7 @@ export interface Listing {
 
 function CarouselCard({ listing }: { listing: Listing }) {
   return (
-    <div className="group bg-white dark:bg-[#1a2030] rounded-xl border border-gray-100 dark:border-gray-800/60 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 shrink-0">
+    <div className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800/60 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 shrink-0">
       <div className="relative h-48 w-full overflow-hidden">
         <img
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

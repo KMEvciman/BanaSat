@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import HeroSection from "@/components/HeroSection";
 import ListingCarousel from "@/components/ListingCarousel";
 import ListingCard from "@/components/ListingCard";
 import type { Listing } from "@/components/ListingCarousel";
@@ -118,6 +119,9 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-1 w-full">
+        {/* Hero Section - Giriş yapmamış kullanıcılar için */}
+        <HeroSection />
+
         {/* Popular Listings Section */}
         <div className="w-full bg-background-light dark:bg-background-dark py-10 md:py-14">
           <div className="px-4 md:px-10">
@@ -142,7 +146,7 @@ export default function Home() {
         </div>
 
         {/* How it Works Section */}
-        <div id="nasil-calisir" className="w-full bg-primary/5 dark:bg-slate-900/50 py-16 scroll-mt-24">
+        <div id="nasil-calisir" className="w-full bg-primary/5 dark:bg-black py-16 scroll-mt-24">
           <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40">
             <div className="flex flex-col gap-12 text-center">
               <div className="flex flex-col gap-2">
