@@ -12,6 +12,7 @@ import {
   ChevronDown,
   LogIn,
   UserPlus,
+  MessageSquare,
 } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
@@ -49,7 +50,7 @@ const categories = [
   "Kargo & Kurye",
 ];
 
-export default function Navbar() {
+export default function Navbar({ hideCategories = false }: { hideCategories?: boolean }) {
   const { isLoggedIn, user, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
@@ -69,7 +70,8 @@ export default function Navbar() {
   }, []);
 
   return (
-    <div className="w-full bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800">
+    <>
+      <div className="w-full bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 fixed top-0 left-0 right-0 z-50">
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40 py-3">
         <header className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
@@ -124,11 +126,20 @@ export default function Navbar() {
 
                 <ThemeToggle />
 
+                <Link
+                  href="/mesajlar"
+                  className="flex items-center justify-center rounded-xl size-10 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                  aria-label="Mesajlar"
+                  title="Mesajlar"
+                >
+                  <MessageSquare size={18} />
+                </Link>
+
                 {/* Profile Dropdown */}
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center gap-2 p-1 rounded-full border border-gray-200 dark:border-gray-800 hover:border-primary/50 transition-colors outline-none"
+                    className="flex items-center gap-2 p-1 pr-3 rounded-full border border-gray-200 dark:border-gray-800 hover:border-primary/50 transition-colors outline-none"
                   >
                     <div
                       className="bg-center bg-no-repeat bg-cover rounded-full size-8"
@@ -138,6 +149,9 @@ export default function Navbar() {
                           : `url("https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "U")}&background=5BB678&color=fff")`,
                       }}
                     ></div>
+                    <span className="hidden md:block text-sm font-semibold text-gray-700 dark:text-gray-200 max-w-[120px] truncate">
+                      {user?.name || "Kullanıcı"}
+                    </span>
                   </button>
 
                   {isProfileOpen && (
@@ -271,6 +285,7 @@ export default function Navbar() {
       </div>
 
       {/* Category Bar */}
+      {!hideCategories && (
       <div className="w-full border-t border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-900/40">
         <div className="flex items-start px-4 py-2 gap-2">
           <span className="shrink-0 px-3.5 py-1.5 text-xs font-bold text-gray-900 dark:text-white whitespace-nowrap">
@@ -296,6 +311,10 @@ export default function Navbar() {
           </button>
         </div>
       </div>
+      )}
     </div>
+      {/* Spacer to prevent content from hiding behind fixed navbar */}
+      <div className={hideCategories ? "h-[72px] md:h-[56px]" : "h-[105px] md:h-[88px]"} />
+    </>
   );
 }

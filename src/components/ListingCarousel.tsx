@@ -17,7 +17,7 @@ export interface Listing {
 
 function CarouselCard({ listing }: { listing: Listing }) {
   return (
-    <div className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800/60 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 shrink-0">
+    <Link href={`/ilan/${listing.id}`} className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800/60 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 shrink-0 block">
       <div className="relative h-48 w-full overflow-hidden">
         <img
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -65,15 +65,14 @@ function CarouselCard({ listing }: { listing: Listing }) {
             <Clock size={14} />
             <span className="text-[11px] whitespace-nowrap">{listing.timeLeft}</span>
           </div>
-          <Link
-            href="/satici/teklif-ver"
-            className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-semibold hover:bg-primary/85 transition-colors active:scale-95 transform text-center shadow-sm shadow-primary/20"
+          <span
+            className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-semibold text-center shadow-sm shadow-primary/20"
           >
             {listing.offers === 0 ? "İlk Teklifi Ver" : "Teklif Ver"}
-          </Link>
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

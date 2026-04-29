@@ -413,7 +413,7 @@ export default function Taleplerim() {
                 return (
                   <Link
                     key={talep.id}
-                    href="/talep-detay"
+                    href={`/ilan/${talep.id}`}
                     className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300"
                   >
                     {/* Image */}

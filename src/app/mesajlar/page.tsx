@@ -1,5 +1,6 @@
 "use client";
 
+import Navbar from "@/components/layout/Navbar";
 import { 
   Search, 
   Star, 
@@ -28,7 +29,9 @@ export default function Mesajlar() {
   };
 
   return (
-    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display h-screen w-full flex overflow-hidden antialiased selection:bg-primary/30">
+    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display h-screen w-full flex flex-col overflow-hidden antialiased selection:bg-primary/30">
+      <Navbar hideCategories />
+      <div className="flex flex-1 overflow-hidden">
       {/* Sidebar: Conversation List */}
       <aside className="w-[380px] flex flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-gray-900 shrink-0 z-20">
         {/* Sidebar Header: Search */}
@@ -275,6 +278,7 @@ export default function Mesajlar() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

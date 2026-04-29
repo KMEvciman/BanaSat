@@ -23,7 +23,7 @@ export default function RootLayout({
       <head>
       </head>
       <body className="font-sans min-h-full flex flex-col bg-background-light dark:bg-background-dark text-gray-900 dark:text-white transition-colors duration-200">
-        <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+        <div className="relative flex h-auto min-h-screen w-full flex-col">
           <AuthProvider>
             {children}
           </AuthProvider>
