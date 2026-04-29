@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="tr" className={`${inter.variable} antialiased light`} suppressHydrationWarning>
       <head>
       </head>
-      <body className="font-sans min-h-full flex flex-col bg-background-light dark:bg-background-dark text-gray-900 dark:text-white transition-colors duration-200">
+      <body className="font-sans min-h-full flex flex-col bg-background-light dark:bg-background-dark text-gray-900 dark:text-white transition-colors duration-200" suppressHydrationWarning>
         <div className="relative flex h-auto min-h-screen w-full flex-col">
           <AuthProvider>
             {children}
