@@ -27,7 +27,7 @@ export default function KayitOl() {
     <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
       {/* Top Bar */}
       <div className="w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark">
-        <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40 py-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40 py-4 flex justify-center md:justify-start">
           <Link href="/" className="flex items-center gap-2 text-primary w-fit">
             <img src="/banasat_logo.png" alt="BanaSat" className="h-8 w-auto" />
           </Link>

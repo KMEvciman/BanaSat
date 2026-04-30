@@ -407,7 +407,7 @@ export default function Taleplerim() {
 
           {/* Cards Grid */}
           {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {filtered.map((talep) => {
                 const sc = statusConfig[talep.status];
                 return (
@@ -417,7 +417,7 @@ export default function Taleplerim() {
                     className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300"
                   >
                     {/* Image */}
-                    <div className="relative h-44 w-full overflow-hidden">
+                    <div className="relative h-32 sm:h-44 w-full overflow-hidden">
                       <img
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         src={talep.image}
@@ -436,7 +436,7 @@ export default function Taleplerim() {
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 space-y-3">
+                    <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
                       <div>
                         <h3 className="text-gray-900 dark:text-white text-sm font-bold leading-tight line-clamp-1 group-hover:text-primary transition-colors">
                           {talep.title}

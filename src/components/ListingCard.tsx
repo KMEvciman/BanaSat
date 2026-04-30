@@ -9,7 +9,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800/60 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 block"
     >
       {/* Image */}
-      <div className="relative h-48 w-full overflow-hidden">
+      <div className="relative h-32 sm:h-48 w-full overflow-hidden">
         <img
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           src={listing.image}
@@ -29,7 +29,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-3">
+      <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
         <div>
           <h3 className="text-gray-900 dark:text-white text-sm font-bold leading-tight line-clamp-1 group-hover:text-primary transition-colors">
             {listing.title}

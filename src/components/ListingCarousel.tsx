@@ -90,6 +90,8 @@ export default function ListingCarousel({ listings }: { listings: Listing[] }) {
   const [visible, setVisible] = useState(4);
   const [page, setPage] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   const totalPages = Math.ceil(listings.length / visible);
   const canPrev = page > 0;
@@ -120,6 +122,20 @@ export default function ListingCarousel({ listings }: { listings: Listing[] }) {
     });
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && canNext) goTo("next");
+      if (diff < 0 && canPrev) goTo("prev");
+    }
+  };
+
   const offset = page * (cardWidth + GAP) * visible;
 
   return (
@@ -127,7 +143,7 @@ export default function ListingCarousel({ listings }: { listings: Listing[] }) {
       {canPrev && (
         <button
           onClick={() => goTo("prev")}
-          className="absolute left-1 sm:-left-5 top-1/2 -translate-y-1/2 z-10 size-9 sm:size-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary transition-all"
+          className="absolute left-1 sm:-left-5 top-1/2 -translate-y-1/2 z-10 size-9 sm:size-10 hidden sm:flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary transition-all"
           aria-label="Önceki"
         >
           <ChevronLeft size={20} />
@@ -137,14 +153,20 @@ export default function ListingCarousel({ listings }: { listings: Listing[] }) {
       {canNext && (
         <button
           onClick={() => goTo("next")}
-          className="absolute right-1 sm:-right-5 top-1/2 -translate-y-1/2 z-10 size-9 sm:size-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary transition-all"
+          className="absolute right-1 sm:-right-5 top-1/2 -translate-y-1/2 z-10 size-9 sm:size-10 hidden sm:flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary transition-all"
           aria-label="Sonraki"
         >
           <ChevronRight size={20} />
         </button>
       )}
 
-      <div ref={containerRef} className="overflow-hidden">
+      <div
+        ref={containerRef}
+        className="overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div
           className="flex transition-transform duration-500 ease-in-out"
           style={{
