@@ -7,6 +7,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ListingsModule } from './modules/listings/listings.module';
+import { OffersModule } from './modules/offers/offers.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { ListingsModule } from './modules/listings/listings.module';
     AuthModule,
     CategoriesModule,
     ListingsModule,
-    // Diğer özellik modülleri (users profili, offers, messages)
+    OffersModule,
+    // Diğer özellik modülleri (users profili, messages)
     // sonraki adımlarda buraya eklenecek.
   ],
 })
