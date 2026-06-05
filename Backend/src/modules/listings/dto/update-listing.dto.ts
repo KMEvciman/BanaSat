@@ -1,13 +1,65 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { IsEnum, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsISO8601,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { ListingStatus } from '@prisma/client';
-import { CreateListingDto } from './create-listing.dto';
 
 /**
- * Güncelleme: CreateListingDto'nun tüm alanları opsiyonel + durum.
- * Sahibi ilanı düzenleyebilir veya durumunu değiştirebilir.
+ * İlan güncelleme. Tüm alanlar opsiyoneldir; yalnızca gönderilenler
+ * güncellenir. Sahibi durumu da değiştirebilir (örn. TAMAMLANDI/IPTAL).
  */
-export class UpdateListingDto extends PartialType(CreateListingDto) {
+export class UpdateListingDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(5)
+  @MaxLength(120)
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(10)
+  @MaxLength(300)
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(20)
+  @MaxLength(5000)
+  fullDescription?: string;
+
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  budgetLabel?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  location?: string;
+
+  @IsOptional()
+  @IsUrl()
+  coverImageUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsUrl({}, { each: true })
+  imageUrls?: string[];
+
+  @IsOptional()
+  @IsISO8601()
+  deadline?: string;
+
   @IsOptional()
   @IsEnum(ListingStatus, { message: 'Geçersiz ilan durumu.' })
   status?: ListingStatus;

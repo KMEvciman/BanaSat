@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { ListingsModule } from './modules/listings/listings.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { CategoriesModule } from './modules/categories/categories.module';
     HealthModule,
     AuthModule,
     CategoriesModule,
-    // Diğer özellik modülleri (users profili, listings, offers, messages)
+    ListingsModule,
+    // Diğer özellik modülleri (users profili, offers, messages)
     // sonraki adımlarda buraya eklenecek.
   ],
 })
