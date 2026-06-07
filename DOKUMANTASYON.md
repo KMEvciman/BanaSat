@@ -170,5 +170,17 @@ npm run dev               # http://localhost:3000
 - **Avatar yükleme:** multer ile disk depolama (`/uploads/avatars`), tip/boyut doğrulama,
   statik sunum (`useStaticAssets`), yeni yüklemede eski dosyanın silinmesi.
 
-### Sıradaki Olası Adımlar
-- Frontend'in backend'e bağlanması (API entegrasyonu).
+### Frontend-Backend Entegrasyonu (devam ediyor)
+- **API katmanı** (`src/lib/api/`): `client.ts` (token yönetimi, otomatik refresh, hata),
+  `services.ts` (tüm uç noktalar), `types.ts`, `adapters.ts`.
+- `.env.local` → `NEXT_PUBLIC_API_URL=http://localhost:4000/api`
+- **Bağlanan sayfalar:** Giriş, Kayıt, Çıkış (gerçek JWT); Ana sayfa (En Popüler/Son Eklenen
+  ilanlar API'den); Talep Oluştur; İlan Detay (teklif ver/kabul/red, mesaj başlat); Profil
+  (bilgi güncelleme + avatar yükleme).
+- **Henüz mock olan sayfalar:** Taleplerim, Tekliflerim, Kategoriler, Mesajlar, Ödeme,
+  Teklif Karşılaştır (sonraki adımda bağlanacak).
+
+### Çalıştırma (geliştirme)
+1. `docker compose up -d` (kök dizin)
+2. `cd Backend && npm run start:dev`
+3. `npm run dev` (kök dizin, frontend)

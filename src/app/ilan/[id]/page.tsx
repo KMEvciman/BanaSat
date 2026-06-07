@@ -3,49 +3,121 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
-import { getListingById } from "@/data/listings";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { listingsApi, offersApi, messagesApi } from "@/lib/api/services";
+import type { ListingDetail } from "@/lib/api/types";
+import { formatTimeLeft } from "@/lib/api/adapters";
 import {
-  Wallet,
-  MapPin,
-  Calendar,
-  Clock,
-  Eye,
-  MessageCircle,
-  Star,
-  BadgeCheck,
-  Check,
-  ShieldCheck,
-  Award,
-  ArrowLeft,
-  Share2,
-  Heart,
-  Flame,
-  User,
+  MapPin, Calendar, Clock, Eye, MessageCircle, Star, BadgeCheck,
+  Check, ShieldCheck, Flame, Send,
 } from "lucide-react";
 
-const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
-  aktif: { label: "Aktif", color: "text-green-700 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" },
-  beklemede: { label: "Beklemede", color: "text-amber-700 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800" },
-  tamamlandi: { label: "Tamamlandı", color: "text-blue-700 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" },
-  iptal: { label: "İptal Edildi", color: "text-red-700 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800" },
+const statusConfig: Record<string, { label: string; cls: string }> = {
+  AKTIF: { label: "Aktif", cls: "text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" },
+  BEKLEMEDE: { label: "Beklemede", cls: "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800" },
+  TAMAMLANDI: { label: "Tamamlandı", cls: "text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" },
+  IPTAL: { label: "İptal", cls: "text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800" },
 };
 
 export default function IlanDetay() {
   const params = useParams();
-  const id = Number(params.id);
-  const listing = getListingById(id);
-  const [liked, setLiked] = useState(false);
+  const router = useRouter();
+  const id = String(params.id);
+  const { user, isLoggedIn } = useAuth();
 
-  if (!listing) {
+  const [listing, setListing] = useState<ListingDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [actionError, setActionError] = useState("");
+
+  const load = useCallback(() => {
+    setLoading(true);
+    listingsApi
+      .detail(id)
+      .then((d) => setListing(d))
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const isOwner = !!user && !!listing && user.id === listing.owner.id;
+
+  // --- Teklif verme (sahibi olmayan, giriş yapmış kullanıcı) ---
+  const [price, setPrice] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("");
+  const [note, setNote] = useState("");
+  const [offerSubmitting, setOfferSubmitting] = useState(false);
+
+  const submitOffer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setActionError("");
+    setOfferSubmitting(true);
+    try {
+      await offersApi.create({
+        listingId: id,
+        price: Number(price),
+        deliveryTime,
+        note,
+      });
+      setPrice(""); setDeliveryTime(""); setNote("");
+      load();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Teklif gönderilemedi.");
+    } finally {
+      setOfferSubmitting(false);
+    }
+  };
+
+  const handleOfferAction = async (offerId: string, action: "accept" | "reject") => {
+    setActionError("");
+    try {
+      if (action === "accept") await offersApi.accept(offerId);
+      else await offersApi.reject(offerId);
+      load();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "İşlem başarısız.");
+    }
+  };
+
+  const startConversation = async (sellerId: string) => {
+    if (!isLoggedIn) {
+      router.push("/giris");
+      return;
+    }
+    try {
+      await messagesApi.createOrGet({ listingId: id, participantId: sellerId });
+      router.push("/mesajlar");
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Mesaj başlatılamadı.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <main className="flex-1 w-full bg-background-light dark:bg-background-dark">
+          <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40 py-10">
+            <div className="h-64 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (notFound || !listing) {
     return (
       <>
         <Navbar />
         <main className="flex-1 w-full bg-background-light dark:bg-background-dark">
           <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40 py-20 text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">İlan Bulunamadı</h1>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">Aradığınız ilan mevcut değil veya kaldırılmış olabilir.</p>
             <Link href="/" className="text-primary font-semibold hover:underline">Ana Sayfaya Dön</Link>
           </div>
         </main>
@@ -61,205 +133,173 @@ export default function IlanDetay() {
       <Navbar />
       <main className="flex-1 w-full bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40 py-6 md:py-10">
-          {/* Breadcrumbs */}
           <nav className="flex flex-wrap items-center gap-2 text-sm mb-6">
-            <Link href="/" className="text-gray-500 hover:text-primary transition-colors">Anasayfa</Link>
+            <Link href="/" className="text-gray-500 hover:text-primary">Anasayfa</Link>
             <span className="text-gray-400">/</span>
-            <Link href="/taleplerim" className="text-gray-500 hover:text-primary transition-colors">İlanlar</Link>
+            <Link href="/kategoriler" className="text-gray-500 hover:text-primary">İlanlar</Link>
             <span className="text-gray-400">/</span>
             <span className="text-gray-900 dark:text-white font-medium truncate max-w-[200px]">{listing.title}</span>
           </nav>
 
+          {actionError && (
+            <div className="mb-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+              {actionError}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
-            {/* Left Column */}
+            {/* Sol kolon */}
             <div className="flex flex-col gap-6">
-              {/* Main Image */}
               <div className="relative rounded-2xl overflow-hidden aspect-[16/9] bg-gray-100 dark:bg-gray-800">
-                <img src={listing.image} alt={listing.title} className="w-full h-full object-cover" />
+                <img
+                  src={listing.coverImageUrl || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80"}
+                  alt={listing.title}
+                  className="w-full h-full object-cover"
+                />
                 <div className="absolute top-4 left-4">
-                  <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-md ${sc.bg} ${sc.color}`}>
-                    {sc.label}
-                  </span>
-                </div>
-                <div className="absolute top-4 right-4 flex gap-2">
-                  <button
-                    onClick={() => setLiked(!liked)}
-                    className={`size-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors border ${liked ? "bg-red-500 border-red-500 text-white" : "bg-white/80 dark:bg-black/50 border-white/30 dark:border-white/10 text-gray-700 dark:text-white hover:bg-white dark:hover:bg-black/70"}`}
-                  >
-                    <Heart size={18} className={liked ? "fill-current" : ""} />
-                  </button>
-                  <button className="size-10 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-md flex items-center justify-center text-gray-700 dark:text-white border border-white/30 dark:border-white/10 hover:bg-white dark:hover:bg-black/70 transition-colors">
-                    <Share2 size={18} />
-                  </button>
+                  <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-md ${sc.cls}`}>{sc.label}</span>
                 </div>
                 <div className="absolute bottom-4 right-4 bg-white/85 dark:bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-gray-200/50 dark:border-white/10">
-                  <span className="text-primary font-bold text-sm">{listing.category}</span>
+                  <span className="text-primary font-bold text-sm">{listing.category.name}</span>
                 </div>
               </div>
 
-              {/* Extra Images */}
               {listing.images.length > 0 && (
                 <div className="flex gap-3 overflow-x-auto no-scrollbar scrollbar-hide">
-                  {listing.images.map((img, i) => (
-                    <div key={i} className="shrink-0 size-24 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                  {listing.images.map((img) => (
+                    <div key={img.id} className="shrink-0 size-24 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+                      <img src={img.url} alt="" className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* Title & Description */}
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 md:p-8">
-                <h1 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-3">
-                  {listing.title}
-                </h1>
-
+                <h1 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-3">{listing.title}</h1>
                 <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mb-6">
-                  <span className="flex items-center gap-1"><MapPin size={14} /> {listing.location}</span>
-                  <span className="flex items-center gap-1"><Calendar size={14} /> {listing.createdAt}</span>
+                  {listing.location && <span className="flex items-center gap-1"><MapPin size={14} /> {listing.location}</span>}
+                  <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(listing.createdAt).toLocaleDateString("tr-TR")}</span>
                   <span className="flex items-center gap-1"><Eye size={14} /> {listing.views} görüntülenme</span>
-                  <span className="flex items-center gap-1"><Clock size={14} /> {listing.timeLeft}</span>
+                  <span className="flex items-center gap-1"><Clock size={14} /> {formatTimeLeft(listing.deadline)}</span>
                 </div>
-
                 <div className="border-t border-gray-100 dark:border-gray-800 pt-6">
                   <h3 className="text-sm uppercase tracking-wider text-gray-500 font-semibold mb-3">Detaylı Açıklama</h3>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                    {listing.fullDescription}
-                  </p>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm whitespace-pre-line">{listing.fullDescription}</p>
                 </div>
               </div>
 
-              {/* Offers Section */}
-              {listing.teklifler.length > 0 && (
-                <div className="flex flex-col gap-4">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    Gelen Teklifler
-                    <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">{listing.teklifler.length}</span>
-                  </h3>
+              {/* Gelen Teklifler */}
+              <div className="flex flex-col gap-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  Gelen Teklifler
+                  <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">{listing.offers.length}</span>
+                </h3>
 
-                  {listing.teklifler.map((teklif) => (
-                    <article key={teklif.id} className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow duration-200 ${teklif.badge ? "border-orange-200 dark:border-orange-900" : "border-gray-100 dark:border-gray-800"}`}>
-                      {teklif.badge && <div className="h-1 bg-gradient-to-r from-orange-400 to-red-500"></div>}
-                      <div className="p-5 flex flex-col md:flex-row gap-5">
-                        <div className="flex md:flex-col items-center md:items-start gap-4 md:w-44 md:border-r md:border-gray-100 dark:md:border-gray-800 md:pr-4">
-                          <div className="relative">
-                            <div className="size-14 rounded-full bg-cover bg-center border-2 border-white dark:border-gray-700 shadow-sm" style={{ backgroundImage: `url('${teklif.sellerAvatar}')` }}></div>
-                            {teklif.verified && (
-                              <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full border-2 border-white dark:border-gray-800">
-                                <Check size={12} />
-                              </div>
-                            )}
+                {listing.offers.length === 0 && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Henüz teklif yok.</p>
+                )}
+
+                {listing.offers.map((offer) => (
+                  <article key={offer.id} className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+                    <div className="p-5 flex flex-col md:flex-row gap-5">
+                      <div className="flex md:flex-col items-center md:items-start gap-4 md:w-44 md:border-r md:border-gray-100 dark:md:border-gray-800 md:pr-4">
+                        <div className="relative">
+                          <div className="size-14 rounded-full bg-cover bg-center border-2 border-white dark:border-gray-700 shadow-sm" style={{ backgroundImage: `url('${offer.seller.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(offer.seller.name)}&background=5BB678&color=fff`}')` }}></div>
+                          {offer.seller.isVerified && (
+                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full border-2 border-white dark:border-gray-800"><Check size={12} /></div>
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 dark:text-white text-sm">{offer.seller.name}</h4>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Star className="text-yellow-400 fill-yellow-400" size={14} />
+                            <span className="text-xs font-semibold text-gray-900 dark:text-white">{offer.seller.ratingAvg}</span>
+                            <span className="text-[11px] text-gray-500">({offer.seller.ratingCount})</span>
                           </div>
+                          <span className={`mt-1.5 inline-block px-2 py-0.5 text-[11px] rounded ${statusConfig[offer.status]?.cls ?? "bg-gray-100 dark:bg-gray-800 text-gray-600"}`}>
+                            {offerStatusLabel(offer.status)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex-1 flex flex-col justify-between gap-3">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                           <div>
-                            <h4 className="font-bold text-gray-900 dark:text-white text-sm">{teklif.sellerName}</h4>
-                            <div className="flex items-center gap-1 mt-1">
-                              <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                              <span className="text-xs font-semibold text-gray-900 dark:text-white">{teklif.sellerRating}</span>
-                              <span className="text-[11px] text-gray-500">({teklif.sellerReviews})</span>
-                            </div>
-                            {teklif.badge && (
-                              <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-[11px] rounded border border-orange-100 dark:border-orange-800">
-                                <Award size={12} />
-                                {teklif.badge}
-                              </div>
-                            )}
-                            {teklif.verified && !teklif.badge && (
-                              <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[11px] rounded">
-                                <BadgeCheck size={12} />
-                                Onaylı
-                              </div>
-                            )}
+                            <p className="text-xs text-gray-500 mb-0.5">Teklif Fiyatı</p>
+                            <p className="text-2xl font-black text-primary tracking-tight">{offer.price.toLocaleString("tr-TR")} ₺</p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/5 text-primary text-xs font-medium"><Clock size={14} /> {offer.deliveryTime}</span>
+                            {offer.warranty && <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 text-xs font-medium"><ShieldCheck size={14} /> {offer.warranty}</span>}
                           </div>
                         </div>
-                        <div className="flex-1 flex flex-col justify-between gap-3">
-                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                            <div>
-                              <p className="text-xs text-gray-500 mb-0.5">Teklif Fiyatı</p>
-                              <p className="text-2xl font-black text-primary tracking-tight">{teklif.price}</p>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/5 dark:bg-primary/10 text-primary text-xs font-medium">
-                                <Clock size={14} /> {teklif.deliveryTime}
-                              </span>
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 text-xs font-medium">
-                                <ShieldCheck size={14} /> {teklif.warranty}
-                              </span>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-100 dark:border-gray-800">
-                            &quot;{teklif.note}&quot;
-                          </p>
-                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-100 dark:border-gray-800">&quot;{offer.note}&quot;</p>
                       </div>
-                      <div className="bg-gray-50 dark:bg-gray-800/30 px-5 py-3 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
-                        <button className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm font-semibold border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                          Profili Gör
-                        </button>
-                        <Link href="/mesajlar" className="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/85 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2">
-                          <MessageCircle size={16} />
-                          Mesaj Gönder
-                        </Link>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800/30 px-5 py-3 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+                      <button onClick={() => startConversation(offer.seller.id)} className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm font-semibold border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2">
+                        <MessageCircle size={16} /> Mesaj
+                      </button>
+                      {isOwner && offer.status === "BEKLEMEDE" && (
+                        <>
+                          <button onClick={() => handleOfferAction(offer.id, "reject")} className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm font-semibold rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors">Reddet</button>
+                          <button onClick={() => handleOfferAction(offer.id, "accept")} className="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/85 transition-colors">Kabul Et</button>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
 
-            {/* Right Column - Sidebar */}
+            {/* Sağ kolon */}
             <div className="flex flex-col gap-6">
-              {/* Budget Card */}
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 lg:sticky lg:top-[120px]">
-                <div className="flex flex-col gap-5">
-                  {/* Budget */}
-                  <div className="text-center pb-5 border-b border-gray-100 dark:border-gray-800">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold tracking-wider mb-1">Bütçe Aralığı</p>
-                    <p className="text-2xl font-black text-gray-900 dark:text-white">{listing.budget}</p>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col items-center gap-1 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                      <Flame size={18} className="text-orange-500" />
-                      <span className="text-lg font-bold text-gray-900 dark:text-white">{listing.offers}</span>
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">Teklif</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                      <Eye size={18} className="text-primary" />
-                      <span className="text-lg font-bold text-gray-900 dark:text-white">{listing.views}</span>
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">Görüntülenme</span>
-                    </div>
-                  </div>
-
-                  {/* CTA */}
-                  <Link
-                    href="/satici/teklif-ver"
-                    className="w-full flex items-center justify-center gap-2 h-12 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg shadow-primary/20"
-                  >
-                    Teklif Ver
-                  </Link>
-
-                  <Link
-                    href="/mesajlar"
-                    className="w-full flex items-center justify-center gap-2 h-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <MessageCircle size={18} />
-                    Mesaj Gönder
-                  </Link>
+                <div className="text-center pb-5 border-b border-gray-100 dark:border-gray-800">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold tracking-wider mb-1">Bütçe</p>
+                  <p className="text-2xl font-black text-gray-900 dark:text-white">{listing.budgetLabel}</p>
                 </div>
+                <div className="grid grid-cols-2 gap-4 mt-5">
+                  <Stat icon={<Flame size={18} className="text-orange-500" />} value={listing.offers.length} label="Teklif" />
+                  <Stat icon={<Eye size={18} className="text-primary" />} value={listing.views} label="Görüntülenme" />
+                </div>
+
+                {/* Teklif verme: sahibi olmayan, aktif ilan */}
+                {!isOwner && listing.status === "AKTIF" && (
+                  isLoggedIn ? (
+                    <form onSubmit={submitOffer} className="mt-6 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-800 pt-5">
+                      <h4 className="text-sm font-bold text-gray-900 dark:text-white">Teklif Ver</h4>
+                      <input type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} required placeholder="Fiyat (₺)" className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-11 px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                      <input value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} required placeholder="Teslimat süresi (örn. 3 Gün)" className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-11 px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                      <textarea value={note} onChange={(e) => setNote(e.target.value)} required minLength={10} placeholder="Teklif notunuz (en az 10 karakter)" className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white p-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-y min-h-[80px]" />
+                      <button disabled={offerSubmitting} className="w-full flex items-center justify-center gap-2 h-11 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-colors disabled:opacity-60">
+                        <Send size={16} /> {offerSubmitting ? "Gönderiliyor..." : "Teklifi Gönder"}
+                      </button>
+                    </form>
+                  ) : (
+                    <Link href="/giris" className="mt-6 w-full flex items-center justify-center gap-2 h-12 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-colors">
+                      Teklif vermek için giriş yap
+                    </Link>
+                  )
+                )}
+
+                {isOwner && (
+                  <p className="mt-6 text-xs text-center text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-5">Bu sizin ilanınız. Gelen teklifleri yukarıdan yönetebilirsiniz.</p>
+                )}
               </div>
 
-              {/* Owner Card */}
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
                 <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4">İlan Sahibi</h4>
                 <div className="flex items-center gap-3">
-                  <div className="size-12 rounded-full bg-cover bg-center border-2 border-gray-100 dark:border-gray-800" style={{ backgroundImage: `url('${listing.owner.avatar}')` }}></div>
+                  <div className="size-12 rounded-full bg-cover bg-center border-2 border-gray-100 dark:border-gray-800" style={{ backgroundImage: `url('${listing.owner.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.owner.name)}&background=5BB678&color=fff`}')` }}></div>
                   <div>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm">{listing.owner.name}</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm flex items-center gap-1">
+                      {listing.owner.name}
+                      {listing.owner.isVerified && <BadgeCheck size={14} className="text-primary" />}
+                    </p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                      <span className="text-xs font-semibold text-gray-900 dark:text-white">{listing.owner.rating}</span>
-                      <span className="text-[11px] text-gray-500">({listing.owner.reviews} değerlendirme)</span>
+                      <span className="text-xs font-semibold text-gray-900 dark:text-white">{listing.owner.ratingAvg}</span>
+                      <span className="text-[11px] text-gray-500">({listing.owner.ratingCount} değerlendirme)</span>
                     </div>
                   </div>
                 </div>
@@ -271,4 +311,21 @@ export default function IlanDetay() {
       <Footer />
     </>
   );
+}
+
+function Stat({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+      {icon}
+      <span className="text-lg font-bold text-gray-900 dark:text-white">{value}</span>
+      <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">{label}</span>
+    </div>
+  );
+}
+
+function offerStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    BEKLEMEDE: "Beklemede", KABUL: "Kabul Edildi", RED: "Reddedildi", GERI_CEKILDI: "Geri Çekildi",
+  };
+  return map[status] ?? status;
 }

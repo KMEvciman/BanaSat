@@ -281,8 +281,8 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                         <div
                           className="bg-center bg-no-repeat bg-cover rounded-full size-8"
                           style={{
-                            backgroundImage: user?.avatar
-                              ? `url("${user.avatar}")`
+                            backgroundImage: user?.avatarUrl
+                              ? `url("${user.avatarUrl}")`
                               : `url("https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "U")}&background=5BB678&color=fff")`,
                           }}
                         ></div>

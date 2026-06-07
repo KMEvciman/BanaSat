@@ -12,11 +12,21 @@ export default function GirisYap() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(email || "user@banasat.com", password || "123456");
-    router.push("/");
+    setError("");
+    setSubmitting(true);
+    try {
+      await login(email, password);
+      router.push("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Giriş başarısız.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -46,6 +56,11 @@ export default function GirisYap() {
           {/* Form Card */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-5 sm:p-8">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              {error && (
+                <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+                  {error}
+                </div>
+              )}
               {/* Email */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-gray-900 dark:text-gray-200">
@@ -111,10 +126,11 @@ export default function GirisYap() {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full h-12 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group mt-2"
+                disabled={submitting}
+                className="w-full h-12 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Giriş Yap
-                <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+                {submitting ? "Giriş yapılıyor..." : "Giriş Yap"}
+                {!submitting && <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />}
               </button>
             </form>
 

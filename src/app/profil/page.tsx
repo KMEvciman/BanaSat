@@ -3,6 +3,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/AuthContext";
+import { usersApi } from "@/lib/api/services";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import {
@@ -19,7 +20,7 @@ import {
 
 export default function Profil() {
   const router = useRouter();
-  const { isLoggedIn, user, updateProfile } = useAuth();
+  const { isLoggedIn, user, loading: authLoading, updateProfile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState("");
@@ -29,31 +30,41 @@ export default function Profil() {
   const [location, setLocation] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!authLoading && !isLoggedIn) {
       router.push("/giris");
       return;
     }
     if (user) {
       setName(user.name);
       setEmail(user.email);
-      setPhone(user.phone);
-      setBio(user.bio);
-      setLocation(user.location);
-      setAvatarPreview(user.avatar);
+      setPhone(user.phone ?? "");
+      setBio(user.bio ?? "");
+      setLocation(user.location ?? "");
+      setAvatarPreview(user.avatarUrl);
     }
-  }, [isLoggedIn, user, router]);
+  }, [authLoading, isLoggedIn, user, router]);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Dosya seçilince anında yükle.
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setAvatarPreview(result);
-    };
-    reader.readAsDataURL(file);
+    setError("");
+    setUploading(true);
+    try {
+      const updated = await usersApi.uploadAvatar(file);
+      setAvatarPreview(updated.avatarUrl);
+      updateProfile({ avatarUrl: updated.avatarUrl });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Fotoğraf yüklenemedi.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const handleRemoveAvatar = () => {
@@ -61,18 +72,20 @@ export default function Profil() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({
-      name,
-      email,
-      phone,
-      bio,
-      location,
-      avatar: avatarPreview,
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setError("");
+    setSubmitting(true);
+    try {
+      const updated = await usersApi.updateProfile({ name, email, phone, bio, location });
+      updateProfile(updated);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Profil güncellenemedi.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const avatarUrl =
@@ -110,7 +123,8 @@ export default function Profil() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="absolute bottom-1 right-1 size-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg hover:bg-primary/85 transition-colors border-2 border-white dark:border-gray-800"
+                      disabled={uploading}
+                      className="absolute bottom-1 right-1 size-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg hover:bg-primary/85 transition-colors border-2 border-white dark:border-gray-800 disabled:opacity-60"
                     >
                       <Camera size={18} />
                     </button>
@@ -173,6 +187,12 @@ export default function Profil() {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
                   Kişisel Bilgiler
                 </h3>
+
+                {error && (
+                  <div className="mb-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+                    {error}
+                  </div>
+                )}
 
                 <div className="flex flex-col gap-6">
                   {/* Name */}
@@ -285,10 +305,11 @@ export default function Profil() {
                     )}
                     <button
                       type="submit"
-                      className="flex items-center justify-center gap-2 h-12 px-8 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg shadow-primary/20"
+                      disabled={submitting}
+                      className="flex items-center justify-center gap-2 h-12 px-8 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <Save size={18} />
-                      Değişiklikleri Kaydet
+                      {submitting ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
                     </button>
                   </div>
                 </div>

@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Flame, Clock } from "lucide-react";
 import Link from "next/link";
 
 export interface Listing {
-  id: number;
+  id: string | number;
   title: string;
   description: string;
   image: string;

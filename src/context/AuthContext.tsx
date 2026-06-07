@@ -1,61 +1,103 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-
-interface User {
-  name: string;
-  email: string;
-  phone: string;
-  avatar: string | null;
-  bio: string;
-  location: string;
-}
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  type ReactNode,
+} from "react";
+import { authApi, usersApi } from "@/lib/api/services";
+import { tokenStore } from "@/lib/api/client";
+import type { User } from "@/lib/api/types";
 
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
-  login: (email: string, password: string) => void;
-  register: (name: string, email: string, password: string) => void;
-  logout: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, phone?: string) => Promise<void>;
+  logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const defaultUser: User = {
-  name: "Kullanıcı Adı",
-  email: "user@banasat.com",
-  phone: "0532 123 45 67",
-  avatar: null,
-  bio: "",
-  location: "İstanbul, Türkiye",
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = useCallback((_email: string, _password: string) => {
-    setUser({ ...defaultUser, email: _email || defaultUser.email });
-    setIsLoggedIn(true);
+  // Açılışta token varsa oturumu geri yükle.
+  useEffect(() => {
+    const token = tokenStore.getAccess();
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    authApi
+      .me()
+      .then((u) => setUser(u))
+      .catch(() => {
+        tokenStore.clear();
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const register = useCallback((_name: string, _email: string, _password: string) => {
-    setUser({ ...defaultUser, name: _name || defaultUser.name, email: _email || defaultUser.email });
-    setIsLoggedIn(true);
+  const login = useCallback(async (email: string, password: string) => {
+    const result = await authApi.login({ email, password });
+    tokenStore.set(result.tokens.accessToken, result.tokens.refreshToken);
+    setUser(result.user);
   }, []);
 
-  const logout = useCallback(() => {
+  const register = useCallback(
+    async (name: string, email: string, password: string, phone?: string) => {
+      const result = await authApi.register({ name, email, password, phone });
+      tokenStore.set(result.tokens.accessToken, result.tokens.refreshToken);
+      setUser(result.user);
+    },
+    [],
+  );
+
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // Sunucu hatası olsa bile yerel oturumu kapat.
+    }
+    tokenStore.clear();
     setUser(null);
-    setIsLoggedIn(false);
   }, []);
 
+  // Profil güncellemesinden dönen kullanıcıyı state'e yansıtmak için.
   const updateProfile = useCallback((data: Partial<User>) => {
-    setUser((prev) => (prev ? { ...prev, ...data } : null));
+    setUser((prev) => (prev ? { ...prev, ...data } : prev));
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const u = await usersApi.updateProfile({});
+      setUser(u);
+    } catch {
+      // yoksay
+    }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, login, register, logout, updateProfile }}>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn: !!user,
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        updateProfile,
+        refreshUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

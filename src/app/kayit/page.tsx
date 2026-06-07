@@ -16,11 +16,25 @@ export default function KayitOl() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    register(name, email, password);
-    router.push("/");
+    setError("");
+    if (password !== confirmPassword) {
+      setError("Parolalar eşleşmiyor.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await register(name, email, password, phone || undefined);
+      router.push("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kayıt başarısız.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -50,6 +64,11 @@ export default function KayitOl() {
           {/* Form Card */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-5 sm:p-8">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              {error && (
+                <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+                  {error}
+                </div>
+              )}
               {/* Name */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-gray-900 dark:text-gray-200">
@@ -180,10 +199,11 @@ export default function KayitOl() {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full h-12 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group mt-2"
+                disabled={submitting}
+                className="w-full h-12 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Kayıt Ol
-                <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+                {submitting ? "Kayıt yapılıyor..." : "Kayıt Ol"}
+                {!submitting && <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />}
               </button>
             </form>
 
