@@ -10,6 +10,7 @@ import { UsersModule } from './modules/users/users.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ListingsModule } from './modules/listings/listings.module';
 import { OffersModule } from './modules/offers/offers.module';
+import { MessagesModule } from './modules/messages/messages.module';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { OffersModule } from './modules/offers/offers.module';
     CategoriesModule,
     ListingsModule,
     OffersModule,
-    // Kalan özellik modülü (messages) sonraki adımda eklenecek.
+    MessagesModule,
   ],
 })
 export class AppModule {}
