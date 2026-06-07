@@ -97,6 +97,15 @@ BanaSat/
 - `POST /:id/messages` — mesaj gönder
 - `PATCH /:id/read` — okundu işaretle
 
+**Orders / Siparişler** (`/api/orders`)
+- `POST /` — kabul edilmiş teklif için sipariş oluştur (yalnızca alıcı, tek sipariş)
+- `POST /:id/pay` — ödeme (simülasyon); sipariş ODENDI, ilan TAMAMLANDI olur
+- `GET /mine` — alımlarım
+- `GET /sales` — satışlarım
+- `GET /:id` — sipariş detayı (yalnızca alıcı/satıcı)
+- `PATCH /:id/status` — durum ilerlet (ODENDI→HAZIRLANIYOR→KARGODA: satıcı, KARGODA→TESLIM_EDILDI: alıcı)
+- `PATCH /:id/cancel` — iptal (yalnızca ödeme beklenirken)
+
 **Health** (`/api/health`) — uygulama + veritabanı durumu (public).
 
 ---
@@ -146,9 +155,10 @@ npm run dev               # http://localhost:3000
   `HashingService` refactor'ü.
 - **Messages modülü:** konuşma (get-or-create), mesaj gönderme, okundu işaretleme,
   okunmamış sayacı, katılımcı yetki kontrolü.
+- **Orders modülü:** kabul edilen teklif için sipariş, ödeme simülasyonu (ilan TAMAMLANDI),
+  durum akışı (hazırlanıyor/kargoda/teslim edildi) aktör denetimiyle, alımlarım/satışlarım, iptal.
 
 ### Sıradaki Olası Adımlar
-- Orders/Payment modülü (ödeme akışı — şema hazır).
 - Reviews modülü (değerlendirme — şema hazır).
 - Avatar için dosya yükleme uç noktası.
 - Frontend'in backend'e bağlanması (API entegrasyonu).
