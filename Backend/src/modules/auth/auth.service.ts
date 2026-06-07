@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import { HashingService } from '@common/hashing/hashing.service';
 import { UsersService, PublicUser } from '@modules/users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -23,6 +23,7 @@ export class AuthService {
     private readonly users: UsersService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly hashing: HashingService,
   ) {}
 
   /** Yeni kullanıcı kaydı oluşturur ve token çifti döndürür. */
@@ -32,7 +33,7 @@ export class AuthService {
       throw new ConflictException('Bu e-posta adresi zaten kayıtlı.');
     }
 
-    const passwordHash = await this.hash(dto.password);
+    const passwordHash = await this.hashing.hash(dto.password);
     const user = await this.users.create({
       email: dto.email,
       passwordHash,
@@ -53,7 +54,7 @@ export class AuthService {
       throw new UnauthorizedException('E-posta veya parola hatalı.');
     }
 
-    const passwordMatches = await bcrypt.compare(dto.password, user.passwordHash);
+    const passwordMatches = await this.hashing.compare(dto.password, user.passwordHash);
     if (!passwordMatches) {
       throw new UnauthorizedException('E-posta veya parola hatalı.');
     }
@@ -71,7 +72,7 @@ export class AuthService {
       throw new ForbiddenException('Erişim reddedildi.');
     }
 
-    const tokenMatches = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+    const tokenMatches = await this.hashing.compare(refreshToken, user.refreshTokenHash);
     if (!tokenMatches) {
       throw new ForbiddenException('Erişim reddedildi.');
     }
@@ -122,12 +123,7 @@ export class AuthService {
   }
 
   private async persistRefreshToken(userId: string, refreshToken: string): Promise<void> {
-    const hash = await this.hash(refreshToken);
+    const hash = await this.hashing.hash(refreshToken);
     await this.users.setRefreshTokenHash(userId, hash);
-  }
-
-  private hash(value: string): Promise<string> {
-    const rounds = this.config.get<number>('bcrypt.saltRounds') ?? 12;
-    return bcrypt.hash(value, rounds);
   }
 }

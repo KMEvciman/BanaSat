@@ -1,6 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
+import { HashingService } from '@common/hashing/hashing.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 /**
  * İstemciye gönderilebilecek güvenli kullanıcı alanları.
@@ -22,6 +31,22 @@ export const PUBLIC_USER_SELECT = {
   updatedAt: true,
 } satisfies Prisma.UserSelect;
 
+/**
+ * Başka kullanıcıların görebileceği herkese açık profil alanları.
+ * Gizlilik gereği e-posta ve telefon İÇERMEZ.
+ */
+export const PUBLIC_PROFILE_SELECT = {
+  id: true,
+  name: true,
+  avatarUrl: true,
+  bio: true,
+  location: true,
+  isVerified: true,
+  ratingAvg: true,
+  ratingCount: true,
+  createdAt: true,
+} satisfies Prisma.UserSelect;
+
 export type PublicUser = Prisma.UserGetPayload<{
   select: typeof PUBLIC_USER_SELECT;
 }>;
@@ -32,7 +57,10 @@ export type PublicUser = Prisma.UserGetPayload<{
  */
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly hashing: HashingService,
+  ) {}
 
   /** Yeni kullanıcı oluşturur (parola zaten hash'lenmiş gelmeli). */
   create(data: {
@@ -75,6 +103,71 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id: userId },
       data: { refreshTokenHash },
+    });
+  }
+
+  /** Başka bir kullanıcının herkese açık profili (e-posta/telefon gizli). */
+  async getPublicProfile(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: PUBLIC_PROFILE_SELECT,
+    });
+
+    if (!user) {
+      throw new NotFoundException('Kullanıcı bulunamadı.');
+    }
+    return user;
+  }
+
+  /** Giriş yapan kullanıcının profilini günceller. */
+  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<PublicUser> {
+    // E-posta değiştiriliyorsa, başka bir kullanıcı tarafından
+    // kullanılmadığından emin ol.
+    if (dto.email) {
+      const existing = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+        select: { id: true },
+      });
+      if (existing && existing.id !== userId) {
+        throw new ConflictException('Bu e-posta adresi başka bir hesapta kayıtlı.');
+      }
+    }
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        name: dto.name,
+        email: dto.email,
+        phone: dto.phone,
+        bio: dto.bio,
+        location: dto.location,
+        avatarUrl: dto.avatarUrl,
+      },
+      select: PUBLIC_USER_SELECT,
+    });
+  }
+
+  /** Parola değiştirir; mevcut parola doğrulanır ve oturumlar sıfırlanır. */
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.findByIdWithSecrets(userId);
+    if (!user) {
+      throw new NotFoundException('Kullanıcı bulunamadı.');
+    }
+
+    const matches = await this.hashing.compare(dto.currentPassword, user.passwordHash);
+    if (!matches) {
+      throw new UnauthorizedException('Mevcut parola hatalı.');
+    }
+
+    if (dto.currentPassword === dto.newPassword) {
+      throw new BadRequestException('Yeni parola eskisiyle aynı olamaz.');
+    }
+
+    const newHash = await this.hashing.hash(dto.newPassword);
+    // Parola değişince güvenlik için refresh token'ı da geçersiz kıl.
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHash, refreshTokenHash: null },
     });
   }
 }

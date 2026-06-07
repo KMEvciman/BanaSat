@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
 
 /**
- * Kullanıcı veri katmanı. Auth ve diğer modüller UsersService'i kullanır.
- * (Profil görüntüleme/güncelleme uç noktaları sonraki adımda eklenecek.)
+ * Kullanıcı modülü: veri katmanı (UsersService) + profil uç noktaları.
+ * Auth ve diğer modüller UsersService'i kullanır.
  */
 @Module({
+  controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
 })
