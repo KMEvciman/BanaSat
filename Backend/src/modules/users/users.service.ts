@@ -5,11 +5,15 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { join } from 'path';
+import { unlink } from 'fs/promises';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { HashingService } from '@common/hashing/hashing.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { AVATAR_UPLOAD_DIR } from './avatar-upload.config';
 
 /**
  * İstemciye gönderilebilecek güvenli kullanıcı alanları.
@@ -60,6 +64,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly hashing: HashingService,
+    private readonly config: ConfigService,
   ) {}
 
   /** Yeni kullanıcı oluşturur (parola zaten hash'lenmiş gelmeli). */
@@ -169,5 +174,49 @@ export class UsersService {
       where: { id: userId },
       data: { passwordHash: newHash, refreshTokenHash: null },
     });
+  }
+
+  /**
+   * Yüklenen avatar dosyasını kullanıcıya atar; varsa eski dosyayı diskten siler.
+   * @param filename Multer tarafından kaydedilen dosya adı.
+   */
+  async setAvatar(userId: string, filename: string): Promise<PublicUser> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarUrl: true },
+    });
+    if (!user) {
+      throw new NotFoundException('Kullanıcı bulunamadı.');
+    }
+
+    const appUrl = this.config.get<string>('appUrl');
+    const newUrl = `${appUrl}/uploads/avatars/${filename}`;
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: newUrl },
+      select: PUBLIC_USER_SELECT,
+    });
+
+    // Eski avatar bizim yüklediğimiz bir dosyaysa diskten temizle.
+    await this.removeOldAvatarFile(user.avatarUrl);
+
+    return updated;
+  }
+
+  /** Eski avatar yerel bir yükleme dosyasıysa diskten siler (hata olsa da akışı bozmaz). */
+  private async removeOldAvatarFile(oldUrl: string | null): Promise<void> {
+    if (!oldUrl || !oldUrl.includes('/uploads/avatars/')) {
+      return;
+    }
+    const oldFilename = oldUrl.split('/uploads/avatars/').pop();
+    if (!oldFilename) {
+      return;
+    }
+    try {
+      await unlink(join(AVATAR_UPLOAD_DIR, oldFilename));
+    } catch {
+      // Dosya yoksa veya silinemezse sessizce geç.
+    }
   }
 }

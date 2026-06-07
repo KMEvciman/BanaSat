@@ -70,7 +70,10 @@ BanaSat/
 **Users** (`/api/users`)
 - `PATCH /me` — profil güncelle (ad, e-posta, telefon, bio, konum, avatar); e-posta benzersizlik kontrolü
 - `PATCH /me/password` — parola değiştir (mevcut parola doğrulanır, oturumlar sıfırlanır)
+- `POST /me/avatar` — profil fotoğrafı yükle (multipart, alan: `avatar`; JPEG/PNG/GIF/WEBP, max 5MB); eski dosya silinir
 - `GET /:id` — herkese açık profil (e-posta/telefon gizli)
+
+> Yüklenen dosyalar `/uploads/avatars/` altından statik sunulur (örn. `http://localhost:4000/uploads/avatars/<dosya>`).
 
 **Categories** (`/api/categories`)
 - `GET /` — tüm kategoriler + aktif ilan sayısı (public)
@@ -164,7 +167,8 @@ npm run dev               # http://localhost:3000
 - **Reviews modülü:** teslim edilen sipariş sonrası satıcı değerlendirme (1-5 + yorum),
   satıcı rating ortalamasının atomik güncellenmesi, mükerrer engelleme. (Şema: Review'a
   orderId @unique eklendi — migration `add_review_order_relation`.)
+- **Avatar yükleme:** multer ile disk depolama (`/uploads/avatars`), tip/boyut doğrulama,
+  statik sunum (`useStaticAssets`), yeni yüklemede eski dosyanın silinmesi.
 
 ### Sıradaki Olası Adımlar
-- Avatar için dosya yükleme uç noktası.
 - Frontend'in backend'e bağlanması (API entegrasyonu).

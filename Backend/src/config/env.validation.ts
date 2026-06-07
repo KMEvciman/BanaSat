@@ -35,6 +35,10 @@ class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
+  APP_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
   DATABASE_URL: string;
 
   @IsString()

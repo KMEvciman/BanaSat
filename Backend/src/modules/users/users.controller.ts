@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -6,10 +7,15 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { avatarMulterOptions } from './avatar-upload.config';
 import { Public } from '@common/decorators/public.decorator';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 
@@ -35,6 +41,22 @@ export class UsersController {
   ) {
     await this.usersService.changePassword(userId, dto);
     return { message: 'Parola güncellendi. Lütfen tekrar giriş yapın.' };
+  }
+
+  /**
+   * Profil fotoğrafı yükler (multipart/form-data, alan adı: "avatar").
+   * Yalnızca görsel, en fazla 5MB.
+   */
+  @Post('me/avatar')
+  @UseInterceptors(FileInterceptor('avatar', avatarMulterOptions))
+  uploadAvatar(
+    @CurrentUser('userId') userId: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Yüklenecek bir görsel seçilmedi.');
+    }
+    return this.usersService.setAvatar(userId, file.filename);
   }
 
   /**

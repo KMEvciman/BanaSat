@@ -40,6 +40,9 @@ yarn-error.log*
 .temp
 .tmp
 
+# Yüklenen dosyalar (avatarlar vb.)
+/uploads
+
 # Prisma
 prisma/*.db
 
