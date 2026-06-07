@@ -245,15 +245,21 @@ model Order {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  review Review?
+
   @@index([buyerId])
   @@map("orders")
 }
 
-/// Değerlendirme. İşlem sonrası alıcının satıcıya verdiği puan/yorum.
+/// Değerlendirme. Teslim edilen bir sipariş sonrası alıcının
+/// satıcıya verdiği puan ve yorum. Her sipariş yalnızca bir kez değerlendirilir.
 model Review {
   id      String  @id @default(uuid())
   rating  Int // 1-5
   comment String?
+
+  orderId String @unique @map("order_id")
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   authorId String @map("author_id")
   author   User   @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)

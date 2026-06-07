@@ -106,6 +106,10 @@ BanaSat/
 - `PATCH /:id/status` — durum ilerlet (ODENDI→HAZIRLANIYOR→KARGODA: satıcı, KARGODA→TESLIM_EDILDI: alıcı)
 - `PATCH /:id/cancel` — iptal (yalnızca ödeme beklenirken)
 
+**Reviews / Değerlendirmeler** (`/api/reviews`)
+- `POST /` — teslim edilmiş sipariş için satıcıyı değerlendir (1-5 puan + yorum); satıcı rating ortalaması atomik güncellenir
+- `GET /user/:userId` — bir kullanıcının aldığı değerlendirmeler (public)
+
 **Health** (`/api/health`) — uygulama + veritabanı durumu (public).
 
 ---
@@ -157,8 +161,10 @@ npm run dev               # http://localhost:3000
   okunmamış sayacı, katılımcı yetki kontrolü.
 - **Orders modülü:** kabul edilen teklif için sipariş, ödeme simülasyonu (ilan TAMAMLANDI),
   durum akışı (hazırlanıyor/kargoda/teslim edildi) aktör denetimiyle, alımlarım/satışlarım, iptal.
+- **Reviews modülü:** teslim edilen sipariş sonrası satıcı değerlendirme (1-5 + yorum),
+  satıcı rating ortalamasının atomik güncellenmesi, mükerrer engelleme. (Şema: Review'a
+  orderId @unique eklendi — migration `add_review_order_relation`.)
 
 ### Sıradaki Olası Adımlar
-- Reviews modülü (değerlendirme — şema hazır).
 - Avatar için dosya yükleme uç noktası.
 - Frontend'in backend'e bağlanması (API entegrasyonu).
