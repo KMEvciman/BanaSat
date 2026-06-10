@@ -184,3 +184,24 @@ npm run dev               # http://localhost:3000
 1. `docker compose up -d` (kök dizin)
 2. `cd Backend && npm run start:dev`
 3. `npm run dev` (kök dizin, frontend)
+
+### Kategori Yeniden Düzenleme (alım-satım odaklı)
+- Kategoriler hizmet ağırlıklı listeden alım-satım (ürün) odaklı listeye çevrildi.
+  Öncelik ürünlerde; hizmetler sona alındı.
+- **Yeni kategoriler (21):** Telefon & Aksesuar, Bilgisayar & Tablet, Elektronik,
+  Beyaz Eşya, Küçük Ev Aletleri, Oyun & Konsol, Mobilya, Ev & Yaşam, Giyim & Moda,
+  Anne & Bebek, Spor & Outdoor, Hobi & Oyuncak, Kitap-Film & Müzik, Otomotiv & Yedek Parça,
+  Bahçe & Yapı Market, Kozmetik & Kişisel Bakım, Evcil Hayvan Ürünleri,
+  Nakliye & Taşımacılık, Tadilat & Usta, Eğitim & Özel Ders, Diğer Hizmetler.
+- **Güncellenen dosyalar:** `Backend/prisma/seed.ts` (kaynak), `src/components/layout/Navbar.tsx`,
+  `src/app/kategoriler/page.tsx` (ikon eşlemesi + mock ilanlar), `src/components/layout/Footer.tsx`,
+  `src/app/taleplerim/page.tsx`, `src/app/tekliflerim/page.tsx`, `src/data/listings.ts` (mock kategori eşlemesi).
+- **DİKKAT:** Backend kategorileri DB'ye yansıması için seed tekrar çalıştırılmalı:
+  `cd Backend && npm run db:seed`. (Seed upsert kullanır; eski kategoriler DB'de kalır,
+  isterseniz manuel temizlenebilir.)
+- Seed çalıştırıldı: 21 yeni kategori DB'ye yazıldı (sıfır DB, eski kategori yok).
+
+### Ortam Notu (port çakışması)
+- Host makinede 5432 portunda native bir PostgreSQL çalıştığı için docker postgres 5433'e
+  maplendi. Kök dizinde `.env` → `POSTGRES_PORT=5433`, `Backend/.env` → `DATABASE_URL` portu 5433.
+- `Backend/.env` docker-compose varsayılan kimlik bilgileriyle oluşturuldu (geliştirme).

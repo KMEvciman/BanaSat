@@ -32,16 +32,16 @@ export default function Footer() {
             <h4 className="text-gray-900 dark:text-white font-bold">Kategoriler</h4>
             <ul className="flex flex-col gap-2 text-sm text-gray-500 dark:text-gray-400">
               <li>
-                <Link className="hover:text-primary transition-colors" href="#">Elektronik</Link>
+                <Link className="hover:text-primary transition-colors" href="/kategoriler?q=Telefon%20%26%20Aksesuar">Telefon & Aksesuar</Link>
               </li>
               <li>
-                <Link className="hover:text-primary transition-colors" href="#">Hizmet</Link>
+                <Link className="hover:text-primary transition-colors" href="/kategoriler?q=Elektronik">Elektronik</Link>
               </li>
               <li>
-                <Link className="hover:text-primary transition-colors" href="#">Emlak</Link>
+                <Link className="hover:text-primary transition-colors" href="/kategoriler?q=Beyaz%20E%C5%9Fya">Beyaz Eşya</Link>
               </li>
               <li>
-                <Link className="hover:text-primary transition-colors" href="#">Vasıta</Link>
+                <Link className="hover:text-primary transition-colors" href="/kategoriler?q=Mobilya">Mobilya</Link>
               </li>
             </ul>
           </div>

@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 /**
  * Türkçe metni URL-dostu slug'a çevirir.
- * "Yazılım & IT" -> "yazilim-it"
+ * "Telefon & Aksesuar" -> "telefon-aksesuar"
  */
 function slugify(text: string): string {
   const map: Record<string, string> = {
@@ -25,32 +25,32 @@ function slugify(text: string): string {
     .replace(/-+/g, '-');
 }
 
-// Frontend ile birebir uyumlu kategori listesi (isim + ikon anahtarı)
+// Frontend ile birebir uyumlu kategori listesi (isim + ikon anahtarı).
+// Öncelik alım-satım (ürün) kategorilerinde; hizmetler sona eklenir.
 const categories: { name: string; icon: string }[] = [
-  { name: 'Elektronik', icon: 'Laptop' },
-  { name: 'Yazılım & IT', icon: 'Code' },
-  { name: 'Grafik Tasarım', icon: 'Palette' },
-  { name: 'Nakliye & Taşımacılık', icon: 'Truck' },
-  { name: 'Eğitim & Özel Ders', icon: 'GraduationCap' },
-  { name: 'Temizlik', icon: 'SprayCan' },
-  { name: 'Tadilat & Dekorasyon', icon: 'Hammer' },
+  // Ürün (alım-satım) kategorileri
+  { name: 'Telefon & Aksesuar', icon: 'Smartphone' },
+  { name: 'Bilgisayar & Tablet', icon: 'Laptop' },
+  { name: 'Elektronik', icon: 'Tv' },
+  { name: 'Beyaz Eşya', icon: 'WashingMachine' },
+  { name: 'Küçük Ev Aletleri', icon: 'Microwave' },
+  { name: 'Oyun & Konsol', icon: 'Gamepad2' },
   { name: 'Mobilya', icon: 'Sofa' },
-  { name: 'Otomotiv', icon: 'Car' },
-  { name: 'Sağlık & Güzellik', icon: 'Heart' },
-  { name: 'Hukuk & Danışmanlık', icon: 'Scale' },
-  { name: 'Emlak', icon: 'Building' },
-  { name: 'Etkinlik & Organizasyon', icon: 'PartyPopper' },
-  { name: 'Fotoğraf & Video', icon: 'Camera' },
-  { name: 'Müzik & Ses', icon: 'Music' },
-  { name: 'Çeviri & Redaksiyon', icon: 'Languages' },
+  { name: 'Ev & Yaşam', icon: 'Home' },
   { name: 'Giyim & Moda', icon: 'Shirt' },
-  { name: 'Bahçe & Peyzaj', icon: 'TreePine' },
-  { name: 'Evcil Hayvan', icon: 'PawPrint' },
-  { name: 'Spor & Fitness', icon: 'Dumbbell' },
-  { name: 'Yemek & Catering', icon: 'UtensilsCrossed' },
-  { name: 'Matbaa & Baskı', icon: 'Printer' },
-  { name: 'Sigorta', icon: 'Shield' },
-  { name: 'Kargo & Kurye', icon: 'Package' },
+  { name: 'Anne & Bebek', icon: 'Baby' },
+  { name: 'Spor & Outdoor', icon: 'Dumbbell' },
+  { name: 'Hobi & Oyuncak', icon: 'Puzzle' },
+  { name: 'Kitap, Film & Müzik', icon: 'BookOpen' },
+  { name: 'Otomotiv & Yedek Parça', icon: 'Car' },
+  { name: 'Bahçe & Yapı Market', icon: 'Hammer' },
+  { name: 'Kozmetik & Kişisel Bakım', icon: 'Sparkles' },
+  { name: 'Evcil Hayvan Ürünleri', icon: 'PawPrint' },
+  // Hizmet kategorileri (ikincil)
+  { name: 'Nakliye & Taşımacılık', icon: 'Truck' },
+  { name: 'Tadilat & Usta', icon: 'Wrench' },
+  { name: 'Eğitim & Özel Ders', icon: 'GraduationCap' },
+  { name: 'Diğer Hizmetler', icon: 'Package' },
 ];
 
 async function main() {
