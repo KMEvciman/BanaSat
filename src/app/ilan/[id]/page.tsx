@@ -188,7 +188,8 @@ export default function IlanDetay() {
                 </div>
               </div>
 
-              {/* Gelen Teklifler */}
+              {/* Gelen Teklifler - yalnızca ilan sahibi görür */}
+              {isOwner && (
               <div className="flex flex-col gap-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   Gelen Teklifler
@@ -249,11 +250,12 @@ export default function IlanDetay() {
                   </article>
                 ))}
               </div>
+              )}
             </div>
 
             {/* Sağ kolon */}
             <div className="flex flex-col gap-6">
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 lg:sticky lg:top-[120px]">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
                 <div className="text-center pb-5 border-b border-gray-100 dark:border-gray-800">
                   <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold tracking-wider mb-1">Bütçe</p>
                   <p className="text-2xl font-black text-gray-900 dark:text-white">{listing.budgetLabel}</p>
