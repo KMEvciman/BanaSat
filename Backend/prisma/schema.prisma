@@ -71,6 +71,8 @@ model User {
   avatarUrl    String?  @map("avatar_url")
   bio          String?
   location     String?
+  province     String?
+  district     String?
   role         UserRole @default(USER)
 
   // Satıcı itibar göstergeleri
@@ -94,6 +96,7 @@ model User {
   reviewsGiven        Review[]       @relation("ReviewAuthor")
   reviewsReceived     Review[]       @relation("ReviewTarget")
   offerBlocksReceived OfferBlock[]   @relation("OfferBlockUser")
+  addresses           Address[]
 
   @@map("users")
 }
@@ -122,6 +125,8 @@ model Listing {
   budgetMax       Decimal?      @map("budget_max") @db.Decimal(12, 2)
   budgetLabel     String        @map("budget_label") // "5.000 - 10.000 TL" gibi serbest metin
   location        String?
+  province        String?
+  district        String?
   status          ListingStatus @default(AKTIF)
   coverImageUrl   String?       @map("cover_image_url")
   views           Int           @default(0)
@@ -145,6 +150,7 @@ model Listing {
   @@index([categoryId])
   @@index([ownerId])
   @@index([status])
+  @@index([province])
   @@map("listings")
 }
 
@@ -307,4 +313,45 @@ model OfferBlock {
   @@unique([listingId, blockedUserId])
   @@index([blockedUserId])
   @@map("offer_blocks")
+}
+
+/// İl (81 il). Lokasyon seçim listelerini besler.
+model Province {
+  id        String     @id @default(uuid())
+  plate     Int        @unique
+  name      String     @unique
+  districts District[]
+
+  @@map("provinces")
+}
+
+/// İlçe. Bağlı olduğu ile referans verir.
+model District {
+  id         String   @id @default(uuid())
+  name       String
+  provinceId String   @map("province_id")
+  province   Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+
+  @@unique([provinceId, name])
+  @@index([provinceId])
+  @@map("districts")
+}
+
+/// Kullanıcının kayıtlı adresleri. Bir kullanıcının birden çok adresi olabilir.
+model Address {
+  id          String  @id @default(uuid())
+  title       String // "Ev", "İş" gibi etiket
+  province    String
+  district    String
+  fullAddress String? @map("full_address")
+  isDefault   Boolean @default(false) @map("is_default")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("addresses")
 }

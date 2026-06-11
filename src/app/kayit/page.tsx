@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import LocationSelect from "@/components/LocationSelect";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, UserRound, Phone } from "lucide-react";
 
 export default function KayitOl() {
@@ -12,6 +13,8 @@ export default function KayitOl() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [province, setProvince] = useState("");
+  const [district, setDistrict] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +31,7 @@ export default function KayitOl() {
     }
     setSubmitting(true);
     try {
-      await register(name, email, password, phone || undefined);
+      await register(name, email, password, phone || undefined, province || undefined, district || undefined);
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Kayıt başarısız.");
@@ -126,6 +129,20 @@ export default function KayitOl() {
                     placeholder="05XX XXX XX XX"
                   />
                 </div>
+              </div>
+
+              {/* İl / İlçe */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-900 dark:text-gray-200">
+                  Konum (İl / İlçe)
+                </label>
+                <LocationSelect
+                  province={province}
+                  district={district}
+                  onChange={(p, d) => { setProvince(p); setDistrict(d); }}
+                  showLabels={false}
+                  selectClassName="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-12 px-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                />
               </div>
 
               {/* Password */}

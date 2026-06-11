@@ -279,3 +279,22 @@ X talep açar → Y ilan detayından teklif verir → teklif sohbete OFFER mesaj
 ### Dark Mode Siyah-Beyaz Tema (çerçeveler)
 - `globals.css`: Koyu temada çerçevesiz butonlara beyaz çerçeve (`:where(.dark) button`, düşük özgüllük — kırmızı/renkli çerçeveli butonları ezmez). Tüm butonlar hover'da yeşil çerçeve.
 - Kart/kapsayıcıların koyu çerçeve tonları (`dark:border-gray/slate-600/700/800/900`) beyaza çevrildi; hover'da yeşile döner (attribute selector ile yalnızca border-color, arka planlar etkilenmez).
+
+## İl / İlçe Lokasyon Sistemi
+
+### Veri
+- `Backend/src/common/data/turkey-locations.ts`: 81 il + tüm ilçeler (973 ilçe). Seed bu veriden `Province`/`District` tablolarını idempotent doldurur.
+
+### Backend
+- `schema.prisma`: `Province`, `District`, `Address` modelleri. `User` ve `Listing`'e `province`/`district` alanları. Migration: `20260613000000_locations`.
+- `locations` modülü: `GET /locations` (iller + ilçeler, public).
+- Kayıt (`register`) il/ilçe alır; `users.create` ve `updateProfile` il/ilçe işler.
+- Adres CRUD: `GET/POST /users/me/addresses`, `PATCH/DELETE /users/me/addresses/:id` (varsayılan adres mantığıyla).
+- İlan oluşturma il/ilçe alır; `GET /listings?province=...` il filtresi eklendi.
+
+### Frontend
+- `LocationSelect` bileşeni: il/ilçe bağımlı iki seçim; lokasyon verisi bir kez yüklenip cache'lenir.
+- Kayıt ve Talep Oluştur sayfalarına il/ilçe seçimi.
+- Profil: il/ilçe seçimi + "Adreslerim" yönetimi (ekle/sil/varsayılan yap).
+- Ana sayfa: giriş yapan kullanıcının iline göre "{İl}'daki Talepler" bölümü.
+- Kategoriler: il filtresi dropdown'u + `?il=` query desteği (bölgesel keşif).

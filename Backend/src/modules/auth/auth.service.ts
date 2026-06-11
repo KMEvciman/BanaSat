@@ -39,6 +39,8 @@ export class AuthService {
       passwordHash,
       name: dto.name,
       phone: dto.phone,
+      province: dto.province,
+      district: dto.district,
     });
 
     const tokens = await this.issueTokens(user.id, user.email, user.role);

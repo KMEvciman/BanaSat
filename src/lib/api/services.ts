@@ -13,6 +13,8 @@ import type {
   OfferBlockOptions,
   Order,
   Paginated,
+  ProvinceOption,
+  Address,
   PublicProfile,
   Review,
   User,
@@ -20,7 +22,7 @@ import type {
 
 // --- Auth ---
 export const authApi = {
-  register: (body: { email: string; name: string; password: string; phone?: string }) =>
+  register: (body: { email: string; name: string; password: string; phone?: string; province?: string; district?: string }) =>
     api.post<AuthResult>("/auth/register", body, false),
   login: (body: { email: string; password: string }) =>
     api.post<AuthResult>("/auth/login", body, false),
@@ -28,9 +30,14 @@ export const authApi = {
   me: () => api.get<User>("/auth/me"),
 };
 
+// --- Locations (il/ilçe) ---
+export const locationsApi = {
+  list: () => api.get<ProvinceOption[]>("/locations", false),
+};
+
 // --- Users ---
 export const usersApi = {
-  updateProfile: (body: Partial<Pick<User, "name" | "email" | "phone" | "bio" | "location">>) =>
+  updateProfile: (body: Partial<Pick<User, "name" | "email" | "phone" | "bio" | "location" | "province" | "district">>) =>
     api.patch<User>("/users/me", body),
   changePassword: (body: { currentPassword: string; newPassword: string }) =>
     api.patch<{ message: string }>("/users/me/password", body),
@@ -40,6 +47,13 @@ export const usersApi = {
     return api.postForm<User>("/users/me/avatar", form);
   },
   publicProfile: (id: string) => api.get<PublicProfile>(`/users/${id}`, false),
+  // Adresler
+  listAddresses: () => api.get<Address[]>("/users/me/addresses"),
+  createAddress: (body: { title: string; province: string; district: string; fullAddress?: string; isDefault?: boolean }) =>
+    api.post<Address>("/users/me/addresses", body),
+  updateAddress: (id: string, body: Partial<{ title: string; province: string; district: string; fullAddress: string; isDefault: boolean }>) =>
+    api.patch<Address>(`/users/me/addresses/${id}`, body),
+  removeAddress: (id: string) => api.delete<void>(`/users/me/addresses/${id}`),
 };
 
 // --- Categories ---
@@ -56,6 +70,7 @@ export interface ListingQuery {
   categorySlug?: string;
   status?: string;
   ownerId?: string;
+  province?: string;
   sort?: string;
 }
 
@@ -81,6 +96,8 @@ export const listingsApi = {
     categoryId: string;
     budgetLabel: string;
     location?: string;
+    province?: string;
+    district?: string;
     coverImageUrl?: string;
     imageUrls?: string[];
     deadline?: string;

@@ -252,7 +252,7 @@ function MesajlarContent() {
                 {conv.lastMessage && <span className="text-slate-400 text-xs shrink-0 ml-2">{fmtTime(conv.lastMessage.createdAt)}</span>}
               </div>
               <p className="text-slate-500 dark:text-slate-400 text-sm truncate">{conv.lastMessage?.content ?? "Yeni görüşme"}</p>
-              <p className="text-slate-400 dark:text-slate-500 text-[11px] mt-1 truncate">{conv.listing.title}</p>
+              <p className="text-slate-400 dark:text-slate-500 text-[11px] mt-1 truncate">{conv.listing?.title ?? "İlan kaldırılmış"}</p>
             </div>
           </div>
         ))}
@@ -270,7 +270,7 @@ function MesajlarContent() {
         <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-10 w-10 sm:h-12 sm:w-12" style={{ backgroundImage: `url("${counterpartAvatar}")` }}></div>
         <div className="flex flex-col min-w-0">
           <h2 className="text-slate-900 dark:text-white text-base sm:text-lg font-bold leading-tight truncate">{counterpartName}</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{detail?.listing.title ?? activeConv?.listing.title}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{detail?.listing?.title ?? activeConv?.listing?.title ?? "İlan kaldırılmış"}</p>
         </div>
         <div className="ml-auto flex items-center gap-2 shrink-0">
           {/* Alıcı: satıcının hangi ilanlara teklif vermesini engelleyeceğini seçer */}
@@ -311,7 +311,7 @@ function MesajlarContent() {
             const canRespond = pending && !mine;
             const canUpdate = pending && mine;
             const busy = actionBusy === m.id;
-            const listingTitle = detail?.listing.title;
+            const listingTitle = detail?.listing?.title;
             return (
               <div key={m.id} className={`flex w-full ${mine ? "justify-end" : "justify-start"}`}>
                 <div className="w-full max-w-md rounded-2xl border border-primary/30 bg-white dark:bg-gray-900 shadow-md overflow-hidden">
@@ -326,7 +326,7 @@ function MesajlarContent() {
                   {/* İlgili ilan */}
                   {listingTitle && (
                     <Link
-                      href={`/ilan/${detail!.listing.id}`}
+                      href={`/ilan/${detail!.listing!.id}`}
                       className="flex items-center gap-2 px-5 py-2.5 border-b border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"
                     >
                       <Tag size={14} className="shrink-0" />

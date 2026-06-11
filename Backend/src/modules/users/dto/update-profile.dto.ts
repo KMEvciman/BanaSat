@@ -36,6 +36,16 @@ export class UpdateProfileDto {
   @MaxLength(120)
   location?: string;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  province?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  district?: string;
+
   /** Avatar görseli (URL veya data URL). */
   @IsOptional()
   @IsString()

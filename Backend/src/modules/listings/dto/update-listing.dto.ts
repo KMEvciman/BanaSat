@@ -48,6 +48,16 @@ export class UpdateListingDto {
   location?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  province?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  district?: string;
+
+  @IsOptional()
   @IsUrl()
   coverImageUrl?: string;
 

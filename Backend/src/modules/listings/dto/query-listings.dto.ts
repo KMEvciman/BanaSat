@@ -23,6 +23,11 @@ export class QueryListingsDto extends PaginationDto {
   @IsString()
   categorySlug?: string;
 
+  /** İl filtresi (örn. ana sayfada kullanıcının iline göre). */
+  @IsOptional()
+  @IsString()
+  province?: string;
+
   @IsOptional()
   @IsEnum(ListingStatus, { message: 'Geçersiz durum filtresi.' })
   status?: ListingStatus;

@@ -41,6 +41,16 @@ export class CreateListingDto {
   location?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  province?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  district?: string;
+
+  @IsOptional()
   @IsUrl({}, { message: 'Geçerli bir kapak görseli URL\'si giriniz.' })
   coverImageUrl?: string;
 

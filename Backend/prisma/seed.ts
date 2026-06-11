@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { TURKEY_LOCATIONS } from '../src/common/data/turkey-locations';
 
 const prisma = new PrismaClient();
 
@@ -79,6 +80,26 @@ async function main() {
   }
 
   console.log(`${categories.length} kategori eklendi/güncellendi.`);
+
+  // İl ve ilçeleri yükle (idempotent).
+  let districtCount = 0;
+  for (const p of TURKEY_LOCATIONS) {
+    const province = await prisma.province.upsert({
+      where: { plate: p.plate },
+      update: { name: p.province },
+      create: { plate: p.plate, name: p.province },
+    });
+    for (const d of p.districts) {
+      await prisma.district.upsert({
+        where: { provinceId_name: { provinceId: province.id, name: d } },
+        update: {},
+        create: { name: d, provinceId: province.id },
+      });
+      districtCount++;
+    }
+  }
+  console.log(`${TURKEY_LOCATIONS.length} il, ${districtCount} ilçe eklendi/güncellendi.`);
+
   console.log('Seed tamamlandı.');
 }
 

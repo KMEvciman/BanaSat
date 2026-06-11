@@ -4,8 +4,10 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { usersApi } from "@/lib/api/services";
+import LocationSelect from "@/components/LocationSelect";
+import type { Address } from "@/lib/api/types";
 import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Camera,
   Mail,
@@ -16,6 +18,9 @@ import {
   Save,
   Trash2,
   CheckCircle,
+  Plus,
+  Home,
+  Star,
 } from "lucide-react";
 
 export default function Profil() {
@@ -28,11 +33,26 @@ export default function Profil() {
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
+  const [province, setProvince] = useState("");
+  const [district, setDistrict] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // Adres yönetimi
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [showAddrForm, setShowAddrForm] = useState(false);
+  const [addrTitle, setAddrTitle] = useState("");
+  const [addrProvince, setAddrProvince] = useState("");
+  const [addrDistrict, setAddrDistrict] = useState("");
+  const [addrFull, setAddrFull] = useState("");
+  const [addrBusy, setAddrBusy] = useState(false);
+
+  const loadAddresses = useCallback(() => {
+    usersApi.listAddresses().then(setAddresses).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !isLoggedIn) {
@@ -45,9 +65,12 @@ export default function Profil() {
       setPhone(user.phone ?? "");
       setBio(user.bio ?? "");
       setLocation(user.location ?? "");
+      setProvince(user.province ?? "");
+      setDistrict(user.district ?? "");
       setAvatarPreview(user.avatarUrl);
+      loadAddresses();
     }
-  }, [authLoading, isLoggedIn, user, router]);
+  }, [authLoading, isLoggedIn, user, router, loadAddresses]);
 
   // Dosya seçilince anında yükle.
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +100,12 @@ export default function Profil() {
     setError("");
     setSubmitting(true);
     try {
-      const updated = await usersApi.updateProfile({ name, email, phone, bio, location });
+      const updated = await usersApi.updateProfile({
+        name, email, phone, bio,
+        province: province || undefined,
+        district: district || undefined,
+        location: province ? `${province}${district ? " / " + district : ""}` : location,
+      });
       updateProfile(updated);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -85,6 +113,47 @@ export default function Profil() {
       setError(err instanceof Error ? err.message : "Profil güncellenemedi.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Yeni adres ekle.
+  const handleAddAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addrTitle.trim() || !addrProvince || !addrDistrict || addrBusy) return;
+    setAddrBusy(true);
+    try {
+      await usersApi.createAddress({
+        title: addrTitle.trim(),
+        province: addrProvince,
+        district: addrDistrict,
+        fullAddress: addrFull.trim() || undefined,
+      });
+      setAddrTitle(""); setAddrProvince(""); setAddrDistrict(""); setAddrFull("");
+      setShowAddrForm(false);
+      loadAddresses();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Adres eklenemedi.");
+    } finally {
+      setAddrBusy(false);
+    }
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    if (!window.confirm("Bu adresi silmek istediğinize emin misiniz?")) return;
+    try {
+      await usersApi.removeAddress(id);
+      setAddresses((prev) => prev.filter((a) => a.id !== id));
+    } catch {
+      // sessizce geç
+    }
+  };
+
+  const handleMakeDefault = async (id: string) => {
+    try {
+      await usersApi.updateAddress(id, { isDefault: true });
+      loadAddresses();
+    } catch {
+      // sessizce geç
     }
   };
 
@@ -234,43 +303,37 @@ export default function Profil() {
                     </div>
                   </div>
 
-                  {/* Phone & Location */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-semibold text-gray-900 dark:text-gray-200">
-                        Telefon Numarası
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                          <Phone size={18} />
-                        </div>
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-12 pl-10 pr-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-400"
-                          placeholder="05XX XXX XX XX"
-                        />
+                  {/* Phone */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-gray-200">
+                      Telefon Numarası
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                        <Phone size={18} />
                       </div>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-12 pl-10 pr-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-400"
+                        placeholder="05XX XXX XX XX"
+                      />
                     </div>
+                  </div>
 
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-semibold text-gray-900 dark:text-gray-200">
-                        Konum
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                          <MapPin size={18} />
-                        </div>
-                        <input
-                          type="text"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-12 pl-10 pr-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-400"
-                          placeholder="Şehir, Ülke"
-                        />
-                      </div>
-                    </div>
+                  {/* İl / İlçe */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-gray-200 flex items-center gap-1.5">
+                      <MapPin size={16} className="text-gray-400" /> Konum (İl / İlçe)
+                    </label>
+                    <LocationSelect
+                      province={province}
+                      district={district}
+                      onChange={(p, d) => { setProvince(p); setDistrict(d); }}
+                      showLabels={false}
+                      selectClassName="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-12 px-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    />
                   </div>
 
                   {/* Bio */}
@@ -316,6 +379,86 @@ export default function Profil() {
               </div>
             </div>
           </form>
+
+          {/* Adreslerim */}
+          <div className="mt-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 md:p-8">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-2">
+                <Home size={20} className="text-primary" />
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Adreslerim</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddrForm((v) => !v)}
+                className="flex items-center gap-1.5 rounded-xl bg-primary px-4 h-10 text-white text-sm font-semibold hover:bg-primary/85 active:scale-95 transition-all"
+              >
+                <Plus size={18} /> Adres Ekle
+              </button>
+            </div>
+
+            {/* Yeni adres formu */}
+            {showAddrForm && (
+              <form onSubmit={handleAddAddress} className="mb-6 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
+                <input
+                  value={addrTitle}
+                  onChange={(e) => setAddrTitle(e.target.value)}
+                  required
+                  placeholder="Adres başlığı (Ev, İş vb.)"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-11 px-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                />
+                <LocationSelect
+                  province={addrProvince}
+                  district={addrDistrict}
+                  onChange={(p, d) => { setAddrProvince(p); setAddrDistrict(d); }}
+                  showLabels={false}
+                  selectClassName="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-11 px-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                />
+                <textarea
+                  value={addrFull}
+                  onChange={(e) => setAddrFull(e.target.value)}
+                  rows={2}
+                  placeholder="Açık adres (mahalle, sokak, no...) - opsiyonel"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
+                />
+                <div className="flex justify-end gap-3">
+                  <button type="button" onClick={() => setShowAddrForm(false)} className="px-5 h-11 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">İptal</button>
+                  <button type="submit" disabled={addrBusy} className="px-5 h-11 rounded-xl bg-primary text-white font-semibold hover:bg-primary/85 active:scale-95 transition-all disabled:opacity-50">{addrBusy ? "Ekleniyor..." : "Kaydet"}</button>
+                </div>
+              </form>
+            )}
+
+            {/* Adres listesi */}
+            {addresses.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">Henüz kayıtlı adresiniz yok.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {addresses.map((a) => (
+                  <div key={a.id} className="rounded-xl border border-gray-200 dark:border-gray-800 p-4 flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-gray-900 dark:text-white text-sm">{a.title}</span>
+                        {a.isDefault && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/15 text-primary">Varsayılan</span>}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {!a.isDefault && (
+                          <button type="button" onClick={() => handleMakeDefault(a.id)} title="Varsayılan yap" className="size-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors">
+                            <Star size={16} />
+                          </button>
+                        )}
+                        <button type="button" onClick={() => handleDeleteAddress(a.id)} title="Sil" className="size-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1.5">
+                      <MapPin size={14} className="text-gray-400 shrink-0" /> {a.province} / {a.district}
+                    </p>
+                    {a.fullAddress && <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{a.fullAddress}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </main>
       <Footer />

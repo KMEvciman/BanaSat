@@ -17,6 +17,8 @@ const LISTING_CARD_SELECT = {
   description: true,
   budgetLabel: true,
   location: true,
+  province: true,
+  district: true,
   status: true,
   coverImageUrl: true,
   views: true,
@@ -44,6 +46,8 @@ export class ListingsService {
         fullDescription: dto.fullDescription,
         budgetLabel: dto.budgetLabel,
         location: dto.location,
+        province: dto.province,
+        district: dto.district,
         coverImageUrl: dto.coverImageUrl,
         deadline: dto.deadline ? new Date(dto.deadline) : undefined,
         owner: { connect: { id: ownerId } },
@@ -67,6 +71,9 @@ export class ListingsService {
     }
     if (query.categorySlug) {
       where.category = { slug: query.categorySlug };
+    }
+    if (query.province) {
+      where.province = query.province;
     }
     if (query.ownerId) {
       where.ownerId = query.ownerId;
@@ -185,6 +192,8 @@ export class ListingsService {
         fullDescription: dto.fullDescription,
         budgetLabel: dto.budgetLabel,
         location: dto.location,
+        province: dto.province,
+        district: dto.district,
         coverImageUrl: dto.coverImageUrl,
         status: dto.status,
         deadline: dto.deadline ? new Date(dto.deadline) : undefined,

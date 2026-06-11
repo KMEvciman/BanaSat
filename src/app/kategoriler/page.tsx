@@ -5,8 +5,8 @@ import Footer from "@/components/layout/Footer";
 import ListingCard from "@/components/ListingCard";
 import { useSearchParams } from "next/navigation";
 import { useState, useMemo, useEffect, Suspense } from "react";
-import { categoriesApi, listingsApi } from "@/lib/api/services";
-import type { Category, Listing } from "@/lib/api/types";
+import { categoriesApi, listingsApi, locationsApi } from "@/lib/api/services";
+import type { Category, Listing, ProvinceOption } from "@/lib/api/types";
 import { listingToCard } from "@/lib/api/adapters";
 import {
   Search, ArrowUpDown, ChevronDown, LayoutGrid,
@@ -31,6 +31,7 @@ const sortOptions = [
 function KategorilerContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
+  const initialIl = searchParams.get("il") || "";
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedSlug, setSelectedSlug] = useState<string>("tumu");
@@ -39,6 +40,13 @@ function KategorilerContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
+  const [province, setProvince] = useState(initialIl);
+
+  // İl listesini yükle (filtre için).
+  useEffect(() => {
+    locationsApi.list().then(setProvinces).catch(() => {});
+  }, []);
 
   // Kategorileri yükle; URL'deki ?q (isim) ile eşleşen kategoriyi seç.
   useEffect(() => {
@@ -60,11 +68,12 @@ function KategorilerContent() {
         limit: 100,
         sort: sortBy,
         categorySlug: selectedSlug === "tumu" ? undefined : selectedSlug,
+        province: province || undefined,
       })
       .then((res) => setListings(res.items))
       .catch(() => setListings([]))
       .finally(() => setLoading(false));
-  }, [selectedSlug, sortBy]);
+  }, [selectedSlug, sortBy, province]);
 
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return listings;
@@ -137,6 +146,16 @@ function KategorilerContent() {
             placeholder="İlan ara..."
           />
         </div>
+        <select
+          value={province}
+          onChange={(e) => setProvince(e.target.value)}
+          className="h-11 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 text-sm font-medium px-3 focus:border-primary outline-none transition-colors"
+        >
+          <option value="">Tüm İller</option>
+          {provinces.map((p) => (
+            <option key={p.id} value={p.name}>{p.name}</option>
+          ))}
+        </select>
         <div className="relative">
           <button
             onClick={() => setShowSortDropdown(!showSortDropdown)}

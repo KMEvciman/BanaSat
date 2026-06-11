@@ -18,6 +18,8 @@ export interface User {
   avatarUrl: string | null;
   bio: string | null;
   location: string | null;
+  province: string | null;
+  district: string | null;
   role: "USER" | "ADMIN";
   isVerified: boolean;
   ratingAvg: number;
@@ -77,6 +79,8 @@ export interface Listing {
   description: string;
   budgetLabel: string;
   location: string | null;
+  province: string | null;
+  district: string | null;
   status: ListingStatus;
   coverImageUrl: string | null;
   views: number;
@@ -157,7 +161,7 @@ export interface Conversation {
   createdAt: string;
   updatedAt: string;
   counterpart: { id: string; name: string; avatarUrl: string | null };
-  listing: { id: string; title: string; coverImageUrl: string | null };
+  listing: { id: string; title: string; coverImageUrl: string | null } | null;
   lastMessage: { content: string; createdAt: string; senderId: string } | null;
   unreadCount: number;
 }
@@ -189,7 +193,7 @@ export interface ConversationDetail {
   offersBlocked: boolean;
   buyer: { id: string; name: string; avatarUrl: string | null };
   seller: { id: string; name: string; avatarUrl: string | null };
-  listing: { id: string; title: string; coverImageUrl: string | null };
+  listing: { id: string; title: string; coverImageUrl: string | null } | null;
   messages: Message[];
 }
 
@@ -238,4 +242,27 @@ export interface Review {
   createdAt: string;
   author: { id: string; name: string; avatarUrl: string | null };
   order: { offer: { listing: { id: string; title: string } } };
+}
+
+export interface DistrictOption {
+  id: string;
+  name: string;
+}
+
+export interface ProvinceOption {
+  id: string;
+  plate: number;
+  name: string;
+  districts: DistrictOption[];
+}
+
+export interface Address {
+  id: string;
+  title: string;
+  province: string;
+  district: string;
+  fullAddress: string | null;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -28,4 +28,14 @@ export class RegisterDto {
   @IsString()
   @MaxLength(20)
   phone?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  province?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  district?: string;
 }

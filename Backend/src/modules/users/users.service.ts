@@ -27,6 +27,8 @@ export const PUBLIC_USER_SELECT = {
   avatarUrl: true,
   bio: true,
   location: true,
+  province: true,
+  district: true,
   role: true,
   isVerified: true,
   ratingAvg: true,
@@ -45,6 +47,8 @@ export const PUBLIC_PROFILE_SELECT = {
   avatarUrl: true,
   bio: true,
   location: true,
+  province: true,
+  district: true,
   isVerified: true,
   ratingAvg: true,
   ratingCount: true,
@@ -73,6 +77,8 @@ export class UsersService {
     passwordHash: string;
     name: string;
     phone?: string;
+    province?: string;
+    district?: string;
   }): Promise<PublicUser> {
     return this.prisma.user.create({
       data,
@@ -146,6 +152,8 @@ export class UsersService {
         phone: dto.phone,
         bio: dto.bio,
         location: dto.location,
+        province: dto.province,
+        district: dto.district,
         avatarUrl: dto.avatarUrl,
       },
       select: PUBLIC_USER_SELECT,
@@ -202,6 +210,79 @@ export class UsersService {
     await this.removeOldAvatarFile(user.avatarUrl);
 
     return updated;
+  }
+
+  // ---------------------------------------------------------------
+  // Adres yönetimi
+  // ---------------------------------------------------------------
+
+  /** Kullanıcının kayıtlı adresleri (varsayılan en üstte). */
+  listAddresses(userId: string) {
+    return this.prisma.address.findMany({
+      where: { userId },
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
+    });
+  }
+
+  /** Yeni adres ekler. İlk adres otomatik varsayılan olur. */
+  async createAddress(
+    userId: string,
+    data: { title: string; province: string; district: string; fullAddress?: string; isDefault?: boolean },
+  ) {
+    const count = await this.prisma.address.count({ where: { userId } });
+    const makeDefault = data.isDefault || count === 0;
+
+    if (makeDefault) {
+      await this.prisma.address.updateMany({ where: { userId }, data: { isDefault: false } });
+    }
+
+    return this.prisma.address.create({
+      data: {
+        userId,
+        title: data.title,
+        province: data.province,
+        district: data.district,
+        fullAddress: data.fullAddress,
+        isDefault: makeDefault,
+      },
+    });
+  }
+
+  /** Adresi günceller (yalnızca sahibi). */
+  async updateAddress(
+    userId: string,
+    addressId: string,
+    data: { title?: string; province?: string; district?: string; fullAddress?: string; isDefault?: boolean },
+  ) {
+    await this.assertAddressOwner(userId, addressId);
+
+    if (data.isDefault) {
+      await this.prisma.address.updateMany({ where: { userId }, data: { isDefault: false } });
+    }
+
+    return this.prisma.address.update({
+      where: { id: addressId },
+      data,
+    });
+  }
+
+  /** Adresi siler (yalnızca sahibi). */
+  async removeAddress(userId: string, addressId: string): Promise<void> {
+    await this.assertAddressOwner(userId, addressId);
+    await this.prisma.address.delete({ where: { id: addressId } });
+  }
+
+  private async assertAddressOwner(userId: string, addressId: string): Promise<void> {
+    const address = await this.prisma.address.findUnique({
+      where: { id: addressId },
+      select: { userId: true },
+    });
+    if (!address) {
+      throw new NotFoundException('Adres bulunamadı.');
+    }
+    if (address.userId !== userId) {
+      throw new BadRequestException('Bu adres üzerinde işlem yapma yetkiniz yok.');
+    }
   }
 
   /** Eski avatar yerel bir yükleme dosyasıysa diskten siler (hata olsa da akışı bozmaz). */

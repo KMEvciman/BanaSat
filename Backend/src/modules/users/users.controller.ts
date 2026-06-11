@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -15,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
 import { avatarMulterOptions } from './avatar-upload.config';
 import { Public } from '@common/decorators/public.decorator';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
@@ -57,6 +59,35 @@ export class UsersController {
       throw new BadRequestException('Yüklenecek bir görsel seçilmedi.');
     }
     return this.usersService.setAvatar(userId, file.filename);
+  }
+
+  /** Kayıtlı adresleri listele. */
+  @Get('me/addresses')
+  listAddresses(@CurrentUser('userId') userId: string) {
+    return this.usersService.listAddresses(userId);
+  }
+
+  /** Yeni adres ekle. */
+  @Post('me/addresses')
+  createAddress(@CurrentUser('userId') userId: string, @Body() dto: CreateAddressDto) {
+    return this.usersService.createAddress(userId, dto);
+  }
+
+  /** Adresi güncelle. */
+  @Patch('me/addresses/:id')
+  updateAddress(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateAddressDto,
+  ) {
+    return this.usersService.updateAddress(userId, id, dto);
+  }
+
+  /** Adresi sil. */
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('me/addresses/:id')
+  removeAddress(@CurrentUser('userId') userId: string, @Param('id') id: string) {
+    return this.usersService.removeAddress(userId, id);
   }
 
   /**
