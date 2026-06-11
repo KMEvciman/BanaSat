@@ -53,7 +53,7 @@
 .dark textarea,
 .dark select {
   background-color: #000000;
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.45);
 }
 
 .dark input:hover,
@@ -74,23 +74,31 @@
     üzerine gelince yeşile döner.
 */
 :where(.dark) button {
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
 }
 
 :where(.dark) button:hover {
   border-color: var(--color-primary);
 }
 
-/* Koyu temadaki çerçeve renklerini beyaza çevir (yalnızca border-color).
-   Opaklık ekli varyantları da kapsamak için "içerir" seçici kullanılır. */
+/* Koyu temadaki çerçeve renklerini beyaza çevir (daha belirgin + biraz kalın). */
 .dark [class*="dark:border-gray-"],
 .dark [class*="dark:border-slate-"] {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.45);
+  border-width: 1.5px;
 }
 
 /* Bu çerçeveli yüzeylerin üzerine gelince yeşile dön. */
 .dark [class*="dark:border-gray-"]:hover,
 .dark [class*="dark:border-slate-"]:hover {
   border-color: var(--color-primary);
+}
+
+/* İstisna: Navbar altındaki kategori barı hover'da yeşile DÖNMESİN. */
+.dark .nav-cat-bar:hover,
+.dark .nav-cat-bar [class*="dark:border-gray-"]:hover,
+.dark .nav-cat-bar [class*="dark:border-slate-"]:hover,
+.dark .nav-cat-bar button:hover {
+  border-color: rgba(255, 255, 255, 0.45);
 }
 

@@ -92,28 +92,26 @@ export default function HomeListings() {
       {/* Konumunda İlgini Çekebilecek İlanlar (il + teklif geçmişi kategorilerine göre) */}
       {user?.province && regional.length > 0 && (
         <div className="w-full bg-white dark:bg-background-dark pt-10 md:pt-14">
-          <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex flex-col gap-1">
-                <span className="flex items-center gap-1 text-primary text-xs sm:text-sm font-semibold">
-                  <MapPin size={15} /> {user.province}{user.district ? ` / ${user.district}` : ""}
-                </span>
-                <h2 className="text-gray-900 dark:text-white text-2xl md:text-3xl font-bold tracking-tight">
-                  Konumunda İlgini Çekebilecek İlanlar
-                </h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  İlgilendiğin kategorilerde bölgendeki taleplere göz at
-                </p>
+          <div className="px-4 md:px-10">
+            <div className="max-w-7xl mx-auto mb-8">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <span className="flex items-center gap-1 text-primary text-xs sm:text-sm font-semibold">
+                    <MapPin size={15} /> {user.province}{user.district ? ` / ${user.district}` : ""}
+                  </span>
+                  <h2 className="text-gray-900 dark:text-white text-2xl md:text-3xl font-bold tracking-tight">
+                    Konumunda İlgini Çekebilecek İlanlar
+                  </h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    İlgilendiğin kategorilerde bölgendeki taleplere göz at
+                  </p>
+                </div>
+                <Link href={`/kategoriler?il=${encodeURIComponent(user.province)}`} className="text-primary text-sm font-semibold hover:underline flex items-center gap-1 shrink-0">
+                  Tümünü Gör <ArrowRight size={16} />
+                </Link>
               </div>
-              <Link href={`/kategoriler?il=${encodeURIComponent(user.province)}`} className="text-primary text-sm font-semibold hover:underline flex items-center gap-1 shrink-0">
-                Tümünü Gör <ArrowRight size={16} />
-              </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-              {regional.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
-            </div>
+            <ListingCarousel listings={regional} />
           </div>
         </div>
       )}

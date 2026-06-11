@@ -279,9 +279,9 @@ export default function Tekliflerim() {
               {filtered.map((teklif) => {
                 const sc = statusConfig[teklif.status];
                 return (
-                  <div key={teklif.id} className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300">
+                  <div key={teklif.id} className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:border-primary transition-colors duration-200">
                     <div className="relative h-32 sm:h-44 w-full overflow-hidden">
-                      <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={teklif.listing.coverImageUrl || PLACEHOLDER} alt={teklif.listing.title} />
+                      <img className="w-full h-full object-cover" src={teklif.listing.coverImageUrl || PLACEHOLDER} alt={teklif.listing.title} />
                       <div className="absolute top-3 left-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border backdrop-blur-md ${sc.bg} ${sc.color}`}>{sc.label}</span>
                       </div>

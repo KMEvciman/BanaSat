@@ -110,7 +110,7 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
 
   return (
     <>
-      <div className="w-full bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 fixed top-0 left-0 right-0 z-50">
+      <div className="nav-cat-bar w-full bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 fixed top-0 left-0 right-0 z-50">
 
         {/* ===== MOBILE NAVBAR (lg altı) ===== */}
         <div className="lg:hidden">
@@ -381,7 +381,7 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
 
           {/* Desktop Category Bar */}
           {!hideCategories && (
-            <div className="w-full border-t border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-900/40">
+            <div className="nav-cat-bar w-full border-t border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-900/40">
               <div className="flex items-start px-4 py-2 gap-2">
                 <span className="shrink-0 px-3.5 py-1.5 text-xs font-bold text-gray-900 dark:text-white whitespace-nowrap">
                   Kategoriler

@@ -6,8 +6,8 @@ import { Search, Paperclip, Send, ArrowLeft, HandCoins, Check, X, Ban, Tag, Chec
 import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { messagesApi } from "@/lib/api/services";
-import type { Conversation, ConversationDetail, OfferStatus, OfferBlockOptions } from "@/lib/api/types";
+import { messagesApi, listingsApi } from "@/lib/api/services";
+import type { Conversation, ConversationDetail, OfferStatus, OfferBlockOptions, Listing } from "@/lib/api/types";
 
 function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
@@ -46,6 +46,11 @@ function MesajlarContent() {
   const [blockOptions, setBlockOptions] = useState<OfferBlockOptions | null>(null);
   const [selectedBlockIds, setSelectedBlockIds] = useState<string[]>([]);
   const [blockSaving, setBlockSaving] = useState(false);
+
+  // Talep seçim (teklif vermek için) pop-up durumu.
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerListings, setPickerListings] = useState<Listing[]>([]);
+  const [pickerLoading, setPickerLoading] = useState(false);
 
   const loadConversations = useCallback(() => {
     messagesApi.list().then(setConversations).catch(() => {});
@@ -130,6 +135,34 @@ function MesajlarContent() {
     setOfferDelivery(prefill?.deliveryTime ?? "");
     setOfferNote("");
     setOfferModalOpen(true);
+  };
+
+  // "Teklif Ver": talep oluşturan kullanıcının (karşı taraf) taleplerini getir.
+  const openListingPicker = async () => {
+    if (!detail) return;
+    setPickerOpen(true);
+    setPickerLoading(true);
+    try {
+      const res = await listingsApi.list({ ownerId: detail.buyer.id, status: "AKTIF", limit: 50 });
+      setPickerListings(res.items);
+    } catch {
+      setPickerListings([]);
+    } finally {
+      setPickerLoading(false);
+    }
+  };
+
+  // Pop-up'tan bir talep seçilince: o talebin konuşmasını aç ve teklif modalını göster.
+  const handlePickListing = async (listingId: string) => {
+    try {
+      const conv = await messagesApi.createOrGet({ listingId });
+      setPickerOpen(false);
+      setActiveId(conv.id);
+      // Konuşma değişimi yüklendikten sonra teklif modalını aç.
+      setTimeout(() => openOfferModal(), 50);
+    } catch {
+      // sessizce geç
+    }
   };
 
   // Sohbet içinden teklif / karşı-teklif gönder.
@@ -287,7 +320,7 @@ function MesajlarContent() {
           {/* Satıcı: yeni teklif başlat (engelli değilse) */}
           {isSeller && !detail?.offersBlocked && (
             <button
-              onClick={() => openOfferModal()}
+              onClick={openListingPicker}
               className="flex items-center gap-1.5 rounded-xl bg-primary px-3 sm:px-4 h-9 sm:h-10 text-white text-sm font-semibold shadow-lg shadow-primary/30 hover:bg-primary/85 active:scale-95 transition-all"
             >
               <HandCoins size={18} />
@@ -550,6 +583,42 @@ function MesajlarContent() {
               >
                 <Ban size={18} /> {blockSaving ? "Kaydediliyor..." : "Engelle"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Talep seçim pop-up'ı: teklif vermek için karşı tarafın talepleri */}
+      {pickerOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setPickerOpen(false)}>
+          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+              <HandCoins size={20} className="text-primary" />
+              <h3 className="text-base sm:text-lg font-bold">Hangi talebe teklif vermek istersiniz?</h3>
+              <button onClick={() => setPickerOpen(false)} className="ml-auto size-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 shrink-0"><X size={18} /></button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+              {pickerLoading && <p className="text-sm text-slate-400 text-center py-8">Yükleniyor...</p>}
+              {!pickerLoading && pickerListings.length === 0 && (
+                <p className="text-sm text-slate-400 text-center py-8">Bu kullanıcının aktif talebi yok.</p>
+              )}
+              {pickerListings.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => handlePickListing(l.id)}
+                  className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-transparent hover:border-primary/40 hover:bg-primary/5 text-left transition-colors"
+                >
+                  <div
+                    className="size-12 rounded-lg bg-cover bg-center bg-slate-100 dark:bg-slate-800 shrink-0"
+                    style={{ backgroundImage: `url("${l.coverImageUrl || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=200&q=80"}")` }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{l.title}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{l.category.name} · {l.budgetLabel}</p>
+                  </div>
+                  <HandCoins size={18} className="text-primary shrink-0" />
+                </button>
+              ))}
             </div>
           </div>
         </div>
