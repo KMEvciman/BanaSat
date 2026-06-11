@@ -3,190 +3,36 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { listingsApi } from "@/lib/api/services";
+import type { Listing, ListingStatus } from "@/lib/api/types";
+import { formatTimeLeft } from "@/lib/api/adapters";
 import {
   Search,
   SlidersHorizontal,
   ArrowUpDown,
   Clock,
-  Flame,
   Eye,
   MessageCircle,
   ChevronDown,
   Plus,
-  LayoutGrid,
-  List,
 } from "lucide-react";
 
-type TalepStatus = "aktif" | "beklemede" | "tamamlandi" | "iptal";
-
-interface Talep {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  category: string;
-  budget: string;
-  offers: number;
-  views: number;
-  status: TalepStatus;
-  timeLeft: string;
-  createdAt: string;
-  location: string;
-}
-
-const talepler: Talep[] = [
-  {
-    id: 1,
-    title: "Projeksiyon Cihazı Kurulumu",
-    description: "Ofisimiz için profesyonel projeksiyon ve ses sistemi kurulumu yaptırmak istiyoruz.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAAilImTYeLMEVFPBZKBdj46Qd3ugDjFNfLmtcRlH-rxbYTub_TjOyui563WCG6Hhg8d9OfOKXADEn5cZuFeUMZTnSICh_pUWRnkuPclSQIS1bmTgHqPXpv0wqJoLt00ymJrS3QMd3gNgbOIoOrRVOl8RbwGzqKTrqGh_RBnnnmzq_QP-7GPw5UNUIFKrCuyqsZ0TPP76gSqEa87yygxegdLVe6hv_5NPRdLSPRJTCxnGOn1j9mg8-ZTFx-AWGTbbmlrbQGXfJZez4s",
-    category: "Diğer Hizmetler",
-    budget: "5.000 - 10.000 TL",
-    offers: 12,
-    views: 245,
-    status: "aktif",
-    timeLeft: "2 gün kaldı",
-    createdAt: "25 Nisan 2026",
-    location: "İstanbul, Kadıköy",
-  },
-  {
-    id: 2,
-    title: "iPhone 15 Pro Max 256GB",
-    description: "Sıfır veya temiz ikinci el iPhone 15 Pro Max arıyorum. Garanti tercihimdir.",
-    image: "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Telefon & Aksesuar",
-    budget: "55.000 - 65.000 TL",
-    offers: 8,
-    views: 189,
-    status: "aktif",
-    timeLeft: "5 gün kaldı",
-    createdAt: "22 Nisan 2026",
-    location: "İstanbul, Beşiktaş",
-  },
-  {
-    id: 3,
-    title: "Kurumsal Web Sitesi Tasarımı",
-    description: "Şirketimiz için modern, responsive ve SEO uyumlu kurumsal web sitesi yaptırmak istiyoruz.",
-    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Diğer Hizmetler",
-    budget: "15.000 - 25.000 TL",
-    offers: 21,
-    views: 412,
-    status: "aktif",
-    timeLeft: "3 gün kaldı",
-    createdAt: "20 Nisan 2026",
-    location: "Uzaktan",
-  },
-  {
-    id: 4,
-    title: "İstanbul - Ankara Ev Taşıma",
-    description: "3+1 dairemizin eşyalarını İstanbul'dan Ankara'ya profesyonel nakliye ile taşıtmak istiyoruz.",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Nakliye & Taşımacılık",
-    budget: "12.000 - 18.000 TL",
-    offers: 6,
-    views: 98,
-    status: "beklemede",
-    timeLeft: "1 gün kaldı",
-    createdAt: "18 Nisan 2026",
-    location: "İstanbul → Ankara",
-  },
-  {
-    id: 5,
-    title: "Lise Matematik Özel Ders",
-    description: "11. sınıf öğrencisi için haftada 3 gün matematik özel ders verecek deneyimli öğretmen arıyorum.",
-    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Eğitim & Özel Ders",
-    budget: "800 - 1.200 TL/Saat",
-    offers: 4,
-    views: 67,
-    status: "aktif",
-    timeLeft: "4 gün kaldı",
-    createdAt: "15 Nisan 2026",
-    location: "İstanbul, Beşiktaş",
-  },
-  {
-    id: 6,
-    title: "Bahçe Peyzaj Düzenlemesi",
-    description: "Villa bahçemiz için komple peyzaj tasarımı ve uygulama hizmeti arıyoruz.",
-    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Bahçe & Yapı Market",
-    budget: "20.000 - 35.000 TL",
-    offers: 3,
-    views: 54,
-    status: "tamamlandi",
-    timeLeft: "Süresi doldu",
-    createdAt: "10 Nisan 2026",
-    location: "İstanbul, Sarıyer",
-  },
-  {
-    id: 7,
-    title: "Düğün Fotoğrafçısı",
-    description: "Ağustos ayında yapılacak düğünümüz için profesyonel fotoğraf ve drone çekimi.",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Diğer Hizmetler",
-    budget: "8.000 - 15.000 TL",
-    offers: 0,
-    views: 23,
-    status: "aktif",
-    timeLeft: "7 gün kaldı",
-    createdAt: "28 Nisan 2026",
-    location: "İstanbul",
-  },
-  {
-    id: 8,
-    title: "Klima Montajı (3 Adet)",
-    description: "Evimize 3 adet inverter klima alımı ve montajı için uygun fiyat teklifi bekliyorum.",
-    image: "https://images.unsplash.com/photo-1631545806609-35d4ae440431?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Tadilat & Usta",
-    budget: "30.000 - 45.000 TL",
-    offers: 5,
-    views: 112,
-    status: "iptal",
-    timeLeft: "İptal edildi",
-    createdAt: "5 Nisan 2026",
-    location: "Ankara, Çankaya",
-  },
-  {
-    id: 9,
-    title: "İngilizce Çeviri (50 Sayfa)",
-    description: "Akademik makale çevirisi için profesyonel ve alanında uzman çevirmen arıyorum.",
-    image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Diğer Hizmetler",
-    budget: "3.000 - 5.000 TL",
-    offers: 9,
-    views: 156,
-    status: "tamamlandi",
-    timeLeft: "Tamamlandı",
-    createdAt: "1 Nisan 2026",
-    location: "Uzaktan",
-  },
-];
-
-const statusConfig: Record<TalepStatus, { label: string; color: string; bg: string }> = {
-  aktif: { label: "Aktif", color: "text-green-700 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" },
-  beklemede: { label: "Beklemede", color: "text-amber-700 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800" },
-  tamamlandi: { label: "Tamamlandı", color: "text-blue-700 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" },
-  iptal: { label: "İptal Edildi", color: "text-red-700 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800" },
+const statusConfig: Record<ListingStatus, { label: string; color: string; bg: string }> = {
+  AKTIF: { label: "Aktif", color: "text-green-700 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" },
+  BEKLEMEDE: { label: "Beklemede", color: "text-amber-700 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800" },
+  TAMAMLANDI: { label: "Tamamlandı", color: "text-blue-700 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" },
+  IPTAL: { label: "İptal Edildi", color: "text-red-700 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800" },
 };
 
 const statusFilters: { value: string; label: string }[] = [
   { value: "tumu", label: "Tümü" },
-  { value: "aktif", label: "Aktif" },
-  { value: "beklemede", label: "Beklemede" },
-  { value: "tamamlandi", label: "Tamamlandı" },
-  { value: "iptal", label: "İptal Edildi" },
-];
-
-const categoryFilters = [
-  "Tüm Kategoriler",
-  "Telefon & Aksesuar",
-  "Bahçe & Yapı Market",
-  "Nakliye & Taşımacılık",
-  "Tadilat & Usta",
-  "Eğitim & Özel Ders",
-  "Diğer Hizmetler",
+  { value: "AKTIF", label: "Aktif" },
+  { value: "BEKLEMEDE", label: "Beklemede" },
+  { value: "TAMAMLANDI", label: "Tamamlandı" },
+  { value: "IPTAL", label: "İptal Edildi" },
 ];
 
 const sortOptions = [
@@ -197,7 +43,16 @@ const sortOptions = [
   { value: "most-views", label: "En Çok Görüntülenen" },
 ];
 
+const PLACEHOLDER = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80";
+
 export default function Taleplerim() {
+  const router = useRouter();
+  const { user, isLoggedIn, loading: authLoading } = useAuth();
+
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("tumu");
   const [categoryFilter, setCategoryFilter] = useState("Tüm Kategoriler");
@@ -205,70 +60,81 @@ export default function Taleplerim() {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
-  const filtered = useMemo(() => {
-    let result = [...talepler];
+  useEffect(() => {
+    if (!authLoading && !isLoggedIn) {
+      router.replace("/giris");
+    }
+  }, [authLoading, isLoggedIn, router]);
 
-    // Search
+  useEffect(() => {
+    if (!user) return;
+    setLoading(true);
+    listingsApi
+      .list({ ownerId: user.id, limit: 100 })
+      .then((res) => setListings(res.items))
+      .catch((err) => setError(err?.message ?? "Talepler yüklenemedi."))
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  // Kullanıcının ilanlarındaki benzersiz kategoriler (dinamik filtre listesi).
+  const categoryFilters = useMemo(() => {
+    const names = Array.from(new Set(listings.map((l) => l.category.name)));
+    return ["Tüm Kategoriler", ...names];
+  }, [listings]);
+
+  const filtered = useMemo(() => {
+    let result = [...listings];
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (t) =>
           t.title.toLowerCase().includes(q) ||
           t.description.toLowerCase().includes(q) ||
-          t.category.toLowerCase().includes(q)
+          t.category.name.toLowerCase().includes(q),
       );
     }
-
-    // Status filter
     if (statusFilter !== "tumu") {
       result = result.filter((t) => t.status === statusFilter);
     }
-
-    // Category filter
     if (categoryFilter !== "Tüm Kategoriler") {
-      result = result.filter((t) => t.category === categoryFilter);
+      result = result.filter((t) => t.category.name === categoryFilter);
     }
 
-    // Sort
     switch (sortBy) {
       case "oldest":
-        result.reverse();
+        result.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
         break;
       case "most-offers":
-        result.sort((a, b) => b.offers - a.offers);
+        result.sort((a, b) => b.offerCount - a.offerCount);
         break;
       case "least-offers":
-        result.sort((a, b) => a.offers - b.offers);
+        result.sort((a, b) => a.offerCount - b.offerCount);
         break;
       case "most-views":
         result.sort((a, b) => b.views - a.views);
         break;
       default:
+        result.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
         break;
     }
-
     return result;
-  }, [searchQuery, statusFilter, categoryFilter, sortBy]);
+  }, [listings, searchQuery, statusFilter, categoryFilter, sortBy]);
 
   const counts = useMemo(() => {
-    const c: Record<string, number> = { tumu: talepler.length };
-    for (const t of talepler) {
-      c[t.status] = (c[t.status] || 0) + 1;
-    }
+    const c: Record<string, number> = { tumu: listings.length };
+    for (const t of listings) c[t.status] = (c[t.status] || 0) + 1;
     return c;
-  }, []);
+  }, [listings]);
 
   return (
     <>
       <Navbar />
       <main className="flex-1 w-full bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-40 py-8 md:py-12">
-          {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-                Taleplerim
-              </h1>
+              <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Taleplerim</h1>
               <p className="text-gray-500 dark:text-gray-400 mt-1">
                 Oluşturduğunuz tüm talepleri buradan yönetin ve takip edin.
               </p>
@@ -295,22 +161,15 @@ export default function Taleplerim() {
                 }`}
               >
                 {sf.label}
-                <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full ${
-                    statusFilter === sf.value
-                      ? "bg-white/20 text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
-                  }`}
-                >
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${statusFilter === sf.value ? "bg-white/20 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"}`}>
                   {counts[sf.value] || 0}
                 </span>
               </button>
             ))}
           </div>
 
-          {/* Search & Filters Bar */}
+          {/* Search & Filters */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            {/* Search */}
             <div className="flex-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                 <Search size={18} />
@@ -324,13 +183,9 @@ export default function Taleplerim() {
               />
             </div>
 
-            {/* Category Filter */}
             <div className="relative">
               <button
-                onClick={() => {
-                  setShowCategoryDropdown(!showCategoryDropdown);
-                  setShowSortDropdown(false);
-                }}
+                onClick={() => { setShowCategoryDropdown(!showCategoryDropdown); setShowSortDropdown(false); }}
                 className="flex items-center gap-2 h-11 px-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap"
               >
                 <SlidersHorizontal size={16} />
@@ -338,19 +193,12 @@ export default function Taleplerim() {
                 <ChevronDown size={16} />
               </button>
               {showCategoryDropdown && (
-                <div className="absolute right-0 top-12 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl py-1 z-50">
+                <div className="absolute right-0 top-12 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl py-1 z-50 max-h-64 overflow-y-auto">
                   {categoryFilters.map((cat) => (
                     <button
                       key={cat}
-                      onClick={() => {
-                        setCategoryFilter(cat);
-                        setShowCategoryDropdown(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                        categoryFilter === cat
-                          ? "text-primary font-semibold bg-primary/5"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      }`}
+                      onClick={() => { setCategoryFilter(cat); setShowCategoryDropdown(false); }}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${categoryFilter === cat ? "text-primary font-semibold bg-primary/5" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"}`}
                     >
                       {cat}
                     </button>
@@ -359,13 +207,9 @@ export default function Taleplerim() {
               )}
             </div>
 
-            {/* Sort */}
             <div className="relative">
               <button
-                onClick={() => {
-                  setShowSortDropdown(!showSortDropdown);
-                  setShowCategoryDropdown(false);
-                }}
+                onClick={() => { setShowSortDropdown(!showSortDropdown); setShowCategoryDropdown(false); }}
                 className="flex items-center gap-2 h-11 px-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap"
               >
                 <ArrowUpDown size={16} />
@@ -377,15 +221,8 @@ export default function Taleplerim() {
                   {sortOptions.map((opt) => (
                     <button
                       key={opt.value}
-                      onClick={() => {
-                        setSortBy(opt.value);
-                        setShowSortDropdown(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                        sortBy === opt.value
-                          ? "text-primary font-semibold bg-primary/5"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      }`}
+                      onClick={() => { setSortBy(opt.value); setShowSortDropdown(false); }}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${sortBy === opt.value ? "text-primary font-semibold bg-primary/5" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"}`}
                     >
                       {opt.label}
                     </button>
@@ -395,15 +232,22 @@ export default function Taleplerim() {
             </div>
           </div>
 
-          {/* Results Count */}
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               <span className="font-semibold text-gray-900 dark:text-white">{filtered.length}</span> talep bulundu
             </p>
           </div>
 
-          {/* Cards Grid */}
-          {filtered.length > 0 ? (
+          {/* İçerik */}
+          {loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-72 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+              ))}
+            </div>
+          ) : error ? (
+            <p className="text-sm text-red-500">{error}</p>
+          ) : filtered.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {filtered.map((talep) => {
                 const sc = statusConfig[talep.status];
@@ -413,66 +257,38 @@ export default function Taleplerim() {
                     href={`/ilan/${talep.id}`}
                     className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300"
                   >
-                    {/* Image */}
                     <div className="relative h-32 sm:h-44 w-full overflow-hidden">
-                      <img
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        src={talep.image}
-                        alt={talep.title}
-                      />
-                      {/* Status Badge */}
+                      <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={talep.coverImageUrl || PLACEHOLDER} alt={talep.title} />
                       <div className="absolute top-3 left-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border backdrop-blur-md ${sc.bg} ${sc.color}`}>
-                          {sc.label}
-                        </span>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border backdrop-blur-md ${sc.bg} ${sc.color}`}>{sc.label}</span>
                       </div>
-                      {/* Category */}
                       <div className="absolute bottom-3 right-3 bg-white/85 dark:bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-gray-200/50 dark:border-white/10">
-                        <span className="text-primary font-bold text-xs">{talep.category}</span>
+                        <span className="text-primary font-bold text-xs">{talep.category.name}</span>
                       </div>
                     </div>
-
-                    {/* Content */}
                     <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
                       <div>
-                        <h3 className="text-gray-900 dark:text-white text-sm font-bold leading-tight line-clamp-1 group-hover:text-primary transition-colors">
-                          {talep.title}
-                        </h3>
-                        <p className="text-gray-500 dark:text-gray-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">
-                          {talep.description}
-                        </p>
+                        <h3 className="text-gray-900 dark:text-white text-sm font-bold leading-tight line-clamp-1 group-hover:text-primary transition-colors">{talep.title}</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">{talep.description}</p>
                       </div>
-
-                      {/* Budget & Offers */}
                       <div className="flex items-center justify-between py-2.5 border-y border-gray-100 dark:border-gray-800">
                         <div className="flex flex-col">
                           <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-semibold tracking-wider">Bütçe</span>
-                          <span className="text-gray-900 dark:text-white font-bold text-xs mt-0.5">{talep.budget}</span>
+                          <span className="text-gray-900 dark:text-white font-bold text-xs mt-0.5">{talep.budgetLabel}</span>
                         </div>
                         <div className="text-right flex flex-col">
                           <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-semibold tracking-wider">Teklifler</span>
-                          <span className={`text-xs font-semibold mt-0.5 ${talep.offers > 0 ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500"}`}>
-                            {talep.offers > 0 ? `${talep.offers} teklif` : "Henüz yok"}
+                          <span className={`text-xs font-semibold mt-0.5 ${talep.offerCount > 0 ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500"}`}>
+                            {talep.offerCount > 0 ? `${talep.offerCount} teklif` : "Henüz yok"}
                           </span>
                         </div>
                       </div>
-
-                      {/* Meta */}
                       <div className="flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500">
                         <div className="flex items-center gap-3">
-                          <span className="flex items-center gap-1">
-                            <Eye size={12} />
-                            {talep.views}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageCircle size={12} />
-                            {talep.offers}
-                          </span>
+                          <span className="flex items-center gap-1"><Eye size={12} />{talep.views}</span>
+                          <span className="flex items-center gap-1"><MessageCircle size={12} />{talep.offerCount}</span>
                         </div>
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          {talep.timeLeft}
-                        </span>
+                        <span className="flex items-center gap-1"><Clock size={12} />{formatTimeLeft(talep.deadline)}</span>
                       </div>
                     </div>
                   </Link>
@@ -486,12 +302,9 @@ export default function Taleplerim() {
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Talep bulunamadı</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">
-                Arama kriterlerinize uygun talep bulunamadı. Filtreleri değiştirmeyi veya yeni bir talep oluşturmayı deneyin.
+                Henüz bir talep oluşturmadınız veya filtrelere uygun talep yok.
               </p>
-              <Link
-                href="/talep-olustur"
-                className="mt-6 flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/85 text-white text-sm font-bold rounded-xl transition-colors shadow-md"
-              >
+              <Link href="/talep-olustur" className="mt-6 flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/85 text-white text-sm font-bold rounded-xl transition-colors shadow-md">
                 <Plus size={18} />
                 Yeni Talep Oluştur
               </Link>
