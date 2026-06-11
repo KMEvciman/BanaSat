@@ -56,13 +56,26 @@ const categories: { name: string; icon: string }[] = [
 async function main() {
   console.log('Seed başlıyor...');
 
+  const validSlugs: string[] = [];
   for (const cat of categories) {
     const slug = slugify(cat.name);
+    validSlugs.push(slug);
     await prisma.category.upsert({
       where: { slug },
       update: { name: cat.name, icon: cat.icon },
       create: { name: cat.name, slug, icon: cat.icon },
     });
+  }
+
+  // Güncel listede olmayan eski kategorilerden ilanı olmayanları temizle.
+  const obsolete = await prisma.category.findMany({
+    where: { slug: { notIn: validSlugs } },
+    select: { id: true, _count: { select: { listings: true } } },
+  });
+  const deletable = obsolete.filter((c) => c._count.listings === 0).map((c) => c.id);
+  if (deletable.length > 0) {
+    await prisma.category.deleteMany({ where: { id: { in: deletable } } });
+    console.log(`${deletable.length} eski (boş) kategori silindi.`);
   }
 
   console.log(`${categories.length} kategori eklendi/güncellendi.`);
