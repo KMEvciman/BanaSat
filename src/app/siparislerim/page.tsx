@@ -8,17 +8,19 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { ordersApi } from "@/lib/api/services";
 import type { Order, OrderStatus } from "@/lib/api/types";
-import { ShoppingBag, Package, Wallet } from "lucide-react";
+import { ShoppingBag, Package, Wallet, Info, X, EyeOff, Calendar, Truck } from "lucide-react";
 
-// Sipariş durumu etiket + renk eşlemesi.
+// Sipariş durumu etiket + renk eşlemesi. (Bu projede ödeme = tamamlandı.)
 const STATUS_META: Record<OrderStatus, { label: string; cls: string }> = {
   ODEME_BEKLENIYOR: { label: "Ödeme Bekleniyor", cls: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400" },
-  ODENDI: { label: "Ödendi", cls: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400" },
+  ODENDI: { label: "Tamamlandı", cls: "bg-primary/15 text-primary" },
   HAZIRLANIYOR: { label: "Hazırlanıyor", cls: "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-400" },
   KARGODA: { label: "Kargoda", cls: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-400" },
-  TESLIM_EDILDI: { label: "Teslim Edildi", cls: "bg-primary/15 text-primary" },
+  TESLIM_EDILDI: { label: "Tamamlandı", cls: "bg-primary/15 text-primary" },
   IPTAL: { label: "İptal", cls: "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400" },
 };
+
+const isCompleted = (s: OrderStatus) => s === "ODENDI" || s === "TESLIM_EDILDI";
 
 type Tab = "purchases" | "sales";
 
@@ -30,7 +32,7 @@ export default function Siparislerim() {
   const [purchases, setPurchases] = useState<Order[]>([]);
   const [sales, setSales] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [payingId, setPayingId] = useState<string | null>(null);
+  const [detailOrder, setDetailOrder] = useState<Order | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -46,20 +48,6 @@ export default function Siparislerim() {
     if (!authLoading && !isLoggedIn) { router.push("/giris"); return; }
     if (isLoggedIn) load();
   }, [authLoading, isLoggedIn, load, router]);
-
-  // Ödeme simülasyonu (alıcı, ödeme bekleyen sipariş).
-  const handlePay = async (id: string) => {
-    if (payingId) return;
-    setPayingId(id);
-    try {
-      await ordersApi.pay(id);
-      load();
-    } catch {
-      // sessizce geç
-    } finally {
-      setPayingId(null);
-    }
-  };
 
   const list = tab === "purchases" ? purchases : sales;
 
@@ -98,8 +86,7 @@ export default function Siparislerim() {
                   key={order.id}
                   order={order}
                   isBuyer={tab === "purchases"}
-                  paying={payingId === order.id}
-                  onPay={() => handlePay(order.id)}
+                  onDetails={() => setDetailOrder(order)}
                 />
               ))}
             </div>
@@ -107,6 +94,10 @@ export default function Siparislerim() {
         </div>
       </main>
       <Footer />
+
+      {detailOrder && (
+        <OrderDetailModal order={detailOrder} isBuyer={tab === "purchases"} onClose={() => setDetailOrder(null)} />
+      )}
     </>
   );
 }
@@ -123,7 +114,7 @@ function TabButton({ active, onClick, label, count }: { active: boolean; onClick
   );
 }
 
-function OrderCard({ order, isBuyer, paying, onPay }: { order: Order; isBuyer: boolean; paying: boolean; onPay: () => void }) {
+function OrderCard({ order, isBuyer, onDetails }: { order: Order; isBuyer: boolean; onDetails: () => void }) {
   const meta = STATUS_META[order.status];
   const counterpart = isBuyer ? order.offer.seller : order.buyer;
   const listing = order.offer.listing;
@@ -153,18 +144,83 @@ function OrderCard({ order, isBuyer, paying, onPay }: { order: Order; isBuyer: b
               <p className="text-xs text-gray-500">Tutar</p>
               <p className="text-2xl font-black text-primary tracking-tight">{order.amount.toLocaleString("tr-TR")} ₺</p>
             </div>
-            {isBuyer && order.status === "ODEME_BEKLENIYOR" && (
+            <div className="flex items-center gap-2">
               <button
-                onClick={onPay}
-                disabled={paying}
-                className="flex items-center gap-2 h-11 px-5 rounded-xl bg-primary text-white text-sm font-semibold shadow-lg shadow-primary/30 hover:bg-primary/85 active:scale-95 transition-all disabled:opacity-50"
+                onClick={onDetails}
+                className="flex items-center gap-1.5 h-10 px-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                <Wallet size={17} /> {paying ? "İşleniyor..." : "Ödemeyi Tamamla"}
+                <Info size={16} /> Ayrıntılar
               </button>
-            )}
+              {isBuyer && order.status === "ODEME_BEKLENIYOR" && (
+                <Link
+                  href={`/odeme?order=${order.id}`}
+                  className="flex items-center gap-2 h-10 px-5 rounded-xl bg-primary text-white text-sm font-semibold shadow-lg shadow-primary/30 hover:bg-primary/85 active:scale-95 transition-all"
+                >
+                  <Wallet size={17} /> Ödemeye Geç
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </article>
+  );
+}
+
+// Geçmiş sipariş/talep ayrıntıları. İlanın artık aktif (görünür) olmadığını belirtir.
+function OrderDetailModal({ order, isBuyer, onClose }: { order: Order; isBuyer: boolean; onClose: () => void }) {
+  const meta = STATUS_META[order.status];
+  const counterpart = isBuyer ? order.offer.seller : order.buyer;
+  const listing = order.offer.listing;
+  const completed = isCompleted(order.status);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Sipariş Ayrıntıları</h3>
+          <button onClick={onClose} className="size-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"><X size={18} /></button>
+        </div>
+
+        <div className="p-5 space-y-5">
+          {/* Pasif/arşiv uyarısı */}
+          {completed && (
+            <div className="flex items-center gap-2 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">
+              <EyeOff size={16} className="shrink-0" />
+              Bu talep tamamlandı ve artık yayında (görünür) değil.
+            </div>
+          )}
+
+          {/* İlan özeti (pasifse soluk) */}
+          <div className={`flex gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 ${completed ? "opacity-70" : ""}`}>
+            <div className="size-16 rounded-lg bg-cover bg-center bg-gray-100 dark:bg-gray-800 shrink-0"
+              style={{ backgroundImage: `url("${listing.coverImageUrl || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=200&q=80"}")` }} />
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] font-semibold text-primary uppercase tracking-wide">{listing.category.name}</span>
+              <p className="font-bold text-gray-900 dark:text-white truncate">{listing.title}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{isBuyer ? "Satıcı" : "Alıcı"}: {counterpart.name}</p>
+            </div>
+          </div>
+
+          {/* Bilgiler */}
+          <div className="space-y-3">
+            <Row label="Durum" value={<span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${meta.cls}`}>{meta.label}</span>} />
+            <Row label="Tutar" value={<span className="font-bold text-primary">{order.amount.toLocaleString("tr-TR")} ₺</span>} />
+            <Row label="Teslim Süresi" value={<span className="flex items-center gap-1 text-gray-700 dark:text-gray-200"><Truck size={14} /> {order.offer.deliveryTime}</span>} />
+            <Row label="Sipariş Tarihi" value={<span className="flex items-center gap-1 text-gray-700 dark:text-gray-200"><Calendar size={14} /> {new Date(order.createdAt).toLocaleDateString("tr-TR")}</span>} />
+            {order.shippingName && <Row label="Teslimat" value={<span className="text-gray-700 dark:text-gray-200">{order.shippingName} · {order.shippingCity}</span>} />}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-gray-500 dark:text-gray-400">{label}</span>
+      {value}
+    </div>
   );
 }

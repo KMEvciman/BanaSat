@@ -298,3 +298,13 @@ X talep açar → Y ilan detayından teklif verir → teklif sohbete OFFER mesaj
 - Profil: il/ilçe seçimi + "Adreslerim" yönetimi (ekle/sil/varsayılan yap).
 - Ana sayfa: giriş yapan kullanıcının iline göre "{İl}'daki Talepler" bölümü.
 - Kategoriler: il filtresi dropdown'u + `?il=` query desteği (bölgesel keşif).
+
+## UI/UX İyileştirmeleri ve Ödeme Akışı (7 maddelik tur)
+
+1. Kart footer: "Süre belirtilmedi" kaldırıldı, "İlk Teklifi Ver" butonu tam genişlik/tek satır.
+2. Profil menüsünden "Taleplerim" kaldırıldı. Navbar araması `/kategoriler?ara=` ile başlık/açıklama/konuma göre arıyor.
+3. "Konumunda İlgini Çekebilecek İlanlar" bölümü En Popüler gibi carousel.
+4. Navbar + kategori barı hover'da yeşile dönmüyor (`nav-cat-bar` istisnası). Kartlar hover'da hareket etmiyor, yalnızca çerçeve yeşile dönüyor. Çerçeveler daha belirgin (0.45) ve kalın (1.5px).
+5. Mesajlarda "Teklif Ver" → karşı tarafın (talep sahibi) aktif taleplerini listeleyen pop-up; seçilen talebin konuşmasına geçip teklif modalı açılıyor.
+6. Çıkışta ana sayfaya yönlendirme; mesajlar sayfasına giriş guard'ı (çıkış sonrası içerik sızıntısı engellendi).
+7. Sipariş akışı: Siparişlerim'de "Ödemeye Geç" → `/odeme?order=<id>` işlevsel ödeme ekranı (gerçek sipariş özeti + form + simülasyon). Ödeme `ordersApi.pay` ile tamamlanır (sipariş ODENDI, ilan TAMAMLANDI), başarı ekranı gösterilir. Siparişlerim'de "Tamamlandı" rozeti + "Ayrıntılar" butonu (geçmiş sipariş modalı; ilanın artık yayında olmadığını belirtir).
