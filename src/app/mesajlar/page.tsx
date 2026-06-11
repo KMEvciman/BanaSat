@@ -4,7 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
 import { Search, Paperclip, Send, ArrowLeft, HandCoins, Check, X, Ban, Tag, CheckSquare, Square, Pencil } from "lucide-react";
 import { useEffect, useRef, useState, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { messagesApi, listingsApi } from "@/lib/api/services";
 import type { Conversation, ConversationDetail, OfferStatus, OfferBlockOptions, Listing } from "@/lib/api/types";
@@ -23,9 +23,17 @@ const OFFER_STATUS_META: Record<OfferStatus, { label: string; cls: string }> = {
 
 function MesajlarContent() {
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, isLoggedIn, loading: authLoading } = useAuth();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Giriş yapılmamışsa (veya çıkış yapılınca) ana sayfaya yönlendir.
+  useEffect(() => {
+    if (!authLoading && !isLoggedIn) {
+      router.replace("/");
+    }
+  }, [authLoading, isLoggedIn, router]);
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(searchParams.get("c"));
@@ -631,6 +639,9 @@ function MesajlarContent() {
       <p className="text-sm">Bir konuşma seçin</p>
     </div>
   );
+
+  // Giriş yapılmamışsa içerik gösterme (çıkış sonrası sızıntıyı engeller).
+  if (!isLoggedIn) return null;
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white h-screen w-full flex flex-col overflow-hidden">

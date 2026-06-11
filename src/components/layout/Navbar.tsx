@@ -100,6 +100,14 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
   // Close mobile menu on route change (link click)
   const closeMobile = () => setIsMobileMenuOpen(false);
 
+  // Çıkış: oturumu kapat ve ana sayfaya yönlendir.
+  const handleLogout = async () => {
+    setIsProfileOpen(false);
+    setIsMobileMenuOpen(false);
+    await logout();
+    router.push("/");
+  };
+
   // Arama: başlık/konum/açıklamaya göre kategoriler sayfasında ara.
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -202,7 +210,7 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                       Ayarlar
                     </Link>
                     <button
-                      onClick={() => { closeMobile(); logout(); }}
+                      onClick={handleLogout}
                       className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors w-full"
                     >
                       <LogOut size={18} />
@@ -356,7 +364,7 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                             <Settings size={16} /> Ayarlar
                           </Link>
                           <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1">
-                            <button onClick={() => { setIsProfileOpen(false); logout(); }} className="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">
+                            <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">
                               <LogOut size={16} /> Çıkış Yap
                             </button>
                           </div>
