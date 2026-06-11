@@ -210,7 +210,7 @@ export default function IlanDetay() {
                           )}
                         </div>
                         <div>
-                          <h4 className="font-bold text-gray-900 dark:text-white text-sm">{offer.seller.name}</h4>
+                          <Link href={`/kullanici/${offer.seller.id}`} className="font-bold text-gray-900 dark:text-white text-sm hover:text-primary transition-colors">{offer.seller.name}</Link>
                           <div className="flex items-center gap-1 mt-1">
                             <Star className="text-yellow-400 fill-yellow-400" size={14} />
                             <span className="text-xs font-semibold text-gray-900 dark:text-white">{offer.seller.ratingAvg}</span>
@@ -289,10 +289,10 @@ export default function IlanDetay() {
 
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
                 <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4">İlan Sahibi</h4>
-                <div className="flex items-center gap-3">
+                <Link href={`/kullanici/${listing.owner.id}`} className="flex items-center gap-3 group">
                   <div className="size-12 rounded-full bg-cover bg-center border-2 border-gray-100 dark:border-gray-800" style={{ backgroundImage: `url('${listing.owner.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.owner.name)}&background=5BB678&color=fff`}')` }}></div>
                   <div>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm flex items-center gap-1">
+                    <p className="font-bold text-gray-900 dark:text-white text-sm flex items-center gap-1 group-hover:text-primary transition-colors">
                       {listing.owner.name}
                       {listing.owner.isVerified && <BadgeCheck size={14} className="text-primary" />}
                     </p>
@@ -302,7 +302,7 @@ export default function IlanDetay() {
                       <span className="text-[11px] text-gray-500">({listing.owner.ratingCount} değerlendirme)</span>
                     </div>
                   </div>
-                </div>
+                </Link>
               </div>
             </div>
           </div>
