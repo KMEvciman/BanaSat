@@ -31,6 +31,7 @@ async function bootstrap() {
   // Yüklenen dosyaları (avatarlar) /uploads altından statik sun.
   const uploadsPath = join(process.cwd(), 'uploads');
   mkdirSync(join(uploadsPath, 'avatars'), { recursive: true });
+  mkdirSync(join(uploadsPath, 'listings'), { recursive: true });
   app.useStaticAssets(uploadsPath, { prefix: '/uploads' });
 
   // Tüm API uç noktaları /api altında (statik /uploads hariç)

@@ -11,7 +11,7 @@ import type { ListingDetail } from "@/lib/api/types";
 import { formatTimeLeft } from "@/lib/api/adapters";
 import {
   MapPin, Calendar, Clock, Eye, MessageCircle, Star, BadgeCheck,
-  Check, ShieldCheck, Flame, Send,
+  Check, ShieldCheck, Flame, Send, X,
 } from "lucide-react";
 
 const statusConfig: Record<string, { label: string; cls: string }> = {
@@ -31,6 +31,7 @@ export default function IlanDetay() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -155,7 +156,8 @@ export default function IlanDetay() {
                 <img
                   src={listing.coverImageUrl || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80"}
                   alt={listing.title}
-                  className="w-full h-full object-cover"
+                  onClick={() => setLightboxUrl(listing.coverImageUrl || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1600&q=80")}
+                  className="w-full h-full object-cover cursor-zoom-in"
                 />
                 <div className="absolute top-4 left-4">
                   <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-md ${sc.cls}`}>{sc.label}</span>
@@ -169,7 +171,7 @@ export default function IlanDetay() {
                 <div className="flex gap-3 overflow-x-auto no-scrollbar scrollbar-hide">
                   {listing.images.map((img) => (
                     <div key={img.id} className="shrink-0 size-24 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
-                      <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      <img src={img.url} alt="" onClick={() => setLightboxUrl(img.url)} className="w-full h-full object-cover cursor-zoom-in" />
                     </div>
                   ))}
                 </div>
@@ -312,6 +314,28 @@ export default function IlanDetay() {
         </div>
       </main>
       <Footer />
+
+      {/* Görsel büyük görünüm (lightbox) */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 p-4"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            onClick={() => setLightboxUrl(null)}
+            className="absolute top-4 right-4 size-11 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+            aria-label="Kapat"
+          >
+            <X size={22} />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+          />
+        </div>
+      )}
     </>
   );
 }

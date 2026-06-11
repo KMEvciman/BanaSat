@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { categoriesApi, listingsApi } from "@/lib/api/services";
+import { categoriesApi, listingsApi, uploadsApi } from "@/lib/api/services";
 import LocationSelect from "@/components/LocationSelect";
 import type { Category } from "@/lib/api/types";
 import {
@@ -15,6 +15,8 @@ import {
   CheckCircle,
   ListChecks,
   Camera,
+  UploadCloud,
+  X,
 } from "lucide-react";
 
 export default function TalepOlustur() {
@@ -31,6 +33,7 @@ export default function TalepOlustur() {
   const [province, setProvince] = useState("");
   const [district, setDistrict] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -46,9 +49,30 @@ export default function TalepOlustur() {
     categoriesApi.list().then(setCategories).catch(() => {});
   }, []);
 
+  // Kapak görselini bilgisayardan yükle (backend'e kaydedilir, URL döner).
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    setUploadingCover(true);
+    try {
+      const { url } = await uploadsApi.image(file);
+      setCoverImageUrl(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Görsel yüklenemedi.");
+    } finally {
+      setUploadingCover(false);
+      e.target.value = "";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!coverImageUrl) {
+      setError("Lütfen bir kapak görseli yükleyiniz.");
+      return;
+    }
     setSubmitting(true);
     try {
       const listing = await listingsApi.create({
@@ -195,14 +219,28 @@ export default function TalepOlustur() {
 
                 <div className="flex flex-col gap-2">
                   <label className="text-gray-900 dark:text-gray-200 text-sm font-medium">
-                    Kapak Görseli URL (Opsiyonel)
+                    Kapak Görseli <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    value={coverImageUrl}
-                    onChange={(e) => setCoverImageUrl(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-3 text-base focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-gray-400"
-                    placeholder="https://..."
-                  />
+                  {coverImageUrl ? (
+                    <div className="relative w-full rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                      <img src={coverImageUrl} alt="Kapak önizleme" className="w-full h-48 object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setCoverImageUrl("")}
+                        className="absolute top-2 right-2 size-8 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-500 transition-colors"
+                        title="Görseli kaldır"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center gap-2 w-full h-40 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors text-gray-500 dark:text-gray-400">
+                      <UploadCloud size={28} className={uploadingCover ? "animate-pulse text-primary" : ""} />
+                      <span className="text-sm font-medium">{uploadingCover ? "Yükleniyor..." : "Bilgisayardan görsel seç"}</span>
+                      <span className="text-xs text-gray-400">JPEG, PNG, WEBP · en fazla 5MB</span>
+                      <input type="file" accept="image/*" onChange={handleCoverChange} disabled={uploadingCover} className="hidden" />
+                    </label>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-gray-800">

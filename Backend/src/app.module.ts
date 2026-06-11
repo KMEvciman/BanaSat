@@ -10,6 +10,7 @@ import { UsersModule } from './modules/users/users.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ListingsModule } from './modules/listings/listings.module';
 import { LocationsModule } from './modules/locations/locations.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
 import { OffersModule } from './modules/offers/offers.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { OrdersModule } from './modules/orders/orders.module';
@@ -31,6 +32,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     CategoriesModule,
     ListingsModule,
     LocationsModule,
+    UploadsModule,
     OffersModule,
     MessagesModule,
     OrdersModule,

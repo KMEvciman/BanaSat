@@ -35,6 +35,15 @@ export const locationsApi = {
   list: () => api.get<ProvinceOption[]>("/locations", false),
 };
 
+// --- Uploads (görsel) ---
+export const uploadsApi = {
+  image: (file: File) => {
+    const form = new FormData();
+    form.append("image", file);
+    return api.postForm<{ url: string }>("/uploads/image", form);
+  },
+};
+
 // --- Users ---
 export const usersApi = {
   updateProfile: (body: Partial<Pick<User, "name" | "email" | "phone" | "bio" | "location" | "province" | "district">>) =>
