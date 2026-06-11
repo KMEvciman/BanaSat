@@ -170,6 +170,7 @@ export interface MessageOfferRef {
   id: string;
   status: OfferStatus;
   sellerId: string;
+  order?: { id: string; status: OrderStatus } | null;
 }
 
 export interface Message {

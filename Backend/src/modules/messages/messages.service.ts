@@ -32,12 +32,13 @@ const MESSAGE_SELECT = {
   offerPrice: true,
   offerDeliveryTime: true,
   offerNote: true,
-  // Bağlı teklifin güncel durumu (kabul/red/beklemede).
+  // Bağlı teklifin güncel durumu (kabul/red/beklemede) + varsa siparişi.
   offer: {
     select: {
       id: true,
       status: true,
       sellerId: true,
+      order: { select: { id: true, status: true } },
     },
   },
 } satisfies Prisma.MessageSelect;

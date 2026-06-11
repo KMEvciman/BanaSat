@@ -2,7 +2,7 @@
 
 import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
-import { Search, Paperclip, Send, ArrowLeft, HandCoins, Check, X, Ban, Tag, CheckSquare, Square, Pencil } from "lucide-react";
+import { Search, Paperclip, Send, ArrowLeft, HandCoins, Check, X, Ban, Tag, CheckSquare, Square, Pencil, Wallet, CheckCircle2 } from "lucide-react";
 import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -425,6 +425,27 @@ function MesajlarContent() {
                       >
                         <Pencil size={16} /> Teklifi Güncelle
                       </button>
+                    )}
+
+                    {/* Kabul edildi: talep sahibi (alıcı) ödemeye geçebilir */}
+                    {isLatest && status === "KABUL" && isBuyer && m.offer?.order?.status === "ODEME_BEKLENIYOR" && (
+                      <Link
+                        href={`/odeme?order=${m.offer.order.id}`}
+                        className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-primary text-white text-sm font-semibold h-11 shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.98] transition-all"
+                      >
+                        <Wallet size={17} /> Ödemeye Geç
+                      </Link>
+                    )}
+                    {isLatest && status === "KABUL" && m.offer?.order && m.offer.order.status !== "ODEME_BEKLENIYOR" && (
+                      <p className="mt-4 flex items-center justify-center gap-1.5 text-sm font-semibold text-primary">
+                        <CheckCircle2 size={16} /> Ödeme tamamlandı
+                      </p>
+                    )}
+                    {/* Satıcı tarafı: ödeme bekleniyor bilgisi (buton değil) */}
+                    {isLatest && status === "KABUL" && !isBuyer && m.offer?.order?.status === "ODEME_BEKLENIYOR" && (
+                      <p className="mt-4 flex items-center justify-center gap-1.5 text-sm font-medium text-amber-600 dark:text-amber-400">
+                        <Wallet size={16} /> Alıcının ödemesi bekleniyor
+                      </p>
                     )}
                   </div>
                   {/* Alt zaman bilgisi */}
