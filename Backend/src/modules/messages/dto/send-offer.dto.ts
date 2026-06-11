@@ -4,7 +4,6 @@ import {
   IsString,
   MaxLength,
   Min,
-  MinLength,
 } from 'class-validator';
 
 /** Sohbet içinden teklif/karşı-teklif gönderirken kullanılan veri. */
@@ -13,10 +12,10 @@ export class SendOfferDto {
   @Min(1, { message: 'Fiyat en az 1 olmalıdır.' })
   price: number;
 
+  @IsOptional()
   @IsString()
-  @MinLength(1, { message: 'Teslim süresi belirtilmelidir.' })
   @MaxLength(100)
-  deliveryTime: string;
+  deliveryTime?: string;
 
   @IsOptional()
   @IsString()

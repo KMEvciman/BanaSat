@@ -151,7 +151,7 @@ export const messagesApi = {
   detail: (id: string) => api.get<ConversationDetail>(`/conversations/${id}`),
   send: (id: string, content: string) =>
     api.post<Message>(`/conversations/${id}/messages`, { content }),
-  sendOffer: (id: string, body: { price: number; deliveryTime: string; note?: string }) =>
+  sendOffer: (id: string, body: { price: number; deliveryTime?: string; note?: string }) =>
     api.post<Message>(`/conversations/${id}/offer`, body),
   acceptOffer: (id: string) =>
     api.patch<{ ok: boolean }>(`/conversations/${id}/offer/accept`),

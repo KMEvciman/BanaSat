@@ -50,7 +50,6 @@ export default function IlanDetay() {
 
   // --- Teklif verme (sahibi olmayan, giriş yapmış kullanıcı) ---
   const [price, setPrice] = useState("");
-  const [deliveryTime, setDeliveryTime] = useState("");
   const [note, setNote] = useState("");
   const [offerSubmitting, setOfferSubmitting] = useState(false);
 
@@ -63,10 +62,9 @@ export default function IlanDetay() {
       const conv = await messagesApi.createOrGet({ listingId: id });
       await messagesApi.sendOffer(conv.id, {
         price: Number(price),
-        deliveryTime,
         note: note.trim() || undefined,
       });
-      setPrice(""); setDeliveryTime(""); setNote("");
+      setPrice(""); setNote("");
       router.push(`/mesajlar?c=${conv.id}`);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Teklif gönderilemedi.");
@@ -274,7 +272,6 @@ export default function IlanDetay() {
                     <form onSubmit={submitOffer} className="mt-6 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-800 pt-5">
                       <h4 className="text-sm font-bold text-gray-900 dark:text-white">Teklif Ver</h4>
                       <input type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} required placeholder="Fiyat (₺)" className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-11 px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
-                      <input value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} required placeholder="Teslimat süresi (örn. 3 Gün)" className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white h-11 px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
                       <textarea value={note} onChange={(e) => setNote(e.target.value)} required minLength={10} placeholder="Teklif notunuz (en az 10 karakter)" className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white p-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-y min-h-[80px]" />
                       <button disabled={offerSubmitting} className="w-full flex items-center justify-center gap-2 h-11 bg-primary hover:bg-primary/85 text-white font-bold rounded-xl transition-colors disabled:opacity-60">
                         <Send size={16} /> {offerSubmitting ? "Gönderiliyor..." : "Teklifi Gönder"}

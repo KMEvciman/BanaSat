@@ -243,6 +243,7 @@ export class MessagesService {
     }
 
     // Teklif her zaman konuşmanın satıcısına ait kayıt üzerinden yürür.
+    const deliveryTime = dto.deliveryTime?.trim() || 'Belirtilmedi';
     const offer = await this.prisma.offer.upsert({
       where: {
         listingId_sellerId: {
@@ -252,7 +253,7 @@ export class MessagesService {
       },
       update: {
         price: dto.price,
-        deliveryTime: dto.deliveryTime,
+        deliveryTime,
         note: dto.note ?? '',
         status: OfferStatus.BEKLEMEDE,
       },
@@ -260,7 +261,7 @@ export class MessagesService {
         listingId: conversation.listingId,
         sellerId: conversation.sellerId,
         price: dto.price,
-        deliveryTime: dto.deliveryTime,
+        deliveryTime,
         note: dto.note ?? '',
       },
       select: { id: true },
@@ -279,7 +280,7 @@ export class MessagesService {
           type: 'OFFER',
           offerId: offer.id,
           offerPrice: dto.price,
-          offerDeliveryTime: dto.deliveryTime,
+          offerDeliveryTime: dto.deliveryTime?.trim() || null,
           offerNote: dto.note ?? '',
         },
         select: MESSAGE_SELECT,

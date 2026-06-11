@@ -44,7 +44,6 @@ function MesajlarContent() {
   // Sohbet-içi teklif modalı durumu.
   const [offerModalOpen, setOfferModalOpen] = useState(false);
   const [offerPrice, setOfferPrice] = useState("");
-  const [offerDelivery, setOfferDelivery] = useState("");
   const [offerNote, setOfferNote] = useState("");
   const [offerSubmitting, setOfferSubmitting] = useState(false);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
@@ -137,10 +136,9 @@ function MesajlarContent() {
     return null;
   })();
 
-  // Teklif modalını aç. Karşı teklifte mevcut fiyatı/teslimatı ön doldur.
-  const openOfferModal = (prefill?: { price?: number | null; deliveryTime?: string | null }) => {
+  // Teklif modalını aç. Karşı teklifte mevcut fiyatı ön doldur.
+  const openOfferModal = (prefill?: { price?: number | null }) => {
     setOfferPrice(prefill?.price != null ? String(prefill.price) : "");
-    setOfferDelivery(prefill?.deliveryTime ?? "");
     setOfferNote("");
     setOfferModalOpen(true);
   };
@@ -178,16 +176,15 @@ function MesajlarContent() {
     e.preventDefault();
     if (!activeId || offerSubmitting) return;
     const price = Number(offerPrice);
-    if (!price || price < 1 || !offerDelivery.trim()) return;
+    if (!price || price < 1) return;
     setOfferSubmitting(true);
     try {
       await messagesApi.sendOffer(activeId, {
         price,
-        deliveryTime: offerDelivery.trim(),
         note: offerNote.trim() || undefined,
       });
       setOfferModalOpen(false);
-      setOfferPrice(""); setOfferDelivery(""); setOfferNote("");
+      setOfferPrice(""); setOfferNote("");
       loadDetail(activeId);
       loadConversations();
     } catch {
@@ -379,11 +376,13 @@ function MesajlarContent() {
                     <p className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                       ₺{(m.offerPrice ?? 0).toLocaleString("tr-TR")}
                     </p>
-                    <div className="mt-3 text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">
-                        Teslim süresi: <span className="font-semibold text-slate-700 dark:text-slate-200">{m.offerDeliveryTime || "-"}</span>
-                      </span>
-                    </div>
+                    {m.offerDeliveryTime && (
+                      <div className="mt-3 text-sm">
+                        <span className="text-slate-500 dark:text-slate-400">
+                          Teslim süresi: <span className="font-semibold text-slate-700 dark:text-slate-200">{m.offerDeliveryTime}</span>
+                        </span>
+                      </div>
+                    )}
                     {m.offerNote && (
                       <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 whitespace-pre-line border-t border-slate-100 dark:border-slate-800 pt-3">{m.offerNote}</p>
                     )}
@@ -392,7 +391,7 @@ function MesajlarContent() {
                     {canRespond && (
                       <div className="mt-4 space-y-2.5">
                         <button
-                          onClick={() => openOfferModal({ price: m.offerPrice, deliveryTime: m.offerDeliveryTime })}
+                          onClick={() => openOfferModal({ price: m.offerPrice })}
                           disabled={busy}
                           className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/40 text-primary text-sm font-semibold h-11 hover:bg-primary/10 active:scale-[0.98] transition-all disabled:opacity-50"
                         >
@@ -420,7 +419,7 @@ function MesajlarContent() {
                     {/* Teklifi gönderen: kendi teklifini güncelleyebilir */}
                     {canUpdate && (
                       <button
-                        onClick={() => openOfferModal({ price: m.offerPrice, deliveryTime: m.offerDeliveryTime })}
+                        onClick={() => openOfferModal({ price: m.offerPrice })}
                         className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-semibold h-11 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all"
                       >
                         <Pencil size={16} /> Teklifi Güncelle
@@ -521,14 +520,6 @@ function MesajlarContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Teslim Süresi</label>
-                <input
-                  type="text" value={offerDelivery} onChange={(e) => setOfferDelivery(e.target.value)}
-                  required placeholder="Örn. 3 Gün, Hemen"
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-background-light dark:bg-background-dark/50 px-4 h-11 outline-none focus:border-primary text-slate-900 dark:text-white"
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Not (opsiyonel)</label>
                 <textarea
                   value={offerNote} onChange={(e) => setOfferNote(e.target.value)} rows={3}
@@ -537,7 +528,7 @@ function MesajlarContent() {
                 />
               </div>
               <button
-                type="submit" disabled={offerSubmitting || !offerPrice || !offerDelivery.trim()}
+                type="submit" disabled={offerSubmitting || !offerPrice}
                 className="w-full h-11 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 hover:bg-primary/85 active:scale-95 transition-all disabled:opacity-50"
               >
                 {offerSubmitting ? "Gönderiliyor..." : "Teklifi Gönder"}
