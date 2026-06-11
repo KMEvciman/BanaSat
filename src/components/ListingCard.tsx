@@ -54,12 +54,14 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 pt-0.5">
-          <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-            <Clock size={14} />
-            <span className="text-[11px] whitespace-nowrap">{listing.timeLeft}</span>
-          </div>
-          <span className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-semibold text-center shadow-sm shadow-primary/20">
+        <div className="flex flex-col gap-2 pt-0.5">
+          {listing.timeLeft && listing.timeLeft !== "Süre belirtilmedi" && (
+            <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
+              <Clock size={14} />
+              <span className="text-[11px] whitespace-nowrap">{listing.timeLeft}</span>
+            </div>
+          )}
+          <span className="w-full block bg-primary text-white py-2.5 rounded-lg text-xs font-semibold text-center shadow-sm shadow-primary/20 whitespace-nowrap">
             {listing.offers === 0 ? "İlk Teklifi Ver" : "Teklif Ver"}
           </span>
         </div>
