@@ -27,6 +27,7 @@ export default function TalepOlustur() {
   const [description, setDescription] = useState("");
   const [fullDescription, setFullDescription] = useState("");
   const [budgetLabel, setBudgetLabel] = useState("");
+  const [budgetWarning, setBudgetWarning] = useState(false);
   const [province, setProvince] = useState("");
   const [district, setDistrict] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState("");
@@ -55,7 +56,7 @@ export default function TalepOlustur() {
         description,
         fullDescription,
         categoryId,
-        budgetLabel,
+        budgetLabel: budgetLabel ? `${Number(budgetLabel).toLocaleString("tr-TR")} ₺` : "",
         location: province ? `${province}${district ? " / " + district : ""}` : undefined,
         province: province || undefined,
         district: district || undefined,
@@ -161,15 +162,24 @@ export default function TalepOlustur() {
 
                 <div className="flex flex-col gap-2">
                   <label className="text-gray-900 dark:text-gray-200 text-sm font-medium">
-                    Bütçe <span className="text-red-500">*</span>
+                    Bütçe (₺) <span className="text-red-500">*</span>
                   </label>
                   <input
-                    value={budgetLabel}
-                    onChange={(e) => setBudgetLabel(e.target.value)}
+                    value={budgetLabel ? Number(budgetLabel).toLocaleString("tr-TR") : ""}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const digits = raw.replace(/\D/g, "");
+                      setBudgetWarning(raw.trim() !== "" && /[^\d.\s]/.test(raw));
+                      setBudgetLabel(digits);
+                    }}
+                    inputMode="numeric"
                     required
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-3 text-base focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-gray-400"
-                    placeholder="Örn. 55.000 - 65.000 TL"
+                    placeholder="Örn. 60000"
                   />
+                  {budgetWarning && (
+                    <p className="text-xs text-red-500">Yalnızca sayı girebilirsiniz.</p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2">
