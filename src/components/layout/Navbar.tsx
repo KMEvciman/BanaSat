@@ -228,7 +228,7 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                           key={cat}
                           href={`/kategoriler?q=${encodeURIComponent(cat)}`}
                           onClick={closeMobile}
-                          className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-primary/10 hover:text-primary transition-all"
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-all"
                         >
                           {cat}
                         </Link>
@@ -380,7 +380,7 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                     <Link
                       key={cat}
                       href={`/kategoriler?q=${encodeURIComponent(cat)}`}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-primary hover:shadow-sm transition-all whitespace-nowrap"
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white hover:shadow-sm transition-all whitespace-nowrap"
                     >
                       {cat}
                     </Link>
@@ -388,7 +388,7 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                 </div>
                 <button
                   onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
-                  className="shrink-0 mt-0.5 size-7 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-primary hover:border-primary/50 transition-all shadow-sm"
+                  className="shrink-0 mt-0.5 size-7 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all shadow-sm"
                   aria-label={isCategoriesOpen ? "Kategorileri daralt" : "Tüm kategorileri göster"}
                 >
                   <ChevronDown size={16} className={`transition-transform duration-200 ${isCategoriesOpen ? "rotate-180" : ""}`} />

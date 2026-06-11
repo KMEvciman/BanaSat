@@ -10,7 +10,7 @@ import { offersApi } from "@/lib/api/services";
 import type { Offer, OfferStatus } from "@/lib/api/types";
 import {
   Search, SlidersHorizontal, ArrowUpDown, Clock, Eye, ChevronDown, X,
-  Truck, ShieldCheck, Wallet, MessageCircle, HandCoins,
+  Truck, ShieldCheck, Wallet, MessageCircle, HandCoins, Trash2,
 } from "lucide-react";
 
 const statusConfig: Record<OfferStatus, { label: string; color: string; bg: string }> = {
@@ -38,7 +38,7 @@ const sortOptions = [
 const PLACEHOLDER = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80";
 const fmtPrice = (p: number) => `${p.toLocaleString("tr-TR")} TL`;
 
-function TeklifModal({ teklif, onClose, onWithdraw }: { teklif: Offer; onClose: () => void; onWithdraw: (id: string) => void }) {
+function TeklifModal({ teklif, onClose, onWithdraw, onDelete }: { teklif: Offer; onClose: () => void; onWithdraw: (id: string) => void; onDelete: (id: string) => void }) {
   const sc = statusConfig[teklif.status];
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -105,6 +105,10 @@ function TeklifModal({ teklif, onClose, onWithdraw }: { teklif: Offer; onClose: 
               Teklifi Geri Çek
             </button>
           )}
+
+          <button onClick={() => onDelete(teklif.id)} className="w-full h-11 flex items-center justify-center gap-2 rounded-xl border border-red-300 dark:border-red-500/40 text-red-600 dark:text-red-400 text-sm font-semibold hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors">
+            <Trash2 size={16} /> Teklifi Sil
+          </button>
         </div>
 
         <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-4 sm:px-6 py-4 flex gap-3 rounded-b-2xl">
@@ -190,6 +194,18 @@ export default function Tekliflerim() {
     }
   };
 
+  // Teklifi tamamen sil (her durumda; kabul edilmişse ilgili sipariş de silinir).
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Bu teklifi silmek istediğinize emin misiniz? Kabul edilmiş teklifin siparişi de silinir.")) return;
+    try {
+      await offersApi.remove(id);
+      setSelectedTeklif(null);
+      setOffers((prev) => prev.filter((o) => o.id !== id));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Teklif silinemedi.");
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -269,6 +285,13 @@ export default function Tekliflerim() {
                       <div className="absolute top-3 left-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border backdrop-blur-md ${sc.bg} ${sc.color}`}>{sc.label}</span>
                       </div>
+                      <button
+                        onClick={() => handleDelete(teklif.id)}
+                        title="Teklifi sil"
+                        className="absolute top-3 right-3 size-8 flex items-center justify-center rounded-full bg-white/85 dark:bg-black/70 backdrop-blur-md border border-gray-200/50 dark:border-white/10 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors"
+                      >
+                        <Trash2 size={15} />
+                      </button>
                       <div className="absolute bottom-3 right-3 bg-white/85 dark:bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-gray-200/50 dark:border-white/10">
                         <span className="text-primary font-bold text-xs">{teklif.listing.category.name}</span>
                       </div>
@@ -314,7 +337,7 @@ export default function Tekliflerim() {
       </main>
       <Footer />
 
-      {selectedTeklif && <TeklifModal teklif={selectedTeklif} onClose={() => setSelectedTeklif(null)} onWithdraw={handleWithdraw} />}
+      {selectedTeklif && <TeklifModal teklif={selectedTeklif} onClose={() => setSelectedTeklif(null)} onWithdraw={handleWithdraw} onDelete={handleDelete} />}
     </>
   );
 }

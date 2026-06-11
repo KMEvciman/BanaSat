@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { OffersService } from './offers.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { QueryOffersDto } from './dto/query-offers.dto';
@@ -36,5 +36,12 @@ export class OffersController {
   @Patch(':id/withdraw')
   withdraw(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.offersService.withdraw(id, userId);
+  }
+
+  /** Satıcı kendi teklifini tamamen siler. */
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  remove(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.offersService.remove(id, userId);
   }
 }

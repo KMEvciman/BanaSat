@@ -201,6 +201,26 @@ export class OffersService {
     return this.toOffer(updated);
   }
 
+  /**
+   * Satıcı kendi teklifini tamamen siler (geçmiş teklifler dahil, her durumda).
+   * İlgili sipariş varsa cascade ile birlikte silinir.
+   */
+  async remove(offerId: string, sellerId: string): Promise<void> {
+    const offer = await this.prisma.offer.findUnique({
+      where: { id: offerId },
+      select: { id: true, sellerId: true },
+    });
+
+    if (!offer) {
+      throw new NotFoundException('Teklif bulunamadı.');
+    }
+    if (offer.sellerId !== sellerId) {
+      throw new ForbiddenException('Bu teklif üzerinde işlem yapma yetkiniz yok.');
+    }
+
+    await this.prisma.offer.delete({ where: { id: offerId } });
+  }
+
   // ---------------------------------------------------------------
   // Yardımcı (private) metotlar
   // ---------------------------------------------------------------

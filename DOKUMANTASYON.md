@@ -260,3 +260,22 @@ X talep açar → Y ilan detayından teklif verir → teklif sohbete OFFER mesaj
 - `ilan/[id]/page.tsx`: Teklif verme artık `createOrGet` + `sendOffer` ile sohbete düşer ve mesajlara yönlendirir.
 - `mesajlar/page.tsx`: Teklif kartında ilgili ilan satırı (linkli). Yanıtlayan için "Karşı Teklif Ver" (tam genişlik) + Reddet/Kabul Et (ferah, profesyonel). Teklif sahibi için "Teklifi Güncelle". "Teklifi Engelle" artık modal açar: ilan sahibinin tüm ilanları, checkbox, "Hepsini Seç", İptal/Engelle.
 - `siparislerim/page.tsx`: Yeni sayfa — Alımlarım/Satışlarım sekmeleri, sipariş kartları, ödeme bekleyen alımlar için "Ödemeyi Tamamla". Navbar profil menüsüne "Siparişlerim" eklendi.
+
+## Silme Özellikleri + Dark Mode Lacivert Düzeltmesi
+
+### Silme
+- `schema.prisma`: `Order.offer` ilişkisi `onDelete: Cascade` yapıldı (teklif silinince siparişi de gider). Migration: `20260612000000_order_offer_cascade`.
+- `offers.service.ts` + controller: `remove(offerId, sellerId)` ve `DELETE /offers/:id` eklendi (geçmiş teklifler dahil her durumda silinir).
+- Listings'te `remove` + `DELETE /listings/:id` zaten vardı; cascade sayesinde siparişli ilanlar da silinebilir.
+- Frontend `services.ts`: `offersApi.remove`.
+- `taleplerim/page.tsx`: Kart görselinde çöp kutusu butonu (onaylı silme).
+- `tekliflerim/page.tsx`: Kart görselinde çöp kutusu + modal içinde "Teklifi Sil".
+
+### Dark Mode Lacivert Sorunu
+- Sebep: Tailwind'in `gray`/`slate` paletleri mavi (soğuk) tonlu; saf siyah zeminde lacivert görünüyordu.
+- Çözüm (`globals.css`): `gray` ve `slate` paletleri NÖTR griye yeniden tanımlandı, en koyu tonlar (800/900/950) tam siyaha yakın/saf siyah. Böylece tüm kart/buton/zemin yüzeyleri lacivert yerine simsiyah/nötr oldu.
+- Form alanları (input/textarea/select) için koyu temada: arka plan saf siyah, çerçeve beyaz (yumuşak), hover/focus'ta yeşil (primary).
+
+### Dark Mode Siyah-Beyaz Tema (çerçeveler)
+- `globals.css`: Koyu temada çerçevesiz butonlara beyaz çerçeve (`:where(.dark) button`, düşük özgüllük — kırmızı/renkli çerçeveli butonları ezmez). Tüm butonlar hover'da yeşil çerçeve.
+- Kart/kapsayıcıların koyu çerçeve tonları (`dark:border-gray/slate-600/700/800/900`) beyaza çevrildi; hover'da yeşile döner (attribute selector ile yalnızca border-color, arka planlar etkilenmez).

@@ -251,7 +251,7 @@ model Order {
   amount Decimal     @db.Decimal(12, 2)
 
   offerId String @unique @map("offer_id")
-  offer   Offer  @relation(fields: [offerId], references: [id])
+  offer   Offer  @relation(fields: [offerId], references: [id], onDelete: Cascade)
 
   buyerId String @map("buyer_id")
   buyer   User   @relation("OrderBuyer", fields: [buyerId], references: [id])

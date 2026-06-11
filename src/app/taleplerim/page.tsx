@@ -18,6 +18,7 @@ import {
   MessageCircle,
   ChevronDown,
   Plus,
+  Trash2,
 } from "lucide-react";
 
 const statusConfig: Record<ListingStatus, { label: string; color: string; bg: string }> = {
@@ -126,6 +127,24 @@ export default function Taleplerim() {
     for (const t of listings) c[t.status] = (c[t.status] || 0) + 1;
     return c;
   }, [listings]);
+
+  // Talebi sil (onaylı). Kart bir Link olduğu için tıklamayı durdururuz.
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const handleDeleteListing = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (deletingId) return;
+    if (!window.confirm("Bu talebi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) return;
+    setDeletingId(id);
+    try {
+      await listingsApi.remove(id);
+      setListings((prev) => prev.filter((l) => l.id !== id));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Talep silinemedi.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <>
@@ -262,6 +281,14 @@ export default function Taleplerim() {
                       <div className="absolute top-3 left-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border backdrop-blur-md ${sc.bg} ${sc.color}`}>{sc.label}</span>
                       </div>
+                      <button
+                        onClick={(e) => handleDeleteListing(e, talep.id)}
+                        disabled={deletingId === talep.id}
+                        title="Talebi sil"
+                        className="absolute top-3 right-3 size-8 flex items-center justify-center rounded-full bg-white/85 dark:bg-black/70 backdrop-blur-md border border-gray-200/50 dark:border-white/10 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors disabled:opacity-50"
+                      >
+                        <Trash2 size={15} />
+                      </button>
                       <div className="absolute bottom-3 right-3 bg-white/85 dark:bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-gray-200/50 dark:border-white/10">
                         <span className="text-primary font-bold text-xs">{talep.category.name}</span>
                       </div>

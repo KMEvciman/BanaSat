@@ -6,10 +6,91 @@
   --color-primary: #5BB678;
   --color-background-light: #f6f6f8;
   --color-background-dark: #000000;
-  
+
   --font-sans: var(--font-inter), sans-serif;
   --font-display: var(--font-inter), sans-serif;
-  
+
   --radius-xl: 1.5rem;
+
+  /*
+    Lacivert sorununun çözümü:
+    Tailwind'in "gray" ve "slate" paletleri mavi (soğuk) tonludur. Saf siyah
+    zeminde bu tonlar lacivert gibi görünür. Aşağıda her iki paleti de NÖTR
+    griye (mavi tonu olmayan) yeniden tanımlıyoruz. En koyu tonlar tam siyah.
+  */
+  --color-slate-50: #fafafa;
+  --color-slate-100: #f5f5f5;
+  --color-slate-200: #e5e5e5;
+  --color-slate-300: #d4d4d4;
+  --color-slate-400: #a3a3a3;
+  --color-slate-500: #737373;
+  --color-slate-600: #525252;
+  --color-slate-700: #2e2e2e;
+  --color-slate-800: #1a1a1a;
+  --color-slate-900: #000000;
+  --color-slate-950: #000000;
+
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #2e2e2e;
+  --color-gray-800: #1a1a1a;
+  --color-gray-900: #000000;
+  --color-gray-950: #000000;
+}
+
+/*
+  Koyu temada form alanları (input / textarea / select):
+  - Arka plan tam siyah
+  - Çerçeve beyaz (yumuşak)
+  - Üzerine gelince / odaklanınca yeşil
+*/
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #000000;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.dark input:hover,
+.dark textarea:hover,
+.dark select:hover,
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--color-primary);
+}
+
+/*
+  Koyu tema: siyah-beyaz görünüm.
+  - Çerçevesi olmayan butonlara beyaz çerçeve (düşük özgüllük: renkli
+    çerçeveli butonların kendi rengini ezmez).
+  - Tüm butonlar üzerine gelince çerçeve yeşil.
+  - Kart / kapsayıcı çerçeveleri (gray/slate koyu tonları) beyaz,
+    üzerine gelince yeşile döner.
+*/
+:where(.dark) button {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+:where(.dark) button:hover {
+  border-color: var(--color-primary);
+}
+
+/* Koyu temadaki çerçeve renklerini beyaza çevir (yalnızca border-color).
+   Opaklık ekli varyantları da kapsamak için "içerir" seçici kullanılır. */
+.dark [class*="dark:border-gray-"],
+.dark [class*="dark:border-slate-"] {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Bu çerçeveli yüzeylerin üzerine gelince yeşile dön. */
+.dark [class*="dark:border-gray-"]:hover,
+.dark [class*="dark:border-slate-"]:hover {
+  border-color: var(--color-primary);
 }
 
