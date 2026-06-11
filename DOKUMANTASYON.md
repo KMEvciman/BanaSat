@@ -176,9 +176,10 @@ npm run dev               # http://localhost:3000
 - `.env.local` → `NEXT_PUBLIC_API_URL=http://localhost:4000/api`
 - **Bağlanan sayfalar:** Giriş, Kayıt, Çıkış (gerçek JWT); Ana sayfa (En Popüler/Son Eklenen
   ilanlar API'den); Talep Oluştur; İlan Detay (teklif ver/kabul/red, mesaj başlat); Profil
-  (bilgi güncelleme + avatar yükleme).
-- **Henüz mock olan sayfalar:** Taleplerim, Tekliflerim, Kategoriler, Mesajlar, Ödeme,
-  Teklif Karşılaştır (sonraki adımda bağlanacak).
+  (bilgi güncelleme + avatar yükleme); Taleplerim; Tekliflerim (geri çekme dahil); Kategoriler;
+  Kullanıcı public profili (`/kullanici/[id]`); Mesajlaşma (gerçek zamanlıya yakın, polling ile).
+- **JWT doğrulama:** access stratejisi her istekte kullanıcının DB'de var olduğunu kontrol eder
+  (silinmiş kullanıcı 401 alır).
 
 ### Çalıştırma (geliştirme)
 1. `docker compose up -d` (kök dizin)
@@ -205,3 +206,57 @@ npm run dev               # http://localhost:3000
 - Host makinede 5432 portunda native bir PostgreSQL çalıştığı için docker postgres 5433'e
   maplendi. Kök dizinde `.env` → `POSTGRES_PORT=5433`, `Backend/.env` → `DATABASE_URL` portu 5433.
 - `Backend/.env` docker-compose varsayılan kimlik bilgileriyle oluşturuldu (geliştirme).
+
+## Mesajlaşmaya Teklif Entegrasyonu
+
+Sohbet içinden gerçek teklif/karşı-teklif gönderme ve kabul/reddetme eklendi.
+
+### Backend
+- `schema.prisma`: `MessageType` enum (TEXT, OFFER); `Message` modeline `type` ve `offerId` (Offer'a SetNull); `Offer`'a `messages` ilişkisi. Migration: `20260610000000_add_message_offer`.
+- `messages.service.ts`: Ortak `MESSAGE_SELECT` (offer bilgisi dahil) + `normalizeMessage` (Decimal→number). Yeni `sendOffer()` metodu: yalnızca satıcı taraf teklif sunar, ilan AKTIF olmalı, `Offer` upsert (varsa güncelle + BEKLEMEDE'ye al), OFFER tipi mesaj oluşturur.
+- `messages.controller.ts`: `POST /conversations/:id/offer`.
+- `dto/send-offer.dto.ts`: price (min 1), deliveryTime, note (opsiyonel).
+
+### Frontend
+- `types.ts`: `Message`'a `type` ve `offer` (MessageOfferRef) eklendi.
+- `services.ts`: `messagesApi.sendOffer()`.
+- `mesajlar/page.tsx`: Satıcı için header'da "Teklif Ver" butonu + modal (fiyat/teslim/not); OFFER mesajları özel kart olarak (tutar + durum etiketi); alıcı + teklif BEKLEMEDE ise Kabul/Reddet butonları (`offersApi.accept/reject`).
+
+## Karşılıklı Teklif (Pazarlık) + Teklif Engelleme
+
+### Backend
+- `schema.prisma`: `Conversation`'a `offersBlocked` (default false). `Message`'a teklif anlık görüntüsü kolonları: `offerPrice`, `offerDeliveryTime`, `offerNote`. Migration: `20260611000000_offer_negotiation`.
+- `messages.service.ts`:
+  - `sendOffer`: artık hem alıcı hem satıcı gönderebilir (karşılıklı pazarlık). Teklif daima konuşmanın satıcısına ait tekil Offer kaydı üzerinden yürür (upsert). Her mesaj o anki fiyatı snapshot olarak saklar. `offersBlocked` ise reddedilir.
+  - `acceptOffer`/`rejectOffer`: güncel BEKLEMEDE teklifi yanıtlar. Son teklifi gönderen kendi teklifini yanıtlayamaz (`getActiveOffer` kontrolü).
+  - `setOffersBlocked`: yalnızca alıcı (ilan sahibi) teklif gönderimini açar/kapatır.
+  - `MESSAGE_SELECT` ve `CONVERSATION_SELECT` snapshot + offersBlocked içerir.
+- `messages.controller.ts`: `PATCH :id/offer/accept`, `PATCH :id/offer/reject`, `PATCH :id/block-offers`. Yeni `BlockOffersDto`.
+
+### Frontend
+- `types.ts`: `Message`'a snapshot alanları; `ConversationDetail`'e `offersBlocked`.
+- `services.ts`: `acceptOffer`, `rejectOffer`, `setBlockOffers`.
+- `mesajlar/page.tsx`:
+  - Konuşma listesi okunmamış rozeti kırmızı (mesaj ikonuyla aynı).
+  - Header: alıcı için "Teklifi Engelle/Engeli Kaldır"; satıcı için "Teklif Ver" (engelliyse gizli).
+  - Teklif kartı ferah/profesyonel; snapshot fiyat gösterir. Son teklif + beklemede + gönderen ben değilsem üç buton: Reddet | Karşı Teklif | Kabul Et.
+  - Karşı Teklif mevcut fiyatı modale ön doldurur. Engelliyse giriş üstünde bilgi şeridi.
+
+## Uçtan Uca Teklif Akışı + Sipariş + Çok-İlanlı Engelleme
+
+### İşleyiş
+X talep açar → Y ilan detayından teklif verir → teklif sohbete OFFER mesajı olarak düşer (konuşma otomatik başlar, mesajlara yönlendirilir). Teklif kartında hangi ilana ait olduğu görünür. Taraflar sohbette karşılıklı teklifleşir; teklif sahibi kendi teklifini güncelleyebilir. Teklif kabul edilince ilgili teklif için sipariş oluşur ve "Siparişlerim" sayfasında görünür.
+
+### Backend
+- `schema.prisma`: `Conversation.offersBlocked` kaldırıldı. Yeni `OfferBlock` modeli (listingId, blockedUserId, unique). Migration: `20260611120000_offer_blocks`.
+- `messages.service.ts`: `findOne` engel durumunu `OfferBlock`'tan türetir. `sendOffer` OfferBlock kontrolü yapar. `acceptOffer` kabulde otomatik `Order` oluşturur (upsert). `getOfferBlockOptions` (ilan sahibinin ilanları + engel durumu) ve `setOfferBlocks` (seçili ilanlara senkronize engel) eklendi.
+- `messages.controller.ts`: `GET/PUT :id/offer-blocks`. Eski `block-offers` ve `BlockOffersDto` kaldırıldı; `SetOfferBlocksDto` eklendi.
+- `offers.service.ts`: `create` OfferBlock kontrolü; `accept` kabulde otomatik `Order` oluşturur.
+
+### Frontend
+- `client.ts`: `api.put` eklendi.
+- `types.ts`: `OfferBlockOptions` / `OfferBlockOptionListing`.
+- `services.ts`: `offerBlockOptions`, `setOfferBlocks`.
+- `ilan/[id]/page.tsx`: Teklif verme artık `createOrGet` + `sendOffer` ile sohbete düşer ve mesajlara yönlendirir.
+- `mesajlar/page.tsx`: Teklif kartında ilgili ilan satırı (linkli). Yanıtlayan için "Karşı Teklif Ver" (tam genişlik) + Reddet/Kabul Et (ferah, profesyonel). Teklif sahibi için "Teklifi Güncelle". "Teklifi Engelle" artık modal açar: ilan sahibinin tüm ilanları, checkbox, "Hepsini Seç", İptal/Engelle.
+- `siparislerim/page.tsx`: Yeni sayfa — Alımlarım/Satışlarım sekmeleri, sipariş kartları, ödeme bekleyen alımlar için "Ödemeyi Tamamla". Navbar profil menüsüne "Siparişlerim" eklendi.

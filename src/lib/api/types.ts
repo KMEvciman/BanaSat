@@ -162,22 +162,48 @@ export interface Conversation {
   unreadCount: number;
 }
 
+export interface MessageOfferRef {
+  id: string;
+  status: OfferStatus;
+  sellerId: string;
+}
+
 export interface Message {
   id: string;
   content: string;
   senderId: string;
+  type: "TEXT" | "OFFER";
   readAt: string | null;
   createdAt: string;
+  // Teklif mesajlarında o anki önerilen değerlerin anlık görüntüsü.
+  offerPrice?: number | null;
+  offerDeliveryTime?: string | null;
+  offerNote?: string | null;
+  offer?: MessageOfferRef | null;
 }
 
 export interface ConversationDetail {
   id: string;
   createdAt: string;
   updatedAt: string;
+  offersBlocked: boolean;
   buyer: { id: string; name: string; avatarUrl: string | null };
   seller: { id: string; name: string; avatarUrl: string | null };
   listing: { id: string; title: string; coverImageUrl: string | null };
   messages: Message[];
+}
+
+export interface OfferBlockOptionListing {
+  id: string;
+  title: string;
+  coverImageUrl: string | null;
+  status: ListingStatus;
+  blocked: boolean;
+}
+
+export interface OfferBlockOptions {
+  sellerId: string;
+  listings: OfferBlockOptionListing[];
 }
 
 export interface Order {

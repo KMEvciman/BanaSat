@@ -59,6 +59,14 @@ export class OffersService {
       throw new BadRequestException('Bu ilan teklif almaya kapalı.');
     }
 
+    // İlan sahibi bu kullanıcıyı bu ilanda engellediyse teklif kabul edilmez.
+    const blocked = await this.prisma.offerBlock.count({
+      where: { listingId: dto.listingId, blockedUserId: sellerId },
+    });
+    if (blocked > 0) {
+      throw new ForbiddenException('Bu ilana teklif gönderimi engellenmiş.');
+    }
+
     try {
       const offer = await this.prisma.offer.create({
         data: {
@@ -129,7 +137,7 @@ export class OffersService {
     };
   }
 
-  /** İlan sahibi teklifi kabul eder. İlan "beklemede"ye geçer. */
+  /** İlan sahibi teklifi kabul eder. İlan "beklemede"ye geçer + sipariş oluşur. */
   async accept(offerId: string, userId: string) {
     const offer = await this.getOfferForOwnerAction(offerId, userId);
 
@@ -142,6 +150,12 @@ export class OffersService {
         where: { id: offerId },
         data: { status: OfferStatus.KABUL },
         select: OFFER_WITH_LISTING_SELECT,
+      }),
+      // Kabul edilince sipariş oluştur (varsa dokunma) - "Siparişlerim".
+      this.prisma.order.upsert({
+        where: { offerId },
+        update: {},
+        create: { offerId, buyerId: userId, amount: offer.price },
       }),
     ]);
 
@@ -198,7 +212,7 @@ export class OffersService {
   private async getOfferForOwnerAction(offerId: string, userId: string) {
     const offer = await this.prisma.offer.findUnique({
       where: { id: offerId },
-      select: { id: true, status: true, listingId: true, listing: { select: { ownerId: true } } },
+      select: { id: true, status: true, listingId: true, price: true, listing: { select: { ownerId: true } } },
     });
 
     if (!offer) {

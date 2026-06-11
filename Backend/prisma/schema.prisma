@@ -50,6 +50,12 @@ enum OrderStatus {
   IPTAL
 }
 
+/// Mesaj tipi: normal metin veya sohbet içi teklif kartı.
+enum MessageType {
+  TEXT
+  OFFER
+}
+
 // ============================================================
 // MODELLER
 // ============================================================
@@ -87,6 +93,7 @@ model User {
   orders              Order[]        @relation("OrderBuyer")
   reviewsGiven        Review[]       @relation("ReviewAuthor")
   reviewsReceived     Review[]       @relation("ReviewTarget")
+  offerBlocksReceived OfferBlock[]   @relation("OfferBlockUser")
 
   @@map("users")
 }
@@ -133,6 +140,7 @@ model Listing {
   images        ListingImage[]
   offers        Offer[]
   conversations Conversation[]
+  offerBlocks   OfferBlock[]
 
   @@index([categoryId])
   @@index([ownerId])
@@ -171,7 +179,8 @@ model Offer {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  order Order?
+  order    Order?
+  messages Message[]
 
   // Bir satıcı aynı talebe yalnızca bir aktif teklif verebilir.
   @@unique([listingId, sellerId])
@@ -215,7 +224,18 @@ model Message {
   sender   User   @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
 
   content String
-  readAt  DateTime? @map("read_at")
+  type    MessageType @default(TEXT)
+  readAt  DateTime?   @map("read_at")
+
+  // OFFER tipi mesajlarda ilgili teklife referans (sohbet içi teklif kartı).
+  offerId String? @map("offer_id")
+  offer   Offer?  @relation(fields: [offerId], references: [id], onDelete: SetNull)
+
+  // Teklif anlık görüntüsü: karşılıklı teklif geçmişinin doğru görünmesi için
+  // her teklif mesajı o anki önerilen fiyat/teslimat/notu saklar.
+  offerPrice        Decimal? @map("offer_price") @db.Decimal(12, 2)
+  offerDeliveryTime String?  @map("offer_delivery_time")
+  offerNote         String?  @map("offer_note")
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -271,4 +291,20 @@ model Review {
 
   @@index([targetId])
   @@map("reviews")
+}
+
+/// İlan sahibinin, belirli bir kullanıcının belirli ilanlarına teklif
+/// vermesini engellemesi. (listingId, blockedUserId) tekildir.
+model OfferBlock {
+  id            String  @id @default(uuid())
+  listingId     String  @map("listing_id")
+  listing       Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  blockedUserId String  @map("blocked_user_id")
+  blockedUser   User    @relation("OfferBlockUser", fields: [blockedUserId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([listingId, blockedUserId])
+  @@index([blockedUserId])
+  @@map("offer_blocks")
 }

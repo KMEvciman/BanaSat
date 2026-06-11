@@ -58,14 +58,15 @@ export default function IlanDetay() {
     setActionError("");
     setOfferSubmitting(true);
     try {
-      await offersApi.create({
-        listingId: id,
+      // Teklif doğrudan sohbete düşsün: konuşmayı başlat, teklifi gönder, mesajlara git.
+      const conv = await messagesApi.createOrGet({ listingId: id });
+      await messagesApi.sendOffer(conv.id, {
         price: Number(price),
         deliveryTime,
-        note,
+        note: note.trim() || undefined,
       });
       setPrice(""); setDeliveryTime(""); setNote("");
-      load();
+      router.push(`/mesajlar?c=${conv.id}`);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Teklif gönderilemedi.");
     } finally {
@@ -90,8 +91,8 @@ export default function IlanDetay() {
       return;
     }
     try {
-      await messagesApi.createOrGet({ listingId: id, participantId: sellerId });
-      router.push("/mesajlar");
+      const conv = await messagesApi.createOrGet({ listingId: id, participantId: sellerId });
+      router.push(`/mesajlar?c=${conv.id}`);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Mesaj başlatılamadı.");
     }

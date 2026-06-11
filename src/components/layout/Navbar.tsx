@@ -15,9 +15,11 @@ import {
   MessageSquare,
   Menu,
   X,
+  ShoppingBag,
 } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
+import { messagesApi } from "@/lib/api/services";
 import { useState, useRef, useEffect } from "react";
 
 const navLinks = [
@@ -57,6 +59,7 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,6 +71,29 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Okunmamış mesaj sayısını periyodik olarak çek (giriş yapmış kullanıcı için).
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setUnreadCount(0);
+      return;
+    }
+    let active = true;
+    const fetchUnread = () => {
+      messagesApi
+        .list()
+        .then((convs) => {
+          if (active) setUnreadCount(convs.reduce((sum, c) => sum + c.unreadCount, 0));
+        })
+        .catch(() => {});
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [isLoggedIn]);
 
   // Close mobile menu on route change (link click)
   const closeMobile = () => setIsMobileMenuOpen(false);
@@ -139,6 +165,11 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                     >
                       <MessageSquare size={18} className="text-gray-400" />
                       Mesajlar
+                      {unreadCount > 0 && (
+                        <span className="ml-auto min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-red-500 text-white text-[11px] font-bold rounded-full">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
                     </Link>
                     <Link
                       href="/talep-olustur"
@@ -264,11 +295,16 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
 
                     <Link
                       href="/mesajlar"
-                      className="flex items-center justify-center rounded-xl size-10 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                      className="relative flex items-center justify-center rounded-xl size-10 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
                       aria-label="Mesajlar"
                       title="Mesajlar"
                     >
                       <MessageSquare size={18} />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white dark:border-background-dark">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
                     </Link>
 
                     {/* Profile Dropdown */}
@@ -297,7 +333,10 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email || "user@banasat.com"}</p>
                           </div>
                           <Link href="/taleplerim" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <FileText size={16} /> Sipariş ve Taleplerim
+                            <FileText size={16} /> Taleplerim
+                          </Link>
+                          <Link href="/siparislerim" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <ShoppingBag size={16} /> Siparişlerim
                           </Link>
                           <Link href="/profil" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                             <User size={16} /> Profil
