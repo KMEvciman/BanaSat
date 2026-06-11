@@ -32,12 +32,13 @@ function KategorilerContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
   const initialIl = searchParams.get("il") || "";
+  const initialAra = searchParams.get("ara") || "";
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedSlug, setSelectedSlug] = useState<string>("tumu");
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialAra);
   const [sortBy, setSortBy] = useState("newest");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
@@ -47,6 +48,11 @@ function KategorilerContent() {
   useEffect(() => {
     locationsApi.list().then(setProvinces).catch(() => {});
   }, []);
+
+  // Navbar aramasından gelen ?ara parametresini senkronize et.
+  useEffect(() => {
+    setSearchQuery(initialAra);
+  }, [initialAra]);
 
   // Kategorileri yükle; URL'deki ?q (isim) ile eşleşen kategoriyi seç.
   useEffect(() => {
@@ -79,7 +85,10 @@ function KategorilerContent() {
     if (!searchQuery.trim()) return listings;
     const q = searchQuery.toLowerCase();
     return listings.filter(
-      (l) => l.title.toLowerCase().includes(q) || l.description.toLowerCase().includes(q),
+      (l) =>
+        l.title.toLowerCase().includes(q) ||
+        l.description.toLowerCase().includes(q) ||
+        (l.location ?? "").toLowerCase().includes(q),
     );
   }, [listings, searchQuery]);
 

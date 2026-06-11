@@ -6,7 +6,6 @@ import {
   User,
   Settings,
   LogOut,
-  FileText,
   ClipboardList,
   HandCoins,
   ChevronDown,
@@ -21,6 +20,7 @@ import ThemeToggle from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { messagesApi } from "@/lib/api/services";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
   { href: "/taleplerim", label: "Taleplerim", icon: ClipboardList },
@@ -55,6 +55,8 @@ const categories = [
 
 export default function Navbar({ hideCategories = false }: { hideCategories?: boolean }) {
   const { isLoggedIn, user, logout } = useAuth();
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -98,6 +100,14 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
   // Close mobile menu on route change (link click)
   const closeMobile = () => setIsMobileMenuOpen(false);
 
+  // Arama: başlık/konum/açıklamaya göre kategoriler sayfasında ara.
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchTerm.trim();
+    setIsMobileMenuOpen(false);
+    router.push(q ? `/kategoriler?ara=${encodeURIComponent(q)}` : "/kategoriler");
+  };
+
   return (
     <>
       <div className="w-full bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 fixed top-0 left-0 right-0 z-50">
@@ -127,16 +137,18 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
             <div className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-background-dark max-h-[calc(100vh-56px)] overflow-y-auto">
               {/* Search */}
               <div className="px-4 py-3">
-                <div className="flex items-stretch rounded-xl h-10 border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <form onSubmit={handleSearch} className="flex items-stretch rounded-xl h-10 border border-gray-200 dark:border-gray-700 overflow-hidden">
                   <div className="text-gray-400 flex bg-gray-50 dark:bg-gray-800 items-center justify-center pl-4">
                     <Search size={18} />
                   </div>
                   <input
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="flex-1 w-full bg-gray-50 dark:bg-gray-800 outline-none px-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400"
                     placeholder="İlan veya hizmet ara..."
                     type="text"
                   />
-                </div>
+                </form>
               </div>
 
               {/* Nav Links */}
@@ -252,16 +264,18 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                 </Link>
 
                 <label className="flex flex-col min-w-40 h-10 w-96 relative group">
-                  <div className="flex w-full flex-1 items-stretch rounded-xl h-full border border-gray-200 dark:border-gray-700 group-focus-within:border-primary/50 transition-colors overflow-hidden">
+                  <form onSubmit={handleSearch} className="flex w-full flex-1 items-stretch rounded-xl h-full border border-gray-200 dark:border-gray-700 group-focus-within:border-primary/50 transition-colors overflow-hidden">
                     <div className="text-gray-400 flex bg-gray-50 dark:bg-gray-800/50 items-center justify-center pl-4 border-r-0">
                       <Search size={18} />
                     </div>
                     <input
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden text-gray-900 dark:text-white focus:outline-none border-none bg-gray-50 dark:bg-gray-800/50 h-full placeholder:text-gray-400 px-3 text-sm font-medium"
                       placeholder="İlan veya hizmet ara..."
                       type="text"
                     />
-                  </div>
+                  </form>
                 </label>
               </div>
 
@@ -332,9 +346,6 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                             <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user?.name || "Kullanıcı"}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email || "user@banasat.com"}</p>
                           </div>
-                          <Link href="/taleplerim" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <FileText size={16} /> Taleplerim
-                          </Link>
                           <Link href="/siparislerim" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                             <ShoppingBag size={16} /> Siparişlerim
                           </Link>
