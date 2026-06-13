@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { View, Text, Pressable, Modal, ScrollView } from "react-native";
+import { View, Text, Pressable, Modal, ScrollView, Image } from "react-native";
 import { useRouter, usePathname } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ChevronLeft, Menu, X, Sun, Moon, MessageSquare, ClipboardList,
-  HandCoins, ShoppingBag, User as UserIcon, LogOut, LogIn, UserPlus, Plus,
+  HandCoins, ShoppingBag, User as UserIcon, LogOut, LogIn, UserPlus, Plus, LayoutGrid,
 } from "lucide-react-native";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -52,7 +52,7 @@ export default function TopBar({ showBack = true }: { showBack?: boolean }) {
 
         {/* Orta: logo */}
         <Pressable onPress={() => router.push("/")}>
-          <Text className="text-xl font-black tracking-tight" style={{ color: PRIMARY }}>BanaSat</Text>
+          <Image source={require("@/assets/banasat_logo.png")} style={{ height: 28, width: 120 }} resizeMode="contain" />
         </Pressable>
 
         {/* Sağ: tema + menü */}
@@ -83,6 +83,7 @@ export default function TopBar({ showBack = true }: { showBack?: boolean }) {
               <ScrollView className="max-h-[70vh] px-3 pb-4">
                 {isLoggedIn ? (
                   <>
+                    <MenuItem icon={<LayoutGrid size={18} color={iconColor} />} label="Kategoriler" onPress={() => go("/kategoriler")} />
                     <MenuItem icon={<MessageSquare size={18} color={iconColor} />} label="Mesajlar" badge={unread} onPress={() => go("/mesajlar")} />
                     <MenuItem icon={<ClipboardList size={18} color={iconColor} />} label="Taleplerim" onPress={() => go("/taleplerim")} />
                     <MenuItem icon={<HandCoins size={18} color={iconColor} />} label="Tekliflerim" onPress={() => go("/tekliflerim")} />
@@ -98,16 +99,19 @@ export default function TopBar({ showBack = true }: { showBack?: boolean }) {
                     </Pressable>
                   </>
                 ) : (
-                  <View className="flex-row gap-2 py-2">
-                    <Pressable onPress={() => go("/giris")} className="flex-1 flex-row items-center justify-center gap-2 h-12 rounded-xl border border-gray-200 dark:border-gray-700">
-                      <LogIn size={16} color={iconColor} />
-                      <Text className="text-gray-700 dark:text-gray-200 font-semibold">Giriş Yap</Text>
-                    </Pressable>
-                    <Pressable onPress={() => go("/kayit")} className="flex-1 flex-row items-center justify-center gap-2 h-12 rounded-xl" style={{ backgroundColor: PRIMARY }}>
-                      <UserPlus size={16} color="#fff" />
-                      <Text className="text-white font-bold">Kayıt Ol</Text>
-                    </Pressable>
-                  </View>
+                  <>
+                    <MenuItem icon={<LayoutGrid size={18} color={iconColor} />} label="Kategoriler" onPress={() => go("/kategoriler")} />
+                    <View className="flex-row gap-2 py-2">
+                      <Pressable onPress={() => go("/giris")} className="flex-1 flex-row items-center justify-center gap-2 h-12 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <LogIn size={16} color={iconColor} />
+                        <Text className="text-gray-700 dark:text-gray-200 font-semibold">Giriş Yap</Text>
+                      </Pressable>
+                      <Pressable onPress={() => go("/kayit")} className="flex-1 flex-row items-center justify-center gap-2 h-12 rounded-xl" style={{ backgroundColor: PRIMARY }}>
+                        <UserPlus size={16} color="#fff" />
+                        <Text className="text-white font-bold">Kayıt Ol</Text>
+                      </Pressable>
+                    </View>
+                  </>
                 )}
               </ScrollView>
             </SafeAreaView>

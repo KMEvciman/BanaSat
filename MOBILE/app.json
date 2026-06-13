@@ -18,6 +18,7 @@
     },
     "android": {
       "package": "com.banasat.mobile",
+      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "backgroundColor": "#5BB678"
       }
@@ -27,7 +28,7 @@
       "typedRoutes": false
     },
     "extra": {
-      "apiUrl": "http://10.0.2.2:4000/api"
+      "apiUrl": "http://192.168.1.35:4000/api"
     }
   }
 }
