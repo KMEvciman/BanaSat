@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { OffersService } from './offers.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
+import { UpdateOfferDto } from './dto/update-offer.dto';
 import { QueryOffersDto } from './dto/query-offers.dto';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 
@@ -36,6 +37,16 @@ export class OffersController {
   @Patch(':id/withdraw')
   withdraw(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.offersService.withdraw(id, userId);
+  }
+
+  /** Satıcı kendi teklifini düzenler (yalnızca beklemedeki). */
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+    @Body() dto: UpdateOfferDto,
+  ) {
+    return this.offersService.update(id, userId, dto);
   }
 
   /** Satıcı kendi teklifini tamamen siler. */

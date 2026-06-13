@@ -201,6 +201,36 @@ export class OffersService {
     return this.toOffer(updated);
   }
 
+  /** Satıcı kendi teklifini düzenler (yalnızca beklemedeki teklifler). */
+  async update(
+    offerId: string,
+    sellerId: string,
+    dto: { price?: number; note?: string },
+  ) {
+    const offer = await this.prisma.offer.findUnique({
+      where: { id: offerId },
+      select: { id: true, sellerId: true, status: true },
+    });
+
+    if (!offer) {
+      throw new NotFoundException('Teklif bulunamadı.');
+    }
+    if (offer.sellerId !== sellerId) {
+      throw new ForbiddenException('Bu teklif üzerinde işlem yapma yetkiniz yok.');
+    }
+    if (offer.status !== OfferStatus.BEKLEMEDE) {
+      throw new BadRequestException('Yalnızca beklemedeki teklifler düzenlenebilir.');
+    }
+
+    const updated = await this.prisma.offer.update({
+      where: { id: offerId },
+      data: { price: dto.price, note: dto.note },
+      select: OFFER_WITH_LISTING_SELECT,
+    });
+
+    return this.toOffer(updated);
+  }
+
   /**
    * Satıcı kendi teklifini tamamen siler (geçmiş teklifler dahil, her durumda).
    * İlgili sipariş varsa cascade ile birlikte silinir.

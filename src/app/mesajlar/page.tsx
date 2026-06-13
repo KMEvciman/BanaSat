@@ -282,7 +282,7 @@ function MesajlarContent() {
             onClick={() => setActiveId(conv.id)}
             className={`group flex items-center gap-3 p-3 rounded-xl cursor-pointer relative transition-colors ${activeId === conv.id ? "bg-primary/10 dark:bg-primary/20 border border-primary/20" : "hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent"}`}
           >
-            {conv.unreadCount > 0 && <div className="absolute right-3 top-3 min-w-5 h-5 px-1.5 flex items-center justify-center bg-red-500 rounded-full text-white text-[10px] font-bold shadow-sm">{conv.unreadCount}</div>}
+            {conv.unreadCount > 0 && <div className="absolute right-3 top-1/2 -translate-y-1/2 min-w-5 h-5 px-1.5 flex items-center justify-center bg-red-500 rounded-full text-white text-[10px] font-bold shadow-sm">{conv.unreadCount}</div>}
             <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-12 w-12 shrink-0 border border-white/20" style={{ backgroundImage: `url("${conv.counterpart.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(conv.counterpart.name)}&background=random`}")` }}></div>
             <div className="flex flex-col flex-1 min-w-0">
               <div className="flex justify-between items-center mb-0.5">

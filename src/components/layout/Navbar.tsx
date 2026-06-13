@@ -15,16 +15,18 @@ import {
   Menu,
   X,
   ShoppingBag,
+  ChevronLeft,
 } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { messagesApi } from "@/lib/api/services";
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const navLinks = [
   { href: "/taleplerim", label: "Taleplerim", icon: ClipboardList },
   { href: "/tekliflerim", label: "Tekliflerim", icon: HandCoins },
+  { href: "/siparislerim", label: "Siparişlerim", icon: ShoppingBag },
 ];
 
 const categories = [
@@ -56,6 +58,7 @@ const categories = [
 export default function Navbar({ hideCategories = false }: { hideCategories?: boolean }) {
   const { isLoggedIn, user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState("");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
@@ -123,21 +126,35 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
         {/* ===== MOBILE NAVBAR (lg altı) ===== */}
         <div className="lg:hidden">
           <div className="flex items-center justify-between px-4 py-3">
-            {/* Theme Toggle - left */}
-            <ThemeToggle />
+            {/* Geri - left (sade < işareti; ana sayfada gizli) */}
+            {pathname !== "/" ? (
+              <button onClick={() => router.back()} aria-label="Geri" className="text-gray-500 dark:text-gray-400 p-1 -ml-1">
+                <ChevronLeft size={26} />
+              </button>
+            ) : (
+              <span className="w-6" />
+            )}
 
             {/* Logo centered */}
             <Link href="/" className="absolute left-1/2 -translate-x-1/2" onClick={closeMobile}>
               <img src="/banasat_logo.png" alt="BanaSat" className="h-7 w-auto" />
             </Link>
 
-            {/* Hamburger - right */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="size-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
-            >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+            {/* Tema + Hamburger - right */}
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="relative size-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+              >
+                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                {!isMobileMenuOpen && isLoggedIn && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white dark:border-background-dark">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+              </button>
+            </div>
           </div>
 
           {/* Mobile Dropdown Menu */}

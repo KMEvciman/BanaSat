@@ -140,6 +140,8 @@ export const offersApi = {
   accept: (id: string) => api.patch<Offer>(`/offers/${id}/accept`),
   reject: (id: string) => api.patch<Offer>(`/offers/${id}/reject`),
   withdraw: (id: string) => api.patch<Offer>(`/offers/${id}/withdraw`),
+  update: (id: string, body: { price?: number; note?: string }) =>
+    api.patch<Offer>(`/offers/${id}`, body),
   remove: (id: string) => api.delete<void>(`/offers/${id}`),
 };
 

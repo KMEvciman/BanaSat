@@ -44,61 +44,23 @@
 }
 
 /*
-  Koyu temada form alanları (input / textarea / select):
-  - Arka plan tam siyah
-  - Çerçeve beyaz (yumuşak)
-  - Üzerine gelince / odaklanınca yeşil
+  Koyu temada form alanları: tam siyah arka plan, ince çerçeve,
+  odaklanınca yeşil. (White mode'daki kadar sade ve profesyonel.)
 */
 .dark input,
 .dark textarea,
 .dark select {
   background-color: #000000;
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
-.dark input:hover,
-.dark textarea:hover,
-.dark select:hover,
 .dark input:focus,
 .dark textarea:focus,
 .dark select:focus {
   border-color: var(--color-primary);
 }
 
-/*
-  Koyu tema: siyah-beyaz görünüm.
-  - Çerçevesi olmayan butonlara beyaz çerçeve (düşük özgüllük: renkli
-    çerçeveli butonların kendi rengini ezmez).
-  - Tüm butonlar üzerine gelince çerçeve yeşil.
-  - Kart / kapsayıcı çerçeveleri (gray/slate koyu tonları) beyaz,
-    üzerine gelince yeşile döner.
-*/
-:where(.dark) button {
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
+/* Yalnızca kartların en dış çerçevesi (koyu temada görünür ince beyaz). */
+.dark .card-outline {
+  border-color: rgba(255, 255, 255, 0.22);
 }
-
-:where(.dark) button:hover {
-  border-color: var(--color-primary);
-}
-
-/* Koyu temadaki çerçeve renklerini beyaza çevir (daha belirgin + biraz kalın). */
-.dark [class*="dark:border-gray-"],
-.dark [class*="dark:border-slate-"] {
-  border-color: rgba(255, 255, 255, 0.45);
-  border-width: 1.5px;
-}
-
-/* Bu çerçeveli yüzeylerin üzerine gelince yeşile dön. */
-.dark [class*="dark:border-gray-"]:hover,
-.dark [class*="dark:border-slate-"]:hover {
-  border-color: var(--color-primary);
-}
-
-/* İstisna: Navbar altındaki kategori barı hover'da yeşile DÖNMESİN. */
-.dark .nav-cat-bar:hover,
-.dark .nav-cat-bar [class*="dark:border-gray-"]:hover,
-.dark .nav-cat-bar [class*="dark:border-slate-"]:hover,
-.dark .nav-cat-bar button:hover {
-  border-color: rgba(255, 255, 255, 0.45);
-}
-

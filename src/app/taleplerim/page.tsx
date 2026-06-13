@@ -274,7 +274,7 @@ export default function Taleplerim() {
                   <Link
                     key={talep.id}
                     href={`/ilan/${talep.id}`}
-                    className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:border-primary transition-colors duration-200"
+                    className="group card-outline bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:border-primary transition-colors duration-200"
                   >
                     <div className="relative h-32 sm:h-44 w-full overflow-hidden">
                       <img className="w-full h-full object-cover" src={talep.coverImageUrl || PLACEHOLDER} alt={talep.title} />

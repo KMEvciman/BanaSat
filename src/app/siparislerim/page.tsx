@@ -120,7 +120,7 @@ function OrderCard({ order, isBuyer, onDetails }: { order: Order; isBuyer: boole
   const listing = order.offer.listing;
 
   return (
-    <article className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
+    <article className="card-outline bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
       <div className="flex flex-col sm:flex-row">
         <Link href={`/ilan/${listing.id}`} className="sm:w-44 h-32 sm:h-auto shrink-0 bg-cover bg-center bg-gray-100 dark:bg-gray-800"
           style={{ backgroundImage: `url("${listing.coverImageUrl || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=400&q=80"}")` }}

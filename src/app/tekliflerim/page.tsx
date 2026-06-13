@@ -10,7 +10,7 @@ import { offersApi } from "@/lib/api/services";
 import type { Offer, OfferStatus } from "@/lib/api/types";
 import {
   Search, SlidersHorizontal, ArrowUpDown, Clock, Eye, ChevronDown, X,
-  Truck, ShieldCheck, Wallet, MessageCircle, HandCoins, Trash2,
+  Truck, ShieldCheck, Wallet, MessageCircle, HandCoins, Trash2, Pencil, Save,
 } from "lucide-react";
 
 const statusConfig: Record<OfferStatus, { label: string; color: string; bg: string }> = {
@@ -38,8 +38,25 @@ const sortOptions = [
 const PLACEHOLDER = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80";
 const fmtPrice = (p: number) => `${p.toLocaleString("tr-TR")} TL`;
 
-function TeklifModal({ teklif, onClose, onWithdraw, onDelete }: { teklif: Offer; onClose: () => void; onWithdraw: (id: string) => void; onDelete: (id: string) => void }) {
+function TeklifModal({ teklif, onClose, onWithdraw, onDelete, onUpdate }: { teklif: Offer; onClose: () => void; onWithdraw: (id: string) => void; onDelete: (id: string) => void; onUpdate: (id: string, body: { price: number; note: string }) => Promise<void> }) {
   const sc = statusConfig[teklif.status];
+  const [editing, setEditing] = useState(false);
+  const [editPrice, setEditPrice] = useState(String(teklif.price));
+  const [editNote, setEditNote] = useState(teklif.note);
+  const [saving, setSaving] = useState(false);
+
+  const saveEdit = async () => {
+    const price = Number(editPrice);
+    if (!price || price < 1 || saving) return;
+    setSaving(true);
+    try {
+      await onUpdate(teklif.id, { price, note: editNote.trim() });
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
@@ -71,7 +88,14 @@ function TeklifModal({ teklif, onClose, onWithdraw, onDelete }: { teklif: Offer;
 
           <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-xl p-4 text-center">
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Verdiğiniz Teklif</p>
-            <p className="text-3xl font-black text-primary tracking-tight">{fmtPrice(teklif.price)}</p>
+            {editing ? (
+              <input
+                type="number" min={1} value={editPrice} onChange={(e) => setEditPrice(e.target.value)}
+                className="w-full text-center text-2xl font-black text-primary bg-white dark:bg-gray-800 border border-primary/30 rounded-lg h-12 outline-none focus:border-primary"
+              />
+            ) : (
+              <p className="text-3xl font-black text-primary tracking-tight">{fmtPrice(teklif.price)}</p>
+            )}
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Talep Bütçesi: {teklif.listing.budgetLabel}</p>
           </div>
 
@@ -95,15 +119,37 @@ function TeklifModal({ teklif, onClose, onWithdraw, onDelete }: { teklif: Offer;
 
           <div>
             <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Teklif Notunuz</p>
-            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{teklif.note}</p>
-            </div>
+            {editing ? (
+              <textarea
+                value={editNote} onChange={(e) => setEditNote(e.target.value)} rows={3}
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3 text-sm outline-none focus:border-primary resize-none"
+                placeholder="Teklif notunuz"
+              />
+            ) : (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{teklif.note}</p>
+              </div>
+            )}
           </div>
 
           {teklif.status === "BEKLEMEDE" && (
-            <button onClick={() => onWithdraw(teklif.id)} className="w-full h-11 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors">
-              Teklifi Geri Çek
-            </button>
+            editing ? (
+              <div className="flex gap-3">
+                <button onClick={() => setEditing(false)} className="flex-1 h-11 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Vazgeç</button>
+                <button onClick={saveEdit} disabled={saving} className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/85 transition-colors disabled:opacity-50">
+                  <Save size={16} /> {saving ? "Kaydediliyor..." : "Kaydet"}
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <button onClick={() => setEditing(true)} className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-primary/10 text-primary text-sm font-semibold hover:bg-primary hover:text-white transition-colors">
+                  <Pencil size={16} /> Teklifi Düzenle
+                </button>
+                <button onClick={() => onWithdraw(teklif.id)} className="flex-1 h-11 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-sm font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors">
+                  Teklifi Geri Çek
+                </button>
+              </div>
+            )
           )}
 
           <button onClick={() => onDelete(teklif.id)} className="w-full h-11 flex items-center justify-center gap-2 rounded-xl border border-red-300 dark:border-red-500/40 text-red-600 dark:text-red-400 text-sm font-semibold hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors">
@@ -206,6 +252,17 @@ export default function Tekliflerim() {
     }
   };
 
+  // Teklifi düzenle (fiyat/not).
+  const handleUpdate = async (id: string, body: { price: number; note: string }) => {
+    try {
+      const updated = await offersApi.update(id, body);
+      setOffers((prev) => prev.map((o) => (o.id === id ? updated : o)));
+      setSelectedTeklif(updated);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Teklif güncellenemedi.");
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -279,7 +336,7 @@ export default function Tekliflerim() {
               {filtered.map((teklif) => {
                 const sc = statusConfig[teklif.status];
                 return (
-                  <div key={teklif.id} className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:border-primary transition-colors duration-200">
+                  <div key={teklif.id} className="group card-outline bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:border-primary transition-colors duration-200">
                     <div className="relative h-32 sm:h-44 w-full overflow-hidden">
                       <img className="w-full h-full object-cover" src={teklif.listing.coverImageUrl || PLACEHOLDER} alt={teklif.listing.title} />
                       <div className="absolute top-3 left-3">
@@ -337,7 +394,7 @@ export default function Tekliflerim() {
       </main>
       <Footer />
 
-      {selectedTeklif && <TeklifModal teklif={selectedTeklif} onClose={() => setSelectedTeklif(null)} onWithdraw={handleWithdraw} onDelete={handleDelete} />}
+      {selectedTeklif && <TeklifModal teklif={selectedTeklif} onClose={() => setSelectedTeklif(null)} onWithdraw={handleWithdraw} onDelete={handleDelete} onUpdate={handleUpdate} />}
     </>
   );
 }

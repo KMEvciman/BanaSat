@@ -6,7 +6,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/ilan/${listing.id}`}
-      className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800/60 overflow-hidden shadow-sm hover:border-primary transition-colors duration-200 block"
+      className="group card-outline bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800/60 overflow-hidden shadow-sm hover:border-primary transition-colors duration-200 block"
     >
       {/* Image */}
       <div className="relative h-32 sm:h-48 w-full overflow-hidden">
@@ -23,8 +23,8 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             </span>
           </div>
         )}
-        <div className="absolute bottom-3 right-3 bg-white/85 dark:bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-gray-200/50 dark:border-white/10">
-          <span className="text-primary font-bold text-xs">{listing.category}</span>
+        <div className="absolute bottom-3 right-3 bg-white/85 dark:bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md border border-gray-200/50 dark:border-white/10 max-w-[55%]">
+          <span className="text-primary font-semibold text-[10px] truncate block">{listing.category}</span>
         </div>
       </div>
 
