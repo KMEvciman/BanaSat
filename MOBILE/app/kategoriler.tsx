@@ -44,6 +44,7 @@ export default function Kategoriler() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedSlug, setSelectedSlug] = useState<string>("tumu");
+  const [showCategory, setShowCategory] = useState(false);
   const [listings, setListings] = useState<CardListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -143,36 +144,7 @@ export default function Kategoriler() {
           </Text>
         </View>
 
-        {/* Kategori chip'leri (yatay liste) */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
-          className="mb-4"
-        >
-          <Chip
-            label="Tümü"
-            icon={<LayoutGrid size={14} color={selectedSlug === "tumu" ? "#fff" : "#737373"} />}
-            active={selectedSlug === "tumu"}
-            onPress={() => setSelectedSlug("tumu")}
-          />
-          {categories.map((cat) => {
-            const Icon = cat.icon ? iconMap[cat.icon] ?? Package : Package;
-            const active = selectedSlug === cat.slug;
-            return (
-              <Chip
-                key={cat.id}
-                label={cat.name}
-                count={cat.listingCount}
-                icon={<Icon size={14} color={active ? "#fff" : "#737373"} />}
-                active={active}
-                onPress={() => setSelectedSlug(cat.slug)}
-              />
-            );
-          })}
-        </ScrollView>
-
-        {/* Arama + İl + Sıralama */}
+        {/* Arama + Kategori + İl + Sıralama */}
         <View className="px-4 gap-3 mb-4">
           {/* Arama kutusu (başlık/konum/açıklama - backend search) */}
           <View className="flex-row items-center h-11 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3">
@@ -190,6 +162,18 @@ export default function Kategoriler() {
               </Pressable>
             )}
           </View>
+
+          {/* Kategori dropdown (tüm kategorilere kolay erişim) */}
+          <Pressable
+            onPress={() => setShowCategory(true)}
+            className="flex-row items-center justify-between h-11 px-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900"
+          >
+            <View className="flex-row items-center gap-2 flex-1">
+              <LayoutGrid size={18} color={PRIMARY} />
+              <Text numberOfLines={1} className="text-gray-900 dark:text-white text-sm font-medium flex-1">{selectedName}</Text>
+            </View>
+            <ChevronDown size={16} color="#9ca3af" />
+          </Pressable>
 
           <View className="flex-row gap-3">
             {/* İl filtresi */}
@@ -255,6 +239,16 @@ export default function Kategoriler() {
         options={[{ key: "", label: "Tüm İller" }, ...provinces.map((p) => ({ key: p.name, label: p.name }))]}
         selected={province}
         onSelect={(key) => { setProvince(key); setShowProvince(false); }}
+      />
+
+      {/* Kategori seçim modalı (dropdown) */}
+      <PickerModal
+        visible={showCategory}
+        title="Kategori Seçin"
+        onClose={() => setShowCategory(false)}
+        options={[{ key: "tumu", label: "Tüm Kategoriler" }, ...categories.map((c) => ({ key: c.slug, label: c.name }))]}
+        selected={selectedSlug}
+        onSelect={(key) => { setSelectedSlug(key); setShowCategory(false); }}
       />
 
       {/* Sıralama modalı */}
