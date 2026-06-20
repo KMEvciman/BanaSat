@@ -3,10 +3,12 @@ import { View, Text, ScrollView, Pressable, Image, Modal, TextInput, Alert, useW
 import { useRouter } from "expo-router";
 import { X, Trash2, Pencil, Save } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
+import { useKeyboardHeight } from "@/components/KeyboardAware";
 import { useAuth } from "@/context/AuthContext";
 import { offersApi } from "@/lib/api/services";
 import { PLACEHOLDER_IMAGE } from "@/lib/api/adapters";
 import type { Offer, OfferStatus } from "@/lib/api/types";
+import { digitsOnly, formatThousands } from "@/lib/format";
 
 const PRIMARY = "#5BB678";
 const filters = [
@@ -99,6 +101,7 @@ function OfferModal({ offer, onClose, onChanged }: { offer: Offer; onClose: () =
   const [price, setPrice] = useState(String(offer.price));
   const [note, setNote] = useState(offer.note);
   const [busy, setBusy] = useState(false);
+  const kbHeight = useKeyboardHeight();
 
   const save = async () => {
     if (!price || Number(price) < 1 || busy) return;
@@ -114,13 +117,13 @@ function OfferModal({ offer, onClose, onChanged }: { offer: Offer; onClose: () =
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/50 justify-end" onPress={onClose}>
+      <Pressable className="flex-1 bg-black/50 justify-end" style={{ paddingBottom: kbHeight }} onPress={onClose}>
         <Pressable className="bg-white dark:bg-gray-900 rounded-t-2xl max-h-[88%]" onPress={(e) => e.stopPropagation()}>
           <View className="flex-row items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
             <Text className="text-lg font-bold text-gray-900 dark:text-white">Teklif Detayı</Text>
             <Pressable onPress={onClose}><X size={20} color="#737373" /></Pressable>
           </View>
-          <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
+          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, gap: 16 }}>
             <View className="flex-row gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
               <Image source={{ uri: offer.listing.coverImageUrl || PLACEHOLDER_IMAGE }} className="size-14 rounded-lg" />
               <View className="flex-1">
@@ -132,7 +135,7 @@ function OfferModal({ offer, onClose, onChanged }: { offer: Offer; onClose: () =
             <View className="items-center rounded-xl p-4" style={{ backgroundColor: "rgba(91,182,120,0.08)" }}>
               <Text className="text-xs text-gray-500 mb-1">Verdiğiniz Teklif</Text>
               {editing ? (
-                <TextInput value={price} onChangeText={setPrice} keyboardType="numeric" className="w-full text-center text-2xl font-black rounded-lg h-12 border border-primary/30 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" style={{ color: PRIMARY }} />
+                <TextInput value={formatThousands(price)} onChangeText={(t) => setPrice(digitsOnly(t))} keyboardType="numeric" className="w-full text-center text-2xl font-black rounded-lg h-12 border border-primary/30 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" style={{ color: PRIMARY }} />
               ) : (
                 <Text className="text-3xl font-black" style={{ color: PRIMARY }}>{offer.price.toLocaleString("tr-TR")} ₺</Text>
               )}

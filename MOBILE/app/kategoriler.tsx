@@ -11,6 +11,7 @@ import {
   PawPrint, Truck, Wrench, GraduationCap, Package,
 } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
+import KeyboardAware from "@/components/KeyboardAware";
 import ListingCard from "@/components/ListingCard";
 import { categoriesApi, listingsApi, locationsApi } from "@/lib/api/services";
 import { listingToCard } from "@/lib/api/adapters";
@@ -125,6 +126,7 @@ export default function Kategoriler() {
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <TopBar />
+      <KeyboardAware>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 32 }}
@@ -243,6 +245,7 @@ export default function Kategoriler() {
           </View>
         )}
       </ScrollView>
+      </KeyboardAware>
 
       {/* İl seçim modalı */}
       <PickerModal

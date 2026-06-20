@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator } from 
 import { useRouter } from "expo-router";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
+import KeyboardAware from "@/components/KeyboardAware";
 import { useAuth } from "@/context/AuthContext";
 
 const PRIMARY = "#5BB678";
@@ -29,7 +30,8 @@ export default function Giris() {
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <TopBar />
-      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 40 }}>
+      <KeyboardAware>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20, paddingTop: 40 }} keyboardShouldPersistTaps="handled">
         <Text className="text-3xl font-black text-gray-900 dark:text-white text-center">Tekrar Hoş Geldin</Text>
         <Text className="text-gray-500 dark:text-gray-400 text-center mt-2 mb-8">Hesabına giriş yap</Text>
 
@@ -55,7 +57,8 @@ export default function Giris() {
           <Text className="text-gray-500 dark:text-gray-400">Hesabın yok mu? </Text>
           <Pressable onPress={() => router.replace("/kayit")}><Text className="font-semibold" style={{ color: PRIMARY }}>Kayıt Ol</Text></Pressable>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAware>
     </View>
   );
 }

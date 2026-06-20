@@ -1,310 +1,38 @@
-# BanaSat - Proje Dokümantasyonu
+# Dokümantasyon
 
-Alıcı odaklı pazar yeri. Alıcı talep (ilan) oluşturur, satıcılar teklif verir,
-alıcı teklifleri karşılaştırıp seçer, taraflar mesajlaşır.
+## Fiyat/Bütçe giriş alanlarında binlik ayraç (tr-TR)
 
----
+Fiyat ve bütçe giriş alanlarında kullanıcı yazarken binlik ayraç (nokta) gösterimi eklendi.
+Örnek: kullanıcı `4000` yazınca alanda `4.000` görünür.
 
-## Genel Yapı
+### Mantık
+- State'lerde her zaman HAM rakam (ayraçsız) tutulur.
+- Görüntülemede `formatThousands(state)` ile binlik ayraçlı gösterilir.
+- Giriş değişiminde `digitsOnly(text)` ile state'e sadece rakam yazılır.
+- Validasyon ve API gönderimi `Number(hamState)` ile yapılır (mevcut gönderim mantığı değişmedi).
 
-```
-BanaSat/
-├── src/                  # Frontend (Next.js 16 + React 19 + Tailwind v4)
-├── Backend/              # Backend (NestJS 10 + Prisma 5 + PostgreSQL 16)
-├── docker-compose.yml    # PostgreSQL + pgAdmin
-└── DOKUMANTASYON.md
-```
+### Ortak yardımcılar
+İki dosya aynı içeriğe sahip:
+- Mobil: `MOBILE/lib/format.ts`
+- Web: `src/lib/format.ts`
 
----
+İçerik:
+- `digitsOnly(s)`: sadece rakamları alır, baştaki sıfırları temizler.
+- `formatThousands(s)`: ham rakam dizisini `tr-TR` binlik ayraçlı gösterime çevirir.
 
-## Frontend
+### Güncellenen giriş alanları
+Mobil (React Native):
+- `MOBILE/app/talep-olustur.tsx` — bütçe
+- `MOBILE/app/ilan/[id].tsx` — teklif fiyatı
+- `MOBILE/app/tekliflerim.tsx` — teklif düzenleme modalı fiyatı
+- `MOBILE/app/mesajlar.tsx` — teklif gönderme modalı fiyatı (offerPrice)
 
-- **Teknoloji:** Next.js 16 (App Router), React 19, Tailwind CSS v4, lucide-react
-- **Tema:** Açık/koyu mod (koyu modda saf siyah arka plan). Ana renk `#5BB678` (yeşil), beyaz.
-- **Auth (simülasyon):** `AuthContext` ile giriş/kayıt/çıkış. Giriş yapmamış kullanıcı
-  hero bölümünü ve Giriş/Kayıt butonlarını görür; giriş yapınca profil menüsü, mesajlar,
-  talep oluştur görünür.
-- **Responsive:** PC görünümü korunarak mobil uyumlu. Mobilde hamburger menü (sağ üst),
-  tema butonu (sol üst), ortada logo. Kategoriler hamburger içinde açılır/kapanır.
-- **Sayfalar:** Ana sayfa, Kategoriler, İlan detay (`/ilan/[id]`), Taleplerim, Tekliflerim,
-  Talep oluştur, Teklif ver, Teklif karşılaştır, Mesajlar, Ödeme, Profil, Giriş, Kayıt.
+Web (Next.js):
+- `src/app/talep-olustur/page.tsx` — bütçe (mevcut mantık format.ts ile sadeleştirildi)
+- `src/app/ilan/[id]/page.tsx` — teklif fiyatı
+- `src/app/tekliflerim/page.tsx` — teklif düzenleme modalı fiyatı
+- `src/app/mesajlar/page.tsx` — teklif gönderme fiyatı
 
-### Önemli Frontend Bileşenleri
-- `Navbar` — masaüstü ve mobil ayrı render; sabit (fixed) üst bar.
-- `ListingCard` / `ListingCarousel` — ilan kartları; carousel mobilde dokunmatik kaydırma,
-  her ekran boyutunda tam kart sayısı gösterir, oklar yalnızca masaüstünde.
-- Taleplerim/Tekliflerim/Kategoriler — filtreleme + sıralama + kart grid (mobilde ikili).
-
----
-
-## Backend
-
-### Teknoloji ve Mimari
-- **NestJS 10** (modüler, controller → service → Prisma katmanları)
-- **Prisma 5** ORM, tek `schema.prisma` dosyasında tüm veri modeli
-- **PostgreSQL 16** (Docker)
-- **JWT** (access + refresh), **bcrypt**, **helmet**, **class-validator**
-
-### Mimari İlkeler
-- Her özellik kendi modülünde; iş mantığı serviste, HTTP controller'da.
-- Tüm girdiler DTO + class-validator ile doğrulanır.
-- Yanıtlar `{ success, data }`, hatalar `{ success: false, statusCode, message }`.
-- Sırlar ortam değişkenlerinden gelir; uygulama açılışta env doğrular (fail-fast).
-- Parola/token hash'leme tek sorumlu `HashingService`'te toplanır.
-
-### Veri Modeli (Prisma)
-`User`, `Category`, `Listing`, `ListingImage`, `Offer`, `Conversation`, `Message`,
-`Order`, `Review` + enum'lar (`UserRole`, `ListingStatus`, `OfferStatus`, `OrderStatus`).
-
-### Modüller ve Uç Noktalar
-
-**Auth** (`/api/auth`)
-- `POST /register` — kayıt + token
-- `POST /login` — giriş + token
-- `POST /refresh` — token yenileme (refresh token ile)
-- `POST /logout` — çıkış (refresh token geçersizleşir)
-- `GET /me` — giriş yapan kullanıcı profili
-- Çift token (access 15dk + refresh 7gün), refresh token DB'de hash'li, token rotation.
-- Global JWT guard; `@Public()` ile muafiyet.
-
-**Users** (`/api/users`)
-- `PATCH /me` — profil güncelle (ad, e-posta, telefon, bio, konum, avatar); e-posta benzersizlik kontrolü
-- `PATCH /me/password` — parola değiştir (mevcut parola doğrulanır, oturumlar sıfırlanır)
-- `POST /me/avatar` — profil fotoğrafı yükle (multipart, alan: `avatar`; JPEG/PNG/GIF/WEBP, max 5MB); eski dosya silinir
-- `GET /:id` — herkese açık profil (e-posta/telefon gizli)
-
-> Yüklenen dosyalar `/uploads/avatars/` altından statik sunulur (örn. `http://localhost:4000/uploads/avatars/<dosya>`).
-
-**Categories** (`/api/categories`)
-- `GET /` — tüm kategoriler + aktif ilan sayısı (public)
-- `GET /:slug` — tek kategori (public)
-
-**Listings / Talepler** (`/api/listings`)
-- `GET /` — filtre (kategori, durum, arama, sahip) + sıralama (yeni/eski/en çok teklif/en çok görüntülenen) + sayfalama (public)
-- `GET /:id` — detay; görüntülenme sayacını artırır (public)
-- `POST /` — oluştur (sahip = giriş yapan)
-- `PATCH /:id` — güncelle (yalnızca sahip)
-- `DELETE /:id` — sil (yalnızca sahip)
-
-**Offers / Teklifler** (`/api/offers`)
-- `POST /` — teklif ver (kendi ilanına veremez, aktif ilana, ilana tek teklif)
-- `GET /mine` — verdiğim teklifler (filtre + sıralama + sayfalama)
-- `PATCH /:id/accept` — ilan sahibi kabul eder (teklif KABUL, ilan BEKLEMEDE — transaction)
-- `PATCH /:id/reject` — ilan sahibi reddeder
-- `PATCH /:id/withdraw` — satıcı geri çeker (yalnızca beklemede)
-
-**Messages / Mesajlaşma** (`/api/conversations`)
-- `POST /` — konuşma başlat/getir (ilan bağlamında, get-or-create)
-- `GET /` — konuşmalarım (karşı taraf, son mesaj, okunmamış sayısı)
-- `GET /:id` — konuşma + mesajlar (yalnızca katılımcılar)
-- `POST /:id/messages` — mesaj gönder
-- `PATCH /:id/read` — okundu işaretle
-
-**Orders / Siparişler** (`/api/orders`)
-- `POST /` — kabul edilmiş teklif için sipariş oluştur (yalnızca alıcı, tek sipariş)
-- `POST /:id/pay` — ödeme (simülasyon); sipariş ODENDI, ilan TAMAMLANDI olur
-- `GET /mine` — alımlarım
-- `GET /sales` — satışlarım
-- `GET /:id` — sipariş detayı (yalnızca alıcı/satıcı)
-- `PATCH /:id/status` — durum ilerlet (ODENDI→HAZIRLANIYOR→KARGODA: satıcı, KARGODA→TESLIM_EDILDI: alıcı)
-- `PATCH /:id/cancel` — iptal (yalnızca ödeme beklenirken)
-
-**Reviews / Değerlendirmeler** (`/api/reviews`)
-- `POST /` — teslim edilmiş sipariş için satıcıyı değerlendir (1-5 puan + yorum); satıcı rating ortalaması atomik güncellenir
-- `GET /user/:userId` — bir kullanıcının aldığı değerlendirmeler (public)
-
-**Health** (`/api/health`) — uygulama + veritabanı durumu (public).
-
----
-
-## Kurulum ve Çalıştırma
-
-```bash
-# 1. Veritabanı (proje kök dizini)
-docker compose up -d
-
-# 2. Backend
-cd Backend
-npm install
-# .env.example -> .env (varsayılanlar Docker ile uyumlu)
-npm run prisma:migrate    # tabloları oluştur
-npm run db:seed           # 24 kategoriyi yükle
-npm run start:dev         # http://localhost:4000/api
-
-# 3. Frontend (proje kök dizini)
-npm install
-npm run dev               # http://localhost:3000
-```
-
----
-
-## Yapılan İşlemler Günlüğü
-
-### Frontend (tamamlandı)
-- Navbar yeniden düzenlendi: kategori barı, Taleplerim/Tekliflerim, Talep Oluştur butonu.
-- Renk paleti `#5BB678` yeşil + beyaz; logo entegrasyonu; koyu mod saf siyah.
-- Ana sayfa: En Popüler İlanlar (carousel), Nasıl Çalışır, Son Eklenen İlanlar.
-- Auth simülasyonu (`AuthContext`): giriş/kayıt/çıkış, role göre arayüz.
-- Sayfalar: Giriş, Kayıt, Profil (avatar yükleme), Taleplerim, Tekliflerim (filtre/sıralama),
-  Kategoriler (mock veri), dinamik İlan detay (`/ilan/[id]`).
-- Tüm tasarım responsive yapıldı (PC görünümü korunarak); mobil hamburger menü.
-- React hydration mismatch hataları giderildi.
-
-### Backend (tamamlandı)
-- **Altyapı:** Docker (PostgreSQL + pgAdmin), NestJS iskeleti, config doğrulama,
-  global pipe/filter/interceptor, helmet, CORS, Prisma şeması + kategori seed.
-- **Auth modülü:** JWT access/refresh, bcrypt, global guard, token rotation.
-- **Categories modülü:** kategori listeleme (aktif ilan sayısıyla).
-- **Listings modülü:** talep CRUD, filtreleme/sıralama/sayfalama, sahiplik kontrolü,
-  görüntülenme sayacı.
-- **Offers modülü:** teklif verme/kabul/red/geri çekme, iş kuralları, durum geçişleri.
-- **Users modülü:** profil güncelleme, parola değiştirme, public profil; ortak
-  `HashingService` refactor'ü.
-- **Messages modülü:** konuşma (get-or-create), mesaj gönderme, okundu işaretleme,
-  okunmamış sayacı, katılımcı yetki kontrolü.
-- **Orders modülü:** kabul edilen teklif için sipariş, ödeme simülasyonu (ilan TAMAMLANDI),
-  durum akışı (hazırlanıyor/kargoda/teslim edildi) aktör denetimiyle, alımlarım/satışlarım, iptal.
-- **Reviews modülü:** teslim edilen sipariş sonrası satıcı değerlendirme (1-5 + yorum),
-  satıcı rating ortalamasının atomik güncellenmesi, mükerrer engelleme. (Şema: Review'a
-  orderId @unique eklendi — migration `add_review_order_relation`.)
-- **Avatar yükleme:** multer ile disk depolama (`/uploads/avatars`), tip/boyut doğrulama,
-  statik sunum (`useStaticAssets`), yeni yüklemede eski dosyanın silinmesi.
-
-### Frontend-Backend Entegrasyonu (devam ediyor)
-- **API katmanı** (`src/lib/api/`): `client.ts` (token yönetimi, otomatik refresh, hata),
-  `services.ts` (tüm uç noktalar), `types.ts`, `adapters.ts`.
-- `.env.local` → `NEXT_PUBLIC_API_URL=http://localhost:4000/api`
-- **Bağlanan sayfalar:** Giriş, Kayıt, Çıkış (gerçek JWT); Ana sayfa (En Popüler/Son Eklenen
-  ilanlar API'den); Talep Oluştur; İlan Detay (teklif ver/kabul/red, mesaj başlat); Profil
-  (bilgi güncelleme + avatar yükleme); Taleplerim; Tekliflerim (geri çekme dahil); Kategoriler;
-  Kullanıcı public profili (`/kullanici/[id]`); Mesajlaşma (gerçek zamanlıya yakın, polling ile).
-- **JWT doğrulama:** access stratejisi her istekte kullanıcının DB'de var olduğunu kontrol eder
-  (silinmiş kullanıcı 401 alır).
-
-### Çalıştırma (geliştirme)
-1. `docker compose up -d` (kök dizin)
-2. `cd Backend && npm run start:dev`
-3. `npm run dev` (kök dizin, frontend)
-
-### Kategori Yeniden Düzenleme (alım-satım odaklı)
-- Kategoriler hizmet ağırlıklı listeden alım-satım (ürün) odaklı listeye çevrildi.
-  Öncelik ürünlerde; hizmetler sona alındı.
-- **Yeni kategoriler (21):** Telefon & Aksesuar, Bilgisayar & Tablet, Elektronik,
-  Beyaz Eşya, Küçük Ev Aletleri, Oyun & Konsol, Mobilya, Ev & Yaşam, Giyim & Moda,
-  Anne & Bebek, Spor & Outdoor, Hobi & Oyuncak, Kitap-Film & Müzik, Otomotiv & Yedek Parça,
-  Bahçe & Yapı Market, Kozmetik & Kişisel Bakım, Evcil Hayvan Ürünleri,
-  Nakliye & Taşımacılık, Tadilat & Usta, Eğitim & Özel Ders, Diğer Hizmetler.
-- **Güncellenen dosyalar:** `Backend/prisma/seed.ts` (kaynak), `src/components/layout/Navbar.tsx`,
-  `src/app/kategoriler/page.tsx` (ikon eşlemesi + mock ilanlar), `src/components/layout/Footer.tsx`,
-  `src/app/taleplerim/page.tsx`, `src/app/tekliflerim/page.tsx`, `src/data/listings.ts` (mock kategori eşlemesi).
-- **DİKKAT:** Backend kategorileri DB'ye yansıması için seed tekrar çalıştırılmalı:
-  `cd Backend && npm run db:seed`. (Seed upsert kullanır; eski kategoriler DB'de kalır,
-  isterseniz manuel temizlenebilir.)
-- Seed çalıştırıldı: 21 yeni kategori DB'ye yazıldı (sıfır DB, eski kategori yok).
-
-### Ortam Notu (port çakışması)
-- Host makinede 5432 portunda native bir PostgreSQL çalıştığı için docker postgres 5433'e
-  maplendi. Kök dizinde `.env` → `POSTGRES_PORT=5433`, `Backend/.env` → `DATABASE_URL` portu 5433.
-- `Backend/.env` docker-compose varsayılan kimlik bilgileriyle oluşturuldu (geliştirme).
-
-## Mesajlaşmaya Teklif Entegrasyonu
-
-Sohbet içinden gerçek teklif/karşı-teklif gönderme ve kabul/reddetme eklendi.
-
-### Backend
-- `schema.prisma`: `MessageType` enum (TEXT, OFFER); `Message` modeline `type` ve `offerId` (Offer'a SetNull); `Offer`'a `messages` ilişkisi. Migration: `20260610000000_add_message_offer`.
-- `messages.service.ts`: Ortak `MESSAGE_SELECT` (offer bilgisi dahil) + `normalizeMessage` (Decimal→number). Yeni `sendOffer()` metodu: yalnızca satıcı taraf teklif sunar, ilan AKTIF olmalı, `Offer` upsert (varsa güncelle + BEKLEMEDE'ye al), OFFER tipi mesaj oluşturur.
-- `messages.controller.ts`: `POST /conversations/:id/offer`.
-- `dto/send-offer.dto.ts`: price (min 1), deliveryTime, note (opsiyonel).
-
-### Frontend
-- `types.ts`: `Message`'a `type` ve `offer` (MessageOfferRef) eklendi.
-- `services.ts`: `messagesApi.sendOffer()`.
-- `mesajlar/page.tsx`: Satıcı için header'da "Teklif Ver" butonu + modal (fiyat/teslim/not); OFFER mesajları özel kart olarak (tutar + durum etiketi); alıcı + teklif BEKLEMEDE ise Kabul/Reddet butonları (`offersApi.accept/reject`).
-
-## Karşılıklı Teklif (Pazarlık) + Teklif Engelleme
-
-### Backend
-- `schema.prisma`: `Conversation`'a `offersBlocked` (default false). `Message`'a teklif anlık görüntüsü kolonları: `offerPrice`, `offerDeliveryTime`, `offerNote`. Migration: `20260611000000_offer_negotiation`.
-- `messages.service.ts`:
-  - `sendOffer`: artık hem alıcı hem satıcı gönderebilir (karşılıklı pazarlık). Teklif daima konuşmanın satıcısına ait tekil Offer kaydı üzerinden yürür (upsert). Her mesaj o anki fiyatı snapshot olarak saklar. `offersBlocked` ise reddedilir.
-  - `acceptOffer`/`rejectOffer`: güncel BEKLEMEDE teklifi yanıtlar. Son teklifi gönderen kendi teklifini yanıtlayamaz (`getActiveOffer` kontrolü).
-  - `setOffersBlocked`: yalnızca alıcı (ilan sahibi) teklif gönderimini açar/kapatır.
-  - `MESSAGE_SELECT` ve `CONVERSATION_SELECT` snapshot + offersBlocked içerir.
-- `messages.controller.ts`: `PATCH :id/offer/accept`, `PATCH :id/offer/reject`, `PATCH :id/block-offers`. Yeni `BlockOffersDto`.
-
-### Frontend
-- `types.ts`: `Message`'a snapshot alanları; `ConversationDetail`'e `offersBlocked`.
-- `services.ts`: `acceptOffer`, `rejectOffer`, `setBlockOffers`.
-- `mesajlar/page.tsx`:
-  - Konuşma listesi okunmamış rozeti kırmızı (mesaj ikonuyla aynı).
-  - Header: alıcı için "Teklifi Engelle/Engeli Kaldır"; satıcı için "Teklif Ver" (engelliyse gizli).
-  - Teklif kartı ferah/profesyonel; snapshot fiyat gösterir. Son teklif + beklemede + gönderen ben değilsem üç buton: Reddet | Karşı Teklif | Kabul Et.
-  - Karşı Teklif mevcut fiyatı modale ön doldurur. Engelliyse giriş üstünde bilgi şeridi.
-
-## Uçtan Uca Teklif Akışı + Sipariş + Çok-İlanlı Engelleme
-
-### İşleyiş
-X talep açar → Y ilan detayından teklif verir → teklif sohbete OFFER mesajı olarak düşer (konuşma otomatik başlar, mesajlara yönlendirilir). Teklif kartında hangi ilana ait olduğu görünür. Taraflar sohbette karşılıklı teklifleşir; teklif sahibi kendi teklifini güncelleyebilir. Teklif kabul edilince ilgili teklif için sipariş oluşur ve "Siparişlerim" sayfasında görünür.
-
-### Backend
-- `schema.prisma`: `Conversation.offersBlocked` kaldırıldı. Yeni `OfferBlock` modeli (listingId, blockedUserId, unique). Migration: `20260611120000_offer_blocks`.
-- `messages.service.ts`: `findOne` engel durumunu `OfferBlock`'tan türetir. `sendOffer` OfferBlock kontrolü yapar. `acceptOffer` kabulde otomatik `Order` oluşturur (upsert). `getOfferBlockOptions` (ilan sahibinin ilanları + engel durumu) ve `setOfferBlocks` (seçili ilanlara senkronize engel) eklendi.
-- `messages.controller.ts`: `GET/PUT :id/offer-blocks`. Eski `block-offers` ve `BlockOffersDto` kaldırıldı; `SetOfferBlocksDto` eklendi.
-- `offers.service.ts`: `create` OfferBlock kontrolü; `accept` kabulde otomatik `Order` oluşturur.
-
-### Frontend
-- `client.ts`: `api.put` eklendi.
-- `types.ts`: `OfferBlockOptions` / `OfferBlockOptionListing`.
-- `services.ts`: `offerBlockOptions`, `setOfferBlocks`.
-- `ilan/[id]/page.tsx`: Teklif verme artık `createOrGet` + `sendOffer` ile sohbete düşer ve mesajlara yönlendirir.
-- `mesajlar/page.tsx`: Teklif kartında ilgili ilan satırı (linkli). Yanıtlayan için "Karşı Teklif Ver" (tam genişlik) + Reddet/Kabul Et (ferah, profesyonel). Teklif sahibi için "Teklifi Güncelle". "Teklifi Engelle" artık modal açar: ilan sahibinin tüm ilanları, checkbox, "Hepsini Seç", İptal/Engelle.
-- `siparislerim/page.tsx`: Yeni sayfa — Alımlarım/Satışlarım sekmeleri, sipariş kartları, ödeme bekleyen alımlar için "Ödemeyi Tamamla". Navbar profil menüsüne "Siparişlerim" eklendi.
-
-## Silme Özellikleri + Dark Mode Lacivert Düzeltmesi
-
-### Silme
-- `schema.prisma`: `Order.offer` ilişkisi `onDelete: Cascade` yapıldı (teklif silinince siparişi de gider). Migration: `20260612000000_order_offer_cascade`.
-- `offers.service.ts` + controller: `remove(offerId, sellerId)` ve `DELETE /offers/:id` eklendi (geçmiş teklifler dahil her durumda silinir).
-- Listings'te `remove` + `DELETE /listings/:id` zaten vardı; cascade sayesinde siparişli ilanlar da silinebilir.
-- Frontend `services.ts`: `offersApi.remove`.
-- `taleplerim/page.tsx`: Kart görselinde çöp kutusu butonu (onaylı silme).
-- `tekliflerim/page.tsx`: Kart görselinde çöp kutusu + modal içinde "Teklifi Sil".
-
-### Dark Mode Lacivert Sorunu
-- Sebep: Tailwind'in `gray`/`slate` paletleri mavi (soğuk) tonlu; saf siyah zeminde lacivert görünüyordu.
-- Çözüm (`globals.css`): `gray` ve `slate` paletleri NÖTR griye yeniden tanımlandı, en koyu tonlar (800/900/950) tam siyaha yakın/saf siyah. Böylece tüm kart/buton/zemin yüzeyleri lacivert yerine simsiyah/nötr oldu.
-- Form alanları (input/textarea/select) için koyu temada: arka plan saf siyah, çerçeve beyaz (yumuşak), hover/focus'ta yeşil (primary).
-
-### Dark Mode Siyah-Beyaz Tema (çerçeveler)
-- `globals.css`: Koyu temada çerçevesiz butonlara beyaz çerçeve (`:where(.dark) button`, düşük özgüllük — kırmızı/renkli çerçeveli butonları ezmez). Tüm butonlar hover'da yeşil çerçeve.
-- Kart/kapsayıcıların koyu çerçeve tonları (`dark:border-gray/slate-600/700/800/900`) beyaza çevrildi; hover'da yeşile döner (attribute selector ile yalnızca border-color, arka planlar etkilenmez).
-
-## İl / İlçe Lokasyon Sistemi
-
-### Veri
-- `Backend/src/common/data/turkey-locations.ts`: 81 il + tüm ilçeler (973 ilçe). Seed bu veriden `Province`/`District` tablolarını idempotent doldurur.
-
-### Backend
-- `schema.prisma`: `Province`, `District`, `Address` modelleri. `User` ve `Listing`'e `province`/`district` alanları. Migration: `20260613000000_locations`.
-- `locations` modülü: `GET /locations` (iller + ilçeler, public).
-- Kayıt (`register`) il/ilçe alır; `users.create` ve `updateProfile` il/ilçe işler.
-- Adres CRUD: `GET/POST /users/me/addresses`, `PATCH/DELETE /users/me/addresses/:id` (varsayılan adres mantığıyla).
-- İlan oluşturma il/ilçe alır; `GET /listings?province=...` il filtresi eklendi.
-
-### Frontend
-- `LocationSelect` bileşeni: il/ilçe bağımlı iki seçim; lokasyon verisi bir kez yüklenip cache'lenir.
-- Kayıt ve Talep Oluştur sayfalarına il/ilçe seçimi.
-- Profil: il/ilçe seçimi + "Adreslerim" yönetimi (ekle/sil/varsayılan yap).
-- Ana sayfa: giriş yapan kullanıcının iline göre "{İl}'daki Talepler" bölümü.
-- Kategoriler: il filtresi dropdown'u + `?il=` query desteği (bölgesel keşif).
-
-## UI/UX İyileştirmeleri ve Ödeme Akışı (7 maddelik tur)
-
-1. Kart footer: "Süre belirtilmedi" kaldırıldı, "İlk Teklifi Ver" butonu tam genişlik/tek satır.
-2. Profil menüsünden "Taleplerim" kaldırıldı. Navbar araması `/kategoriler?ara=` ile başlık/açıklama/konuma göre arıyor.
-3. "Konumunda İlgini Çekebilecek İlanlar" bölümü En Popüler gibi carousel.
-4. Navbar + kategori barı hover'da yeşile dönmüyor (`nav-cat-bar` istisnası). Kartlar hover'da hareket etmiyor, yalnızca çerçeve yeşile dönüyor. Çerçeveler daha belirgin (0.45) ve kalın (1.5px).
-5. Mesajlarda "Teklif Ver" → karşı tarafın (talep sahibi) aktif taleplerini listeleyen pop-up; seçilen talebin konuşmasına geçip teklif modalı açılıyor.
-6. Çıkışta ana sayfaya yönlendirme; mesajlar sayfasına giriş guard'ı (çıkış sonrası içerik sızıntısı engellendi).
-7. Sipariş akışı: Siparişlerim'de "Ödemeye Geç" → `/odeme?order=<id>` işlevsel ödeme ekranı (gerçek sipariş özeti + form + simülasyon). Ödeme `ordersApi.pay` ile tamamlanır (sipariş ODENDI, ilan TAMAMLANDI), başarı ekranı gösterilir. Siparişlerim'de "Tamamlandı" rozeti + "Ayrıntılar" butonu (geçmiş sipariş modalı; ilanın artık yayında olmadığını belirtir).
+Not: Web tarafında ilgili input'ların `type="number"` olanları `inputMode="numeric"` olarak değiştirildi
+(binlik ayraç metin gösterimi için gerekli). Mevcut gösterim alanları (toLocaleString ile gösterilen yerler)
+değiştirilmedi.

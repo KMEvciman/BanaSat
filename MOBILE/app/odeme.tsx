@@ -5,6 +5,7 @@ import {
   Lock, Truck, CreditCard, BadgeCheck, ArrowRight, CheckCircle2, ShoppingBag,
 } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
+import KeyboardAware from "@/components/KeyboardAware";
 import { useAuth } from "@/context/AuthContext";
 import { ordersApi } from "@/lib/api/services";
 import { resolveImageUrl } from "@/lib/api/adapters";
@@ -72,7 +73,8 @@ export default function OdemeEkrani() {
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <TopBar />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+      <KeyboardAware>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
         {/* Kırıntı menü */}
         <View className="flex-row items-center gap-1 mb-6">
           <Pressable onPress={() => router.push("/siparislerim" as never)}>
@@ -208,6 +210,7 @@ export default function OdemeEkrani() {
           </>
         )}
       </ScrollView>
+      </KeyboardAware>
     </View>
   );
 }

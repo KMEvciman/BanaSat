@@ -29,6 +29,7 @@ import {
   X,
 } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
+import KeyboardAware, { useKeyboardHeight } from "@/components/KeyboardAware";
 import LocationSelect from "@/components/LocationSelect";
 import { useAuth } from "@/context/AuthContext";
 import { usersApi } from "@/lib/api/services";
@@ -40,6 +41,7 @@ const PRIMARY = "#5BB678";
 export default function Profil() {
   const router = useRouter();
   const { isLoggedIn, user, loading: authLoading, updateProfile } = useAuth();
+  const kbHeight = useKeyboardHeight();
 
   // Profil alanları
   const [name, setName] = useState("");
@@ -259,7 +261,8 @@ export default function Profil() {
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <TopBar />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
+      <KeyboardAware>
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
         {/* Başlık */}
         <Text className="text-2xl font-black text-gray-900 dark:text-white">Profil Düzenle</Text>
         <Text className="text-gray-500 dark:text-gray-400 mt-1 mb-6">
@@ -549,10 +552,11 @@ export default function Profil() {
           )}
         </View>
       </ScrollView>
+      </KeyboardAware>
 
       {/* Adres ekle/düzenle modalı */}
       <Modal visible={addrModal} transparent animationType="slide" onRequestClose={() => setAddrModal(false)}>
-        <Pressable className="flex-1 bg-black/50 justify-end" onPress={() => setAddrModal(false)}>
+        <Pressable className="flex-1 bg-black/50 justify-end" style={{ paddingBottom: kbHeight }} onPress={() => setAddrModal(false)}>
           <Pressable
             className="bg-white dark:bg-gray-900 rounded-t-2xl max-h-[85%]"
             onPress={(e) => e.stopPropagation()}
@@ -565,7 +569,7 @@ export default function Profil() {
                 <X size={20} color="#737373" />
               </Pressable>
             </View>
-            <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <ScrollView contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
               <Label text="Adres Başlığı" />
               <Field>
                 <TextInput

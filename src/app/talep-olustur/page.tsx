@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { categoriesApi, listingsApi, uploadsApi } from "@/lib/api/services";
 import LocationSelect from "@/components/LocationSelect";
 import type { Category } from "@/lib/api/types";
+import { digitsOnly, formatThousands } from "@/lib/format";
 import {
   ChevronDown,
   ArrowRight,
@@ -189,12 +190,11 @@ export default function TalepOlustur() {
                     Bütçe (₺) <span className="text-red-500">*</span>
                   </label>
                   <input
-                    value={budgetLabel ? Number(budgetLabel).toLocaleString("tr-TR") : ""}
+                    value={formatThousands(budgetLabel)}
                     onChange={(e) => {
                       const raw = e.target.value;
-                      const digits = raw.replace(/\D/g, "");
                       setBudgetWarning(raw.trim() !== "" && /[^\d.\s]/.test(raw));
-                      setBudgetLabel(digits);
+                      setBudgetLabel(digitsOnly(raw));
                     }}
                     inputMode="numeric"
                     required

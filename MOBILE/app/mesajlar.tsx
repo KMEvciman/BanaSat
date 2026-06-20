@@ -7,8 +7,6 @@ import {
   Image,
   Modal,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {
@@ -16,6 +14,7 @@ import {
   CheckSquare, Square, Pencil, Wallet, CheckCircle2,
 } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
+import KeyboardAware, { useKeyboardHeight } from "@/components/KeyboardAware";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { messagesApi, listingsApi } from "@/lib/api/services";
@@ -27,6 +26,7 @@ import type {
   OfferBlockOptions,
   Listing,
 } from "@/lib/api/types";
+import { digitsOnly, formatThousands } from "@/lib/format";
 
 const PRIMARY = "#5BB678";
 
@@ -48,6 +48,7 @@ export default function Mesajlar() {
   const params = useLocalSearchParams<{ c?: string; listing?: string; seller?: string }>();
   const { user, isLoggedIn, loading: authLoading } = useAuth();
   const { mode } = useTheme();
+  const kbHeight = useKeyboardHeight();
   const isDark = mode === "dark";
   const iconColor = isDark ? "#d4d4d4" : "#525252";
   const scrollRef = useRef<ScrollView>(null);
@@ -337,11 +338,7 @@ export default function Mesajlar() {
 
   // --- Sohbet görünümü ---
   const chatView = (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-    >
+    <View className="flex-1">
       {/* Başlık */}
       <View className="flex-row items-center gap-3 px-3 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <Pressable onPress={() => setActiveId(null)} className="size-9 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
@@ -366,8 +363,10 @@ export default function Mesajlar() {
         )}
       </View>
 
-      {/* Mesajlar */}
-      <ScrollView ref={scrollRef} className="flex-1 bg-[#fafafa] dark:bg-black" contentContainerStyle={{ padding: 12, gap: 12 }}>
+      {/* Mesajlar + giriş kutusu: klavye açılınca giriş kutusu klavyenin üstüne gelir */}
+      <KeyboardAware>
+        {/* Mesajlar */}
+        <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" className="flex-1 bg-[#fafafa] dark:bg-black" contentContainerStyle={{ padding: 12, gap: 12 }}>
         {detail?.messages.map((m) => {
           const mine = m.senderId === user?.id;
 
@@ -542,7 +541,8 @@ export default function Mesajlar() {
           </Pressable>
         </View>
       </View>
-    </KeyboardAvoidingView>
+      </KeyboardAware>
+    </View>
   );
 
   return (
@@ -552,7 +552,7 @@ export default function Mesajlar() {
 
       {/* Sohbet-içi teklif modalı */}
       <Modal visible={offerModalOpen} transparent animationType="slide" onRequestClose={() => setOfferModalOpen(false)}>
-        <Pressable className="flex-1 bg-black/50 justify-end" onPress={() => setOfferModalOpen(false)}>
+        <Pressable className="flex-1 bg-black/50 justify-end" style={{ paddingBottom: kbHeight }} onPress={() => setOfferModalOpen(false)}>
           <Pressable className="bg-white dark:bg-gray-900 rounded-t-2xl" onPress={(e) => e.stopPropagation()}>
             <View className="flex-row items-center gap-2 px-5 py-4 border-b border-gray-200 dark:border-gray-800">
               <HandCoins size={20} color={PRIMARY} />
@@ -563,8 +563,8 @@ export default function Mesajlar() {
               <View>
                 <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Fiyat (₺)</Text>
                 <TextInput
-                  value={offerPrice}
-                  onChangeText={setOfferPrice}
+                  value={formatThousands(offerPrice)}
+                  onChangeText={(t) => setOfferPrice(digitsOnly(t))}
                   keyboardType="numeric"
                   placeholder="Örn. 5000"
                   placeholderTextColor="#94a3b8"
@@ -620,7 +620,7 @@ export default function Mesajlar() {
             </View>
 
             {/* İlan listesi */}
-            <ScrollView contentContainerStyle={{ padding: 12, gap: 4 }}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 12, gap: 4 }}>
               {!blockOptions && <Text className="text-sm text-gray-400 text-center py-8">Yükleniyor...</Text>}
               {blockOptions && blockOptions.listings.length === 0 && (
                 <Text className="text-sm text-gray-400 text-center py-8">Henüz ilanınız yok.</Text>
@@ -672,7 +672,7 @@ export default function Mesajlar() {
               <Text className="flex-1 text-base font-bold text-gray-900 dark:text-white">Hangi talebe teklif vermek istersiniz?</Text>
               <Pressable onPress={() => setPickerOpen(false)}><X size={20} color={iconColor} /></Pressable>
             </View>
-            <ScrollView contentContainerStyle={{ padding: 12, gap: 4 }}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 12, gap: 4 }}>
               {pickerLoading && <Text className="text-sm text-gray-400 text-center py-8">Yükleniyor...</Text>}
               {!pickerLoading && pickerListings.length === 0 && (
                 <Text className="text-sm text-gray-400 text-center py-8">Bu kullanıcının aktif talebi yok.</Text>

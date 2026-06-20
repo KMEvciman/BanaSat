@@ -18,7 +18,6 @@
     },
     "android": {
       "package": "com.banasat.mobile",
-      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "backgroundColor": "#5BB678"
       }

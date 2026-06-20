@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { offersApi } from "@/lib/api/services";
 import type { Offer, OfferStatus } from "@/lib/api/types";
+import { digitsOnly, formatThousands } from "@/lib/format";
 import {
   Search, SlidersHorizontal, ArrowUpDown, Clock, Eye, ChevronDown, X,
   Truck, ShieldCheck, Wallet, MessageCircle, HandCoins, Trash2, Pencil, Save,
@@ -90,7 +91,7 @@ function TeklifModal({ teklif, onClose, onWithdraw, onDelete, onUpdate }: { tekl
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Verdiğiniz Teklif</p>
             {editing ? (
               <input
-                type="number" min={1} value={editPrice} onChange={(e) => setEditPrice(e.target.value)}
+                inputMode="numeric" value={formatThousands(editPrice)} onChange={(e) => setEditPrice(digitsOnly(e.target.value))}
                 className="w-full text-center text-2xl font-black text-primary bg-white dark:bg-gray-800 border border-primary/30 rounded-lg h-12 outline-none focus:border-primary"
               />
             ) : (

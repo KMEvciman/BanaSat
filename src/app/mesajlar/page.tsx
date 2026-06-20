@@ -8,6 +8,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { messagesApi, listingsApi } from "@/lib/api/services";
 import type { Conversation, ConversationDetail, OfferStatus, OfferBlockOptions, Listing } from "@/lib/api/types";
+import { digitsOnly, formatThousands } from "@/lib/format";
 
 function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
@@ -514,7 +515,7 @@ function MesajlarContent() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Fiyat (₺)</label>
                 <input
-                  type="number" min={1} value={offerPrice} onChange={(e) => setOfferPrice(e.target.value)}
+                  inputMode="numeric" value={formatThousands(offerPrice)} onChange={(e) => setOfferPrice(digitsOnly(e.target.value))}
                   required placeholder="Örn. 5000"
                   className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-background-light dark:bg-background-dark/50 px-4 h-11 outline-none focus:border-primary text-slate-900 dark:text-white"
                 />

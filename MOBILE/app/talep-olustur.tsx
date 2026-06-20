@@ -4,10 +4,12 @@ import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { UploadCloud, X, ChevronDown, ArrowRight } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
+import KeyboardAware from "@/components/KeyboardAware";
 import LocationSelect from "@/components/LocationSelect";
 import { useAuth } from "@/context/AuthContext";
 import { categoriesApi, listingsApi, uploadsApi } from "@/lib/api/services";
 import type { Category } from "@/lib/api/types";
+import { digitsOnly, formatThousands } from "@/lib/format";
 
 const PRIMARY = "#5BB678";
 
@@ -78,7 +80,8 @@ export default function TalepOlustur() {
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <TopBar />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
+      <KeyboardAware>
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
         <Text className="text-2xl font-black text-gray-900 dark:text-white mb-1">Yeni Talep Oluştur</Text>
         <Text className="text-gray-500 dark:text-gray-400 mb-5">Satıcılardan en iyi teklifleri almak için detayları girin.</Text>
 
@@ -102,7 +105,7 @@ export default function TalepOlustur() {
         <TextInput value={fullDescription} onChangeText={setFullDescription} placeholder="İhtiyacınızın detayları..." placeholderTextColor="#9ca3af" multiline className={`${inputCls} min-h-[110px]`} style={{ textAlignVertical: "top" }} />
 
         <Label text="Bütçe (₺)" />
-        <TextInput value={budget ? Number(budget).toLocaleString("tr-TR") : ""} onChangeText={(t) => setBudget(t.replace(/\D/g, ""))} keyboardType="numeric" placeholder="Örn. 60000" placeholderTextColor="#9ca3af" className={inputCls} />
+        <TextInput value={formatThousands(budget)} onChangeText={(t) => setBudget(digitsOnly(t))} keyboardType="numeric" placeholder="Örn. 60000" placeholderTextColor="#9ca3af" className={inputCls} />
 
         <Label text="Konum (İl / İlçe)" />
         <LocationSelect province={province} district={district} onChange={(p, d) => { setProvince(p); setDistrict(d); }} />
@@ -123,7 +126,8 @@ export default function TalepOlustur() {
         <Pressable onPress={submit} disabled={submitting} className="h-12 rounded-xl flex-row items-center justify-center gap-2 mt-6" style={{ backgroundColor: PRIMARY, opacity: submitting ? 0.6 : 1 }}>
           {submitting ? <ActivityIndicator color="#fff" /> : <><Text className="text-white font-bold">Talebi Yayınla</Text><ArrowRight size={18} color="#fff" /></>}
         </Pressable>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAware>
 
       {/* Kategori seçim modalı */}
       <Modal visible={catOpen} transparent animationType="slide" onRequestClose={() => setCatOpen(false)}>

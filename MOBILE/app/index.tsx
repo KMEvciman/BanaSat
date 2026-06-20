@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, RefreshControl, useWindowDimensions } from "react-native";
-import { MapPin } from "lucide-react-native";
+import { View, Text, ScrollView, RefreshControl, useWindowDimensions, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { MapPin, FileText, MailCheck, BadgeCheck } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
 import ListingCard from "@/components/ListingCard";
 import { listingsApi, offersApi } from "@/lib/api/services";
@@ -8,8 +9,11 @@ import { listingToCard } from "@/lib/api/adapters";
 import { useAuth } from "@/context/AuthContext";
 import type { CardListing, Listing } from "@/lib/api/types";
 
+const PRIMARY = "#5BB678";
+
 export default function Home() {
-  const { user } = useAuth();
+  const { user, isLoggedIn, loading: authLoading } = useAuth();
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const cardW = (width - 16 * 2 - 12) / 2; // 2 sütun, 16 padding, 12 gap
 
@@ -17,6 +21,11 @@ export default function Home() {
   const [recent, setRecent] = useState<CardListing[]>([]);
   const [regional, setRegional] = useState<CardListing[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Giriş yapılmamışsa doğrudan giriş ekranına yönlendir.
+  useEffect(() => {
+    if (!authLoading && !isLoggedIn) router.replace("/giris");
+  }, [authLoading, isLoggedIn]);
 
   const load = () =>
     Promise.all([
@@ -65,15 +74,20 @@ export default function Home() {
 
   const onRefresh = async () => { setRefreshing(true); await load(); setRefreshing(false); };
 
+  // Giriş yoksa içerik render etme (yönlendirme yapılıyor).
+  if (!isLoggedIn) {
+    return <View className="flex-1 bg-background-light dark:bg-background-dark" />;
+  }
+
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
       <TopBar />
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 32 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#5BB678" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={PRIMARY} />}
       >
-        {/* Konumunda İlgini Çekebilecek İlanlar */}
+        {/* Konumunda İlgini Çekebilecek İlanlar (yalnızca konumu olan) */}
         {!!user?.province && regional.length > 0 && (
           <Section
             title="Konumunda İlgini Çekebilecek İlanlar"
@@ -86,7 +100,63 @@ export default function Home() {
 
         <Section title="En Popüler İlanlar" subtitle="Şu anda en çok teklif alan ilanlar" items={popular} cardW={cardW} />
         <Section title="Son Eklenen İlanlar" subtitle="Yeni yayınlanan taleplere göz atın" items={recent} cardW={cardW} />
+
+        {/* Nasıl Çalışır */}
+        <HowItWorks />
+
+        {/* CTA */}
+        <CTA onPress={() => router.push(isLoggedIn ? "/talep-olustur" : "/kayit")} />
       </ScrollView>
+    </View>
+  );
+}
+
+/** Nasıl Çalışır 3 adımlı bölüm. */
+function HowItWorks() {
+  const steps = [
+    { icon: FileText, title: "1. İhtiyacını Anlat", desc: "Detaylı bir şekilde neye ihtiyacın olduğunu yaz, kategorini seç." },
+    { icon: MailCheck, title: "2. Teklifleri Topla", desc: "Satıcılardan gelen rekabetçi teklifleri anında görüntüle." },
+    { icon: BadgeCheck, title: "3. En İyisini Seç", desc: "Sana en uygun fiyatı ve güvenilir satıcıyı onayla, alışverişi tamamla." },
+  ];
+  return (
+    <View className="mt-8 px-4 py-8 bg-primary/5 dark:bg-black">
+      <Text className="text-gray-900 dark:text-white text-2xl font-bold text-center">Nasıl Çalışır?</Text>
+      <Text className="text-gray-500 dark:text-gray-400 text-center text-sm mt-1 mb-6">
+        Sadece 3 adımda ihtiyacınız olan ürüne en uygun fiyatla ulaşın.
+      </Text>
+      <View className="gap-4">
+        {steps.map((s) => {
+          const Icon = s.icon;
+          return (
+            <View key={s.title} className="flex-row items-center gap-4 card-outline bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
+              <View className="size-14 rounded-2xl bg-primary/10 items-center justify-center">
+                <Icon size={26} color={PRIMARY} />
+              </View>
+              <View className="flex-1">
+                <Text className="text-gray-900 dark:text-white text-base font-bold">{s.title}</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mt-0.5">{s.desc}</Text>
+              </View>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+/** Talep oluşturmaya yönlendiren çağrı bölümü. */
+function CTA({ onPress }: { onPress: () => void }) {
+  return (
+    <View className="px-4 mt-8">
+      <View className="rounded-3xl p-6 gap-4" style={{ backgroundColor: PRIMARY }}>
+        <Text className="text-white text-2xl font-bold">Hâlâ aradığını bulamadın mı?</Text>
+        <Text className="text-green-50 text-base leading-relaxed">
+          Hemen ücretsiz bir talep oluştur, aradığın ürün veya hizmet ayağına gelsin.
+        </Text>
+        <Pressable onPress={onPress} className="h-12 rounded-xl items-center justify-center bg-white">
+          <Text className="font-bold" style={{ color: PRIMARY }}>Ücretsiz Talep Oluştur</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -97,8 +167,8 @@ function Section({ title, subtitle, items, cardW, location }: { title: string; s
     <View className="px-4 pt-6">
       {location && (
         <View className="flex-row items-center gap-1 mb-1">
-          <MapPin size={14} color="#5BB678" />
-          <Text className="text-primary text-xs font-semibold" style={{ color: "#5BB678" }}>{subtitle}</Text>
+          <MapPin size={14} color={PRIMARY} />
+          <Text className="text-primary text-xs font-semibold" style={{ color: PRIMARY }}>{subtitle}</Text>
         </View>
       )}
       <Text className="text-gray-900 dark:text-white text-xl font-bold">{title}</Text>

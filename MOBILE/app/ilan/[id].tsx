@@ -1,12 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, ScrollView, Image, Pressable, TextInput, ActivityIndicator, Modal, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, Image, Pressable, TextInput, ActivityIndicator, Modal } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { MapPin, Eye, Clock, Star, BadgeCheck, Check, MessageCircle, X } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
+import KeyboardAware from "@/components/KeyboardAware";
 import { useAuth } from "@/context/AuthContext";
 import { listingsApi, offersApi, messagesApi } from "@/lib/api/services";
 import { formatTimeLeft, PLACEHOLDER_IMAGE, resolveImageUrl, resolveAvatarUrl } from "@/lib/api/adapters";
 import type { ListingDetail } from "@/lib/api/types";
+import { digitsOnly, formatThousands } from "@/lib/format";
 
 const PRIMARY = "#5BB678";
 
@@ -69,11 +71,7 @@ export default function IlanDetay() {
           <Text className="text-gray-900 dark:text-white text-lg font-bold">İlan bulunamadı</Text>
         </View>
       ) : (
-        <KeyboardAvoidingView
-          className="flex-1"
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-        >
+        <KeyboardAware>
         <ScrollView contentContainerStyle={{ paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
           {/* Kapak */}
           <Pressable onPress={() => setLightbox(resolveImageUrl(listing.coverImageUrl))}>
@@ -141,7 +139,7 @@ export default function IlanDetay() {
               isLoggedIn ? (
                 <View className="card-outline bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 gap-3">
                   <Text className="font-bold text-gray-900 dark:text-white">Teklif Ver</Text>
-                  <TextInput value={price} onChangeText={setPrice} keyboardType="numeric" placeholder="Fiyat (₺)" placeholderTextColor="#9ca3af" className="h-11 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white" />
+                  <TextInput value={formatThousands(price)} onChangeText={(t) => setPrice(digitsOnly(t))} keyboardType="numeric" placeholder="Fiyat (₺)" placeholderTextColor="#9ca3af" className="h-11 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white" />
                   <TextInput value={note} onChangeText={setNote} placeholder="Teklif notunuz (en az 10 karakter)" placeholderTextColor="#9ca3af" multiline className="min-h-[80px] p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white" />
                   <Pressable onPress={submitOffer} disabled={submitting} className="h-11 rounded-xl items-center justify-center" style={{ backgroundColor: PRIMARY, opacity: submitting ? 0.6 : 1 }}>
                     <Text className="text-white font-bold">{submitting ? "Gönderiliyor..." : "Teklifi Gönder"}</Text>
@@ -187,7 +185,7 @@ export default function IlanDetay() {
             )}
           </View>
         </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAware>
       )}
 
       {/* Lightbox */}
