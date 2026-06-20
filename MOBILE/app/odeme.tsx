@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { View, Text, ScrollView, Pressable, Image, TextInput } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { View, Text, ScrollView, Pressable, Image, TextInput, Modal } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {
   Lock, Truck, CreditCard, BadgeCheck, ArrowRight, CheckCircle2, ShoppingBag,
+  ChevronDown, X,
 } from "lucide-react-native";
 import TopBar from "@/components/TopBar";
 import KeyboardAware from "@/components/KeyboardAware";
@@ -33,8 +34,41 @@ export default function OdemeEkrani() {
   const [address, setAddress] = useState("");
   const [cardName, setCardName] = useState("");
   const [cardNo, setCardNo] = useState("");
-  const [cardExp, setCardExp] = useState("");
+  const [expMonth, setExpMonth] = useState(""); // "01".."12"
+  const [expYear, setExpYear] = useState("");   // son iki hane "25".."39"
   const [cardCvv, setCardCvv] = useState("");
+  const [showMonth, setShowMonth] = useState(false);
+  const [showYear, setShowYear] = useState(false);
+
+  // Ay seçenekleri (01-12).
+  const monthOptions = useMemo(
+    () => Array.from({ length: 12 }, (_, i) => {
+      const m = String(i + 1).padStart(2, "0");
+      return { key: m, label: m };
+    }),
+    [],
+  );
+
+  // Yıl seçenekleri: içinde bulunulan yıldan itibaren 15 yıl, son iki hane.
+  const yearOptions = useMemo(() => {
+    const base = new Date().getFullYear();
+    return Array.from({ length: 15 }, (_, i) => {
+      const yy = String((base + i) % 100).padStart(2, "0");
+      return { key: yy, label: yy };
+    });
+  }, []);
+
+  // Kart numarasını rakamla sınırla (16) ve 4'er gruplayıp boşlukla birleştir.
+  const handleCardNoChange = (text: string) => {
+    const digits = text.replace(/\D/g, "").slice(0, 16);
+    const grouped = digits.replace(/(.{4})/g, "$1 ").trim();
+    setCardNo(grouped);
+  };
+
+  // CVV: sadece rakam, en fazla 3 hane.
+  const handleCvvChange = (text: string) => {
+    setCardCvv(text.replace(/\D/g, "").slice(0, 3));
+  };
 
   useEffect(() => {
     if (!authLoading && !isLoggedIn) { router.replace("/giris"); return; }
@@ -176,10 +210,31 @@ export default function OdemeEkrani() {
               </View>
               <View className="gap-4">
                 <Field label="Kart Üzerindeki İsim"><Input value={cardName} onChangeText={setCardName} placeholder="AD SOYAD" autoCapitalize="characters" /></Field>
-                <Field label="Kart Numarası"><Input value={cardNo} onChangeText={setCardNo} placeholder="0000 0000 0000 0000" keyboardType="numeric" maxLength={19} /></Field>
+                <Field label="Kart Numarası"><Input value={cardNo} onChangeText={handleCardNoChange} placeholder="0000 0000 0000 0000" keyboardType="numeric" maxLength={19} /></Field>
                 <View className="flex-row gap-4">
-                  <View className="flex-1"><Field label="Son Kullanma"><Input value={cardExp} onChangeText={setCardExp} placeholder="AA/YY" maxLength={5} /></Field></View>
-                  <View className="flex-1"><Field label="CVV"><Input value={cardCvv} onChangeText={setCardCvv} placeholder="123" keyboardType="numeric" maxLength={4} /></Field></View>
+                  <View className="flex-1">
+                    <Field label="Son Kullanma">
+                      <View className="flex-row gap-2">
+                        {/* Ay seçici (01-12) */}
+                        <Pressable
+                          onPress={() => setShowMonth(true)}
+                          className="flex-1 flex-row items-center justify-between h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800"
+                        >
+                          <Text className={expMonth ? "text-gray-900 dark:text-white" : "text-gray-400"}>{expMonth || "Ay"}</Text>
+                          <ChevronDown size={16} color="#9ca3af" />
+                        </Pressable>
+                        {/* Yıl seçici (son iki hane) */}
+                        <Pressable
+                          onPress={() => setShowYear(true)}
+                          className="flex-1 flex-row items-center justify-between h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800"
+                        >
+                          <Text className={expYear ? "text-gray-900 dark:text-white" : "text-gray-400"}>{expYear || "Yıl"}</Text>
+                          <ChevronDown size={16} color="#9ca3af" />
+                        </Pressable>
+                      </View>
+                    </Field>
+                  </View>
+                  <View className="flex-1"><Field label="CVV"><Input value={cardCvv} onChangeText={handleCvvChange} placeholder="123" keyboardType="numeric" maxLength={3} /></Field></View>
                 </View>
                 <View className="flex-row items-center gap-1.5">
                   <Lock size={14} color="#9ca3af" />
@@ -211,7 +266,69 @@ export default function OdemeEkrani() {
         )}
       </ScrollView>
       </KeyboardAware>
+
+      {/* Ay seçim modalı */}
+      <PickerModal
+        visible={showMonth}
+        title="Ay Seçin"
+        options={monthOptions}
+        selected={expMonth}
+        onSelect={(key) => { setExpMonth(key); setShowMonth(false); }}
+        onClose={() => setShowMonth(false)}
+      />
+
+      {/* Yıl seçim modalı */}
+      <PickerModal
+        visible={showYear}
+        title="Yıl Seçin"
+        options={yearOptions}
+        selected={expYear}
+        onSelect={(key) => { setExpYear(key); setShowYear(false); }}
+        onClose={() => setShowYear(false)}
+      />
     </View>
+  );
+}
+
+/** Alttan açılan tek seçimli liste modalı (ay/yıl). */
+function PickerModal({ visible, title, options, selected, onSelect, onClose }: {
+  visible: boolean;
+  title: string;
+  options: { key: string; label: string }[];
+  selected: string;
+  onSelect: (key: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable className="flex-1 bg-black/50 justify-end" onPress={onClose}>
+        <Pressable className="bg-white dark:bg-gray-900 rounded-t-2xl max-h-[70%]" onPress={(e) => e.stopPropagation()}>
+          <View className="flex-row items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <Text className="text-lg font-bold text-gray-900 dark:text-white">{title}</Text>
+            <Pressable onPress={onClose} hitSlop={8}><X size={20} color="#737373" /></Pressable>
+          </View>
+          <ScrollView>
+            {options.map((opt) => {
+              const active = opt.key === selected;
+              return (
+                <Pressable
+                  key={opt.key}
+                  onPress={() => onSelect(opt.key)}
+                  className="px-5 py-3 border-b border-gray-50 dark:border-gray-800"
+                >
+                  <Text
+                    style={active ? { color: PRIMARY } : undefined}
+                    className={active ? "font-semibold" : "text-gray-800 dark:text-gray-200"}
+                  >
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 

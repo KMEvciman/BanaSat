@@ -8,19 +8,7 @@ import { useState, useMemo, useEffect, Suspense } from "react";
 import { categoriesApi, listingsApi, locationsApi } from "@/lib/api/services";
 import type { Category, Listing, ProvinceOption } from "@/lib/api/types";
 import { listingToCard } from "@/lib/api/adapters";
-import {
-  Search, ArrowUpDown, ChevronDown, LayoutGrid,
-  Smartphone, Laptop, Cpu, Tv, WashingMachine, Microwave, Gamepad2, Sofa,
-  Home, Shirt, Baby, Dumbbell, Puzzle, BookOpen, Car, Hammer, Sparkles,
-  PawPrint, Truck, Wrench, GraduationCap, Package,
-} from "lucide-react";
-
-// API'den gelen ikon anahtarını lucide bileşenine eşler.
-const iconMap: Record<string, React.ElementType> = {
-  Smartphone, Laptop, Cpu, Tv, WashingMachine, Microwave, Gamepad2, Sofa,
-  Home, Shirt, Baby, Dumbbell, Puzzle, BookOpen, Car, Hammer, Sparkles,
-  PawPrint, Truck, Wrench, GraduationCap, Package,
-};
+import { Search, ArrowUpDown, ChevronDown } from "lucide-react";
 
 const sortOptions = [
   { value: "newest", label: "En Yeni" },
@@ -106,42 +94,7 @@ function KategorilerContent() {
         </p>
       </div>
 
-      {/* Kategori chip'leri */}
-      <div className="flex gap-2 overflow-x-auto pb-1 mb-6 no-scrollbar scrollbar-hide">
-        <button
-          onClick={() => setSelectedSlug("tumu")}
-          className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            selectedSlug === "tumu"
-              ? "bg-primary text-white shadow-sm"
-              : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
-          }`}
-        >
-          <LayoutGrid size={14} />
-          Tümü
-        </button>
-        {categories.map((cat) => {
-          const Icon = cat.icon ? iconMap[cat.icon] ?? Package : Package;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedSlug(cat.slug)}
-              className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                selectedSlug === cat.slug
-                  ? "bg-primary text-white shadow-sm"
-                  : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
-              }`}
-            >
-              <Icon size={14} />
-              {cat.name}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${selectedSlug === cat.slug ? "bg-white/20 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-500"}`}>
-                {cat.listingCount}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Arama + Sıralama */}
+      {/* Arama + Kategori + İl + Sıralama */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="flex-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
@@ -155,6 +108,19 @@ function KategorilerContent() {
             placeholder="İlan ara..."
           />
         </div>
+        {/* Kategori seçimi (chip listesi yerine dropdown) */}
+        <select
+          value={selectedSlug}
+          onChange={(e) => setSelectedSlug(e.target.value)}
+          className="h-11 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 text-sm font-medium px-3 focus:border-primary outline-none transition-colors"
+        >
+          <option value="tumu">Tüm Kategoriler</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.slug}>
+              {cat.name} ({cat.listingCount})
+            </option>
+          ))}
+        </select>
         <select
           value={province}
           onChange={(e) => setProvince(e.target.value)}

@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   Search,
   User,
-  Settings,
   LogOut,
   ClipboardList,
   HandCoins,
@@ -222,10 +221,6 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                       <User size={18} className="text-gray-400" />
                       Profil
                     </Link>
-                    <Link href="/ayarlar" onClick={closeMobile} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      <Settings size={18} className="text-gray-400" />
-                      Ayarlar
-                    </Link>
                     <button
                       onClick={handleLogout}
                       className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors w-full"
@@ -376,9 +371,6 @@ export default function Navbar({ hideCategories = false }: { hideCategories?: bo
                           </Link>
                           <Link href="/profil" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                             <User size={16} /> Profil
-                          </Link>
-                          <Link href="/ayarlar" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <Settings size={16} /> Ayarlar
                           </Link>
                           <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1">
                             <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">

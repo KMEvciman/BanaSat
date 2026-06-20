@@ -2,7 +2,7 @@
 
 import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
-import { Search, Paperclip, Send, ArrowLeft, HandCoins, Check, X, Ban, Tag, CheckSquare, Square, Pencil, Wallet, CheckCircle2 } from "lucide-react";
+import { Search, Send, ArrowLeft, HandCoins, Check, X, Ban, Tag, CheckSquare, Square, Pencil, Wallet, CheckCircle2 } from "lucide-react";
 import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -481,9 +481,6 @@ function MesajlarContent() {
           </div>
         )}
         <div className="max-w-4xl mx-auto flex items-end gap-2 sm:gap-3">
-          <button type="button" className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Dosya Ekle">
-            <Paperclip size={22} />
-          </button>
           <div className="flex-1 bg-background-light dark:bg-background-dark border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center px-3 sm:px-4 py-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
             <textarea
               ref={textareaRef}

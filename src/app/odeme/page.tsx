@@ -52,6 +52,34 @@ function OdemeContent() {
     if (user) { setName(user.name ?? ""); setPhone(user.phone ?? ""); }
   }, [user]);
 
+  // Kart numarasını 4'er gruplayıp boşlukla biçimlendirir; en fazla 16 rakam.
+  const handleCardNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
+    const grouped = digits.replace(/(.{4})/g, "$1 ").trim();
+    setCardNo(grouped);
+  };
+
+  // Son kullanma tarihini "AA/YY" formatına dönüştürür; geçersiz ay (13+) engellenir.
+  const handleCardExpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let digits = e.target.value.replace(/\D/g, "").slice(0, 4);
+    // Ayın ilk hanesi 2-9 ise başına 0 koyup tek haneli ay yap (örn. "3" -> "03").
+    if (digits.length === 1 && Number(digits) > 1) {
+      digits = `0${digits}`;
+    }
+    // İki haneli ay 01-12 dışındaysa kabul etme.
+    if (digits.length >= 2) {
+      const month = Number(digits.slice(0, 2));
+      if (month < 1 || month > 12) return;
+    }
+    const formatted = digits.length >= 3 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+    setCardExp(formatted);
+  };
+
+  // CVV: sadece rakam, en fazla 3 hane.
+  const handleCardCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 3));
+  };
+
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!order || processing) return;
@@ -143,10 +171,10 @@ function OdemeContent() {
                     </div>
                     <div className="space-y-5">
                       <Field label="Kart Üzerindeki İsim"><input value={cardName} onChange={(e) => setCardName(e.target.value)} required className={`${inputCls} uppercase`} placeholder="AD SOYAD" /></Field>
-                      <Field label="Kart Numarası"><input value={cardNo} onChange={(e) => setCardNo(e.target.value)} required maxLength={19} className={`${inputCls} font-mono tracking-wider`} placeholder="0000 0000 0000 0000" /></Field>
+                      <Field label="Kart Numarası"><input value={cardNo} onChange={handleCardNoChange} required inputMode="numeric" maxLength={19} className={`${inputCls} font-mono tracking-wider`} placeholder="0000 0000 0000 0000" /></Field>
                       <div className="grid grid-cols-2 gap-5">
-                        <Field label="Son Kullanma"><input value={cardExp} onChange={(e) => setCardExp(e.target.value)} required maxLength={5} className={`${inputCls} text-center`} placeholder="AA/YY" /></Field>
-                        <Field label="CVV"><input value={cardCvv} onChange={(e) => setCardCvv(e.target.value)} required maxLength={4} className={`${inputCls} text-center`} placeholder="123" /></Field>
+                        <Field label="Son Kullanma"><input value={cardExp} onChange={handleCardExpChange} required inputMode="numeric" maxLength={5} className={`${inputCls} text-center`} placeholder="AA/YY" /></Field>
+                        <Field label="CVV"><input value={cardCvv} onChange={handleCardCvvChange} required inputMode="numeric" maxLength={3} className={`${inputCls} text-center`} placeholder="123" /></Field>
                       </div>
                       <p className="flex items-center gap-1.5 text-xs text-gray-400"><Lock size={14} /> Bu bir simülasyondur; gerçek bir ödeme alınmaz.</p>
                     </div>
