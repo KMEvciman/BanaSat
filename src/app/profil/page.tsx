@@ -3,7 +3,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/AuthContext";
-import { usersApi } from "@/lib/api/services";
+import { usersApi, listingsApi, offersApi, ordersApi } from "@/lib/api/services";
 import LocationSelect from "@/components/LocationSelect";
 import type { Address } from "@/lib/api/types";
 import { useRouter } from "next/navigation";
@@ -54,6 +54,21 @@ export default function Profil() {
     usersApi.listAddresses().then(setAddresses).catch(() => {});
   }, []);
 
+  // Hesap özeti (gerçek veri): toplam talep, verilen teklif, tamamlanan işlem.
+  const [stats, setStats] = useState({ listings: 0, offers: 0, completed: 0 });
+  const loadStats = useCallback((userId: string) => {
+    Promise.all([
+      listingsApi.list({ ownerId: userId, limit: 1 }).then((r) => r.meta.total).catch(() => 0),
+      offersApi.mine({ limit: 1 }).then((r) => r.meta.total).catch(() => 0),
+      ordersApi.myPurchases().catch(() => []),
+      ordersApi.mySales().catch(() => []),
+    ]).then(([listings, offers, purchases, sales]) => {
+      const isDone = (s: string) => s === "ODENDI" || s === "TESLIM_EDILDI";
+      const completed = [...purchases, ...sales].filter((o) => isDone(o.status)).length;
+      setStats({ listings, offers, completed });
+    });
+  }, []);
+
   useEffect(() => {
     if (!authLoading && !isLoggedIn) {
       router.push("/giris");
@@ -69,8 +84,9 @@ export default function Profil() {
       setDistrict(user.district ?? "");
       setAvatarPreview(user.avatarUrl);
       loadAddresses();
+      loadStats(user.id);
     }
-  }, [authLoading, isLoggedIn, user, router, loadAddresses]);
+  }, [authLoading, isLoggedIn, user, router, loadAddresses, loadStats]);
 
   // Dosya seçilince anında yükle.
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -233,15 +249,15 @@ export default function Profil() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Toplam Talep</span>
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">9</span>
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">{stats.listings}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Verilen Teklif</span>
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">7</span>
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">{stats.offers}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Tamamlanan İşlem</span>
-                      <span className="text-sm font-bold text-primary">3</span>
+                      <span className="text-sm font-bold text-primary">{stats.completed}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Üyelik Tarihi</span>
